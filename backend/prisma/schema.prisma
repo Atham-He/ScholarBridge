@@ -341,7 +341,6 @@ model EmailVerification {
   user      User?    @relation(fields: [userId], references: [id])
   userId    String?  // Nullable to support verification before account creation
 
-  @@unique([email, role])  // Prevent multiple active codes per email+role
   @@index([email])
   @@index([expiresAt])
   @@index([code])
