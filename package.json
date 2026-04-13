@@ -21,6 +21,7 @@
     "db:seed": "cd backend && prisma db seed",
     "db:push": "cd backend && prisma db push",
     "db:studio": "cd backend && prisma studio",
+    "pre-migration": "tsx scripts/pre-migration-check.ts",
     "test": "jest --config=jest.config.cjs",
     "test:watch": "jest --config=jest.config.cjs --watch",
     "test:coverage": "jest --config=jest.config.cjs --coverage",
