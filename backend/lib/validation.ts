@@ -96,3 +96,19 @@ export const sendVerificationSchema = z.object({
   email: z.string().email("邮箱格式不正确"),
   role: z.enum(["MENTOR", "STUDENT"]),
 });
+
+export const verifyEmailSchema = z.object({
+  email: z.string().email("邮箱格式不正确"),
+  code: z.string().regex(/^\d{6}$/, "验证码必须是6位数字"),
+  role: z.enum(["MENTOR", "STUDENT"]),
+  password: z.string().min(6, "密码至少 6 位"),
+  displayName: z.string().min(1, "请填写姓名或昵称"),
+  // Optional mentor fields
+  institution: z.string().optional(),
+  department: z.string().optional(),
+  title: z.string().optional(),
+  bioShort: z.string().optional(),
+  location: z.string().optional(),
+  // Optional student fields
+  backgroundBrief: z.string().optional(),
+});
