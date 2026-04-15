@@ -4,6 +4,12 @@
 
   var authRole = "student";
   var authMode = "login";
+  var authSignupStep = "details";
+  var pendingSignup = null;
+  var authBusy = false;
+  var authResendBusy = false;
+  var resendCountdown = 0;
+  var resendTimer = null;
   var user = null;
   var skills = [];
   var selectedSlug = null;
@@ -72,12 +78,195 @@
   }
   window.show = show;
 
+  function authEl(id) {
+    return document.getElementById(id);
+  }
+
+  function authRoleValue() {
+    return authRole === "mentor" ? "MENTOR" : "STUDENT";
+  }
+
+  function clearAuthStatus() {
+    var box = authEl("authStatus");
+    if (!box) return;
+    box.style.display = "none";
+    box.className = "auth-status";
+    box.textContent = "";
+  }
+
+  function setAuthStatus(message, type) {
+    var box = authEl("authStatus");
+    if (!box) return;
+    box.className = "auth-status " + (type || "info");
+    box.textContent = message;
+    box.style.display = "block";
+  }
+
+  function stopAuthCountdown() {
+    if (resendTimer) {
+      window.clearInterval(resendTimer);
+      resendTimer = null;
+    }
+    resendCountdown = 0;
+  }
+
+  function updateAuthResendButton() {
+    var btn = authEl("authResendBtn");
+    if (!btn) return;
+    btn.disabled = !pendingSignup || authResendBusy || resendCountdown > 0 || authBusy;
+    if (authResendBusy) {
+      btn.textContent = "Sending...";
+      return;
+    }
+    btn.textContent = resendCountdown > 0 ? "Resend (" + resendCountdown + "s)" : "Resend";
+  }
+
+  function startAuthCountdown(seconds) {
+    stopAuthCountdown();
+    resendCountdown = seconds;
+    updateAuthResendButton();
+    resendTimer = window.setInterval(function () {
+      resendCountdown -= 1;
+      if (resendCountdown <= 0) {
+        stopAuthCountdown();
+      }
+      updateAuthResendButton();
+    }, 1000);
+  }
+
+  function resetSignupFlow() {
+    authSignupStep = "details";
+    pendingSignup = null;
+    stopAuthCountdown();
+    var codeInput = authEl("authCode");
+    if (codeInput) codeInput.value = "";
+  }
+
+  function collectSignupDraft() {
+    return {
+      email: authEl("authEmail").value.trim(),
+      password: authEl("authPassword").value,
+      confirm: authEl("authConfirm").value,
+      displayName: authEl("authName").value.trim(),
+      institution: authEl("authInstitution").value.trim(),
+      role: authRoleValue(),
+    };
+  }
+
+  function validateSignupDraft(draft) {
+    if (!draft.displayName) return "Please enter your name.";
+    if (!draft.email) return "Please enter your email.";
+    if (!draft.password || draft.password.length < 6) {
+      return "Password must be at least 6 characters.";
+    }
+    if (draft.password !== draft.confirm) return "Passwords do not match.";
+    if (draft.role === "MENTOR" && !draft.institution) {
+      return "Please enter your institution.";
+    }
+    return "";
+  }
+
+  function renderAuthState() {
+    var isSignup = authMode === "signup";
+    var isVerify = isSignup && authSignupStep === "verify";
+    var nameField = authEl("nameField");
+    var institutionField = authEl("institutionField");
+    var passwordField = authEl("passwordField");
+    var confirmField = authEl("confirmField");
+    var codeField = authEl("codeField");
+    var summary = authEl("authSummary");
+    var emailInput = authEl("authEmail");
+    var passwordInput = authEl("authPassword");
+    var submitBtn = authEl("authSubmit");
+    var backBtn = authEl("authBackBtn");
+    var divider = authEl("authDivider");
+    var oauthButtons = authEl("authOauthButtons");
+    var footer = authEl("authFooter");
+    var footerText = authEl("authFooterText");
+    var footerLink = authEl("authFooterLink");
+
+    if (nameField) nameField.style.display = isSignup && !isVerify ? "block" : "none";
+    if (institutionField) {
+      institutionField.style.display = isSignup && !isVerify && authRole === "mentor" ? "block" : "none";
+    }
+    if (passwordField) passwordField.style.display = isVerify ? "none" : "block";
+    if (confirmField) confirmField.style.display = isSignup && !isVerify ? "block" : "none";
+    if (codeField) codeField.style.display = isVerify ? "block" : "none";
+    if (summary) {
+      summary.style.display = isVerify ? "block" : "none";
+      summary.textContent = isVerify && pendingSignup
+        ? "We sent a verification code to " + pendingSignup.email + " for your " +
+          (pendingSignup.role === "MENTOR" ? "mentor" : "student") + " account."
+        : "";
+    }
+
+    if (emailInput) {
+      emailInput.readOnly = isVerify;
+      emailInput.style.background = isVerify ? "var(--bg-alt)" : "";
+    }
+    if (passwordInput) passwordInput.required = !isVerify;
+    if (authEl("authConfirm")) authEl("authConfirm").required = isSignup && !isVerify;
+    if (authEl("authName")) authEl("authName").required = isSignup && !isVerify;
+    if (authEl("authInstitution")) {
+      authEl("authInstitution").required = isSignup && !isVerify && authRole === "mentor";
+    }
+    if (authEl("authCode")) authEl("authCode").required = isVerify;
+
+    document.querySelectorAll("#auth .role-btn").forEach(function (btn) {
+      btn.style.pointerEvents = isVerify ? "none" : "";
+      btn.style.opacity = isVerify ? "0.7" : "1";
+    });
+
+    if (submitBtn) {
+      submitBtn.disabled = authBusy;
+      if (authBusy) {
+        if (authMode === "login") submitBtn.textContent = "Signing In...";
+        else if (isVerify) submitBtn.textContent = "Verifying...";
+        else submitBtn.textContent = "Sending...";
+      } else if (authMode === "login") {
+        submitBtn.textContent = "Sign In";
+      } else if (isVerify) {
+        submitBtn.textContent = "Verify & Create Account";
+      } else {
+        submitBtn.textContent = "Send Verification Code";
+      }
+    }
+
+    if (backBtn) {
+      backBtn.style.display = isVerify ? "block" : "none";
+      backBtn.disabled = authBusy;
+    }
+    if (divider) divider.style.display = isVerify ? "none" : "flex";
+    if (oauthButtons) oauthButtons.style.display = isVerify ? "none" : "flex";
+    if (footer) footer.style.display = isVerify ? "none" : "block";
+    if (footerText) {
+      footerText.textContent = authMode === "login"
+        ? "Don't have an account?"
+        : "Already have an account?";
+    }
+    if (footerLink) {
+      footerLink.textContent = authMode === "login" ? "Create one" : "Sign in";
+      footerLink.onclick = function (e) {
+        e.preventDefault();
+        window.setAuthModeFromFooter(authMode === "login" ? "signup" : "login");
+      };
+    }
+
+    updateAuthResendButton();
+  }
+
   window.setAuthRole = function (role, el) {
+    var wasVerify = authMode === "signup" && authSignupStep === "verify";
     authRole = role;
     document.querySelectorAll("#auth .role-btn").forEach(function (b) {
       b.classList.remove("active");
     });
     if (el) el.classList.add("active");
+    if (wasVerify) {
+      resetSignupFlow();
+      setAuthStatus("Role changed. Please request a new verification code.", "info");
+    }
+    renderAuthState();
   };
 
   window.setAuthMode = function (mode, el) {
@@ -86,28 +275,9 @@
       t.classList.remove("active");
     });
     if (el) el.classList.add("active");
-    document.getElementById("nameField").style.display =
-      mode === "signup" ? "block" : "none";
-    document.getElementById("confirmField").style.display =
-      mode === "signup" ? "block" : "none";
-    document.getElementById("authSubmit").textContent =
-      mode === "login" ? "Sign In" : "Create Account";
-    document.getElementById("authFooterText").textContent =
-      mode === "login"
-        ? "Don't have an account?"
-        : "Already have an account?";
-    var link = document.getElementById("authFooterLink");
-    link.textContent = mode === "login" ? "Create one" : "Sign in";
-    link.onclick = function (e) {
-      e.preventDefault();
-      if (mode === "login") {
-        var signupTab = document.querySelector("#auth .form-tab:nth-child(2)");
-        setAuthMode("signup", signupTab);
-      } else {
-        var loginTab = document.querySelector("#auth .form-tab:nth-child(1)");
-        setAuthMode("login", loginTab);
-      }
-    };
+    clearAuthStatus();
+    resetSignupFlow();
+    renderAuthState();
   };
 
   window.setAuthModeFromFooter = function (targetMode) {
@@ -115,49 +285,128 @@
       targetMode === "signup"
         ? document.querySelector("#auth .form-tab:nth-child(2)")
         : document.querySelector("#auth .form-tab:nth-child(1)");
-    if (tab) setAuthMode(targetMode, tab);
+    if (tab) window.setAuthMode(targetMode, tab);
+  };
+
+  window.backToSignupDetails = function () {
+    resetSignupFlow();
+    clearAuthStatus();
+    renderAuthState();
+  };
+
+  window.resendAuthCode = async function () {
+    if (!pendingSignup) {
+      setAuthStatus("Please fill in your registration details first.", "error");
+      return;
+    }
+    clearAuthStatus();
+    authResendBusy = true;
+    updateAuthResendButton();
+    try {
+      var data = await fetchJSON("/api/auth/send-code", {
+        method: "POST",
+        body: JSON.stringify({
+          email: pendingSignup.email,
+          role: pendingSignup.role,
+        }),
+      });
+      startAuthCountdown(60);
+      setAuthStatus(data.message || "Verification code resent.", "success");
+    } catch (err) {
+      setAuthStatus(err.message || "Failed to resend code.", "error");
+    } finally {
+      authResendBusy = false;
+      updateAuthResendButton();
+    }
   };
 
   window.handleAuth = async function (e) {
     e.preventDefault();
-    var email = document.getElementById("authEmail").value.trim();
-    var password = document.getElementById("authPassword").value;
+    clearAuthStatus();
+    var email = authEl("authEmail").value.trim();
+    var password = authEl("authPassword").value;
     try {
       if (authMode === "signup") {
-        var name = document.getElementById("authName").value.trim();
-        var confirm = document.getElementById("authConfirm").value;
-        if (!name) {
-          alert("Please enter your name.");
+        if (authSignupStep === "verify") {
+          if (!pendingSignup) {
+            resetSignupFlow();
+            setAuthStatus("Please enter your details and request a new code.", "error");
+            renderAuthState();
+            return;
+          }
+
+          var code = authEl("authCode").value.trim();
+          if (!/^\d{6}$/.test(code)) {
+            setAuthStatus("Please enter the 6-digit verification code.", "error");
+            return;
+          }
+
+          authBusy = true;
+          renderAuthState();
+          await fetchJSON("/api/auth/verify-email", {
+            method: "POST",
+            body: JSON.stringify({
+              email: pendingSignup.email,
+              code: code,
+              role: pendingSignup.role,
+              password: pendingSignup.password,
+              displayName: pendingSignup.displayName,
+              institution: pendingSignup.role === "MENTOR" ? pendingSignup.institution : undefined,
+            }),
+          });
+          setAuthStatus("Account created successfully.", "success");
+        } else {
+          var draft = collectSignupDraft();
+          var validationError = validateSignupDraft(draft);
+          if (validationError) {
+            setAuthStatus(validationError, "error");
+            return;
+          }
+
+          authBusy = true;
+          renderAuthState();
+          var sendResult = await fetchJSON("/api/auth/send-code", {
+            method: "POST",
+            body: JSON.stringify({
+              email: draft.email,
+              role: draft.role,
+            }),
+          });
+          pendingSignup = {
+            email: draft.email,
+            password: draft.password,
+            displayName: draft.displayName,
+            institution: draft.institution,
+            role: draft.role,
+          };
+          authSignupStep = "verify";
+          startAuthCountdown(60);
+          setAuthStatus(sendResult.message || "Verification code sent. Check your inbox.", "success");
+          renderAuthState();
+          authEl("authCode").focus();
           return;
         }
-        if (password !== confirm) {
-          alert("Passwords do not match!");
-          return;
-        }
-        var body = {
-          email: email,
-          password: password,
-          role: authRole === "mentor" ? "MENTOR" : "STUDENT",
-          displayName: name,
-          institution: authRole === "mentor" ? "Institution (update in profile)" : undefined,
-        };
-        await fetchJSON("/api/auth/register", {
-          method: "POST",
-          body: JSON.stringify(body),
-        });
-        alert("Account created! Welcome to ScholarBridge.");
       } else {
+        if (!email || !password) {
+          setAuthStatus("Please enter your email and password.", "error");
+          return;
+        }
+        authBusy = true;
+        renderAuthState();
         await fetchJSON("/api/auth/login", {
           method: "POST",
           body: JSON.stringify({ email: email, password: password }),
         });
-        alert("Welcome back!");
+        setAuthStatus("Welcome back!", "success");
       }
       await refreshMe();
       if (user && user.role === "MENTOR") show("dashboard");
       else show("browse");
     } catch (err) {
-      alert(err.message || "Auth failed");
+      setAuthStatus(err.message || "Auth failed", "error");
+    } finally {
+      authBusy = false;
+      renderAuthState();
     }
   };
 
@@ -1048,6 +1297,13 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     void refreshMe();
+    renderAuthState();
+    var codeInput = authEl("authCode");
+    if (codeInput) {
+      codeInput.addEventListener("input", function () {
+        codeInput.value = codeInput.value.replace(/\D/g, "").slice(0, 6);
+      });
+    }
     var cards = document.querySelectorAll("#landing .role-card");
     if (cards[0])
       cards[0].onclick = function () {

@@ -1523,6 +1523,95 @@
       box-shadow: 0 0 0 3px rgba(44, 95, 124, 0.1)
     }
 
+    #auth .auth-status {
+      display: none;
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+      border: 1px solid transparent
+    }
+
+    #auth .auth-status.info {
+      background: #EBF3F8;
+      border-color: #A8D0E8;
+      color: #2C5F7C
+    }
+
+    #auth .auth-status.success {
+      background: #E8F5EE;
+      border-color: #B8E0CC;
+      color: #2D7A4F
+    }
+
+    #auth .auth-status.error {
+      background: #FEEEEE;
+      border-color: #F0C0C0;
+      color: #C53030
+    }
+
+    #auth .auth-summary {
+      display: none;
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6
+    }
+
+    #auth .auth-inline {
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    #auth .auth-inline input {
+      flex: 1
+    }
+
+    #auth .auth-inline .btn-ghost {
+      flex-shrink: 0;
+      min-width: 112px;
+      height: 44px
+    }
+
+    #auth .auth-helper {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-light);
+      line-height: 1.5
+    }
+
+    #auth .auth-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px
+    }
+
+    #auth .btn-submit.secondary {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border)
+    }
+
+    #auth .btn-submit.secondary:hover {
+      background: var(--bg-alt);
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    #auth .btn-submit:disabled,
+    #auth .btn-submit.secondary:disabled,
+    #auth .auth-inline .btn-ghost:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+      box-shadow: none
+    }
+
     #auth .btn-submit {
       width: 100%;
       padding: 14px;
@@ -2823,16 +2912,22 @@
             <div class="form-tab active" onclick="setAuthMode('login', this)">Sign In</div>
             <div class="form-tab" onclick="setAuthMode('signup', this)">Create Account</div>
           </div>
+          <div class="auth-status" id="authStatus"></div>
           <form id="authForm" onsubmit="handleAuth(event)">
+            <div class="auth-summary" id="authSummary"></div>
             <div class="form-group" id="nameField" style="display:none">
-              <label>Full Name</label>
+              <label>Name</label>
               <input type="text" id="authName" placeholder="Dr. Jane Chen">
             </div>
             <div class="form-group">
               <label>Email</label>
               <input type="text" id="authEmail" placeholder="jane.chen@mit.edu" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="institutionField" style="display:none">
+              <label>Institution</label>
+              <input type="text" id="authInstitution" placeholder="MIT / Tsinghua University">
+            </div>
+            <div class="form-group" id="passwordField">
               <label>Password</label>
               <input type="password" id="authPassword" placeholder="••••••••" required>
             </div>
@@ -2840,10 +2935,21 @@
               <label>Confirm Password</label>
               <input type="password" id="authConfirm" placeholder="••••••••">
             </div>
-            <button type="submit" class="btn-submit" id="authSubmit">Sign In</button>
+            <div class="form-group" id="codeField" style="display:none">
+              <label>Verification Code</label>
+              <div class="auth-inline">
+                <input type="text" id="authCode" inputmode="numeric" maxlength="6" placeholder="6-digit code">
+                <button type="button" class="btn-ghost" id="authResendBtn" onclick="resendAuthCode()">Resend</button>
+              </div>
+              <div class="auth-helper">We will send a 6-digit code to your email. It stays valid for 15 minutes.</div>
+            </div>
+            <div class="auth-actions">
+              <button type="button" class="btn-submit secondary" id="authBackBtn" style="display:none" onclick="backToSignupDetails()">Edit Details</button>
+              <button type="submit" class="btn-submit" id="authSubmit">Sign In</button>
+            </div>
           </form>
-          <div class="divider"><span>or continue with</span></div>
-          <div class="oauth-buttons">
+          <div class="divider" id="authDivider"><span>or continue with</span></div>
+          <div class="oauth-buttons" id="authOauthButtons">
             <button class="oauth-btn" onclick="handleOAuth('scholar')">
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path
@@ -2859,7 +2965,7 @@
               ORCID
             </button>
           </div>
-          <div class="form-footer">
+          <div class="form-footer" id="authFooter">
             <span id="authFooterText">Don't have an account?</span>
             <a href="#" onclick="event.preventDefault(); setAuthModeFromFooter('signup')" id="authFooterLink">Create one</a>
           </div>

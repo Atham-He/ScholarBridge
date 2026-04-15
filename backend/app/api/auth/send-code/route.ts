@@ -93,6 +93,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    message: `验证码已发送到 ${email}，15分钟内有效`
+    // message: `验证码已发送到 ${email}，15分钟内有效`
   });
 }

@@ -10,83 +10,93 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "请求体必须是 JSON" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Request body must be JSON" },
+      { status: 400 }
+    );
   }
 
   const parsed = verifyEmailSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "参数校验失败", details: parsed.error.issues.map((i) => i.message) },
-      { status: 400 },
+      {
+        error: "Validation failed",
+        details: parsed.error.issues.map((i) => i.message),
+      },
+      { status: 400 }
     );
   }
 
   const data = parsed.data;
 
-  // Find verification record
+  // Find the latest verification record
   const verification = await db.emailVerification.findFirst({
     where: {
       email: data.email,
       role: data.role,
-      verified: false
+      verified: false,
     },
     orderBy: {
-      createdAt: 'desc'
-    }
+      createdAt: "desc",
+    },
   });
 
   if (!verification) {
     return NextResponse.json(
-      { error: "验证码不存在或已使用，请重新获取" },
+      { error: "No pending verification found. Please request a new code." },
       { status: 400 }
     );
   }
 
-  // Check if expired
+  // Check expiration
   if (isCodeExpired(verification.expiresAt)) {
     return NextResponse.json(
-      { error: "验证码已过期，请重新获取" },
+      { error: "Verification code has expired. Please request a new one." },
       { status: 400 }
     );
   }
 
-  // Check attempts
+  // Check max attempts
   if (verification.attemptCount >= 3) {
     return NextResponse.json(
-      { error: "验证失败次数过多，请重新获取验证码" },
+      { error: "Too many failed attempts. Please request a new code." },
       { status: 400 }
     );
   }
 
-  // Verify code
+  // Validate code
   const isValid = await verifyCode(data.code, verification.code);
   if (!isValid) {
-    // Increment attempt count
     await db.emailVerification.update({
       where: { id: verification.id },
       data: {
         attemptCount: { increment: 1 },
-        lastAttemptAt: new Date()
-      }
+        lastAttemptAt: new Date(),
+      },
     });
 
     return NextResponse.json(
-      { error: "验证码错误" },
+      { error: "Invalid verification code" },
       { status: 400 }
     );
   }
 
-  // Check if user already exists with this email+role
+  // Check for existing user
   const existingUser = await db.user.findFirst({
     where: {
       email: data.email,
-      role: data.role
-    }
+      role: data.role,
+    },
   });
 
   if (existingUser) {
     return NextResponse.json(
-      { error: data.role === 'MENTOR' ? '该邮箱已注册导师账号' : '该邮箱已注册学生账号' },
+      {
+        error:
+          data.role === "MENTOR"
+            ? "A mentor account with this email already exists"
+            : "A student account with this email already exists",
+      },
       { status: 409 }
     );
   }
@@ -96,11 +106,11 @@ export async function POST(request: NextRequest) {
     where: { id: verification.id },
     data: {
       verified: true,
-      usedAt: new Date()
-    }
+      usedAt: new Date(),
+    },
   });
 
-  // Create user account
+  // Create user & profile
   const passwordHash = await hashPassword(data.password);
 
   const user = await db.$transaction(async (tx) => {
@@ -110,8 +120,8 @@ export async function POST(request: NextRequest) {
         passwordHash,
         role: data.role,
         lastLoginAt: new Date(),
-        lastRoleAt: new Date()
-      }
+        lastRoleAt: new Date(),
+      },
     });
 
     if (data.role === "MENTOR") {
@@ -150,7 +160,7 @@ export async function POST(request: NextRequest) {
     user: {
       id: user.id,
       email: user.email,
-      role: user.role
-    }
+      role: user.role,
+    },
   });
 }

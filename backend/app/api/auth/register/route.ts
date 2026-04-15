@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { registerSchema } from "@/lib/validation";
+import { emailService } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -21,12 +22,21 @@ export async function POST(request: NextRequest) {
   }
 
   const data = parsed.data;
-  const existing = await db.user.findUnique({ where: { email: data.email } });
+  //const existing = await db.user.findUnique({ where: { email: data.email } });
+  const existing = await db.user.findUnique({
+    where: {
+      email_role: {
+        email: data.email,
+        role: data.role,
+      },
+    },
+  });
   if (existing) {
     return NextResponse.json({ error: "该邮箱已注册" }, { status: 409 });
   }
 
   const passwordHash = await hashPassword(data.password);
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
 
   const user = await db.$transaction(async (tx) => {
     const created = await tx.user.create({
@@ -34,6 +44,8 @@ export async function POST(request: NextRequest) {
         email: data.email,
         passwordHash,
         role: data.role,
+        emailVerificationCode: code, 
+        emailVerified: false,        
       },
     });
 
@@ -62,12 +74,15 @@ export async function POST(request: NextRequest) {
     return created;
   });
 
-  const session = await getSession();
-  session.userId = user.id;
-  await session.save();
+  await emailService.sendVerification(user.email, code, user.role); 
+  
+  // const session = await getSession();
+  // session.userId = user.id;
+  // await session.save();
 
   return NextResponse.json({
     ok: true,
+    message: "注册成功，验证码已发送至邮箱",
     user: {
       id: user.id,
       email: user.email,
