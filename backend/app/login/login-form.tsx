@@ -10,6 +10,8 @@ export function LoginForm() {
   const next = searchParams.get("next") ?? "/browse";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  type Role = "MENTOR" | "STUDENT";
+  const [role, setRole] = useState<Role>("STUDENT");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +22,7 @@ export function LoginForm() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, role }),
     });
     setLoading(false);
     if (!res.ok) {
@@ -36,6 +38,35 @@ export function LoginForm() {
     <div className="mx-auto max-w-md px-4 py-16">
       <h1 className="text-2xl font-bold text-slate-900 dark:text-white">登录</h1>
       <form onSubmit={onSubmit} className="mt-8 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            身份
+          </label>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => setRole("STUDENT")}
+              className={`flex-1 py-2 px-3 border rounded-lg text-center ${
+                role === "STUDENT"
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-slate-300 text-slate-700"
+              }`}
+            >
+              学生
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole("MENTOR")}
+              className={`flex-1 py-2 px-3 border rounded-lg text-center ${
+                role === "MENTOR"
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-slate-300 text-slate-700"
+              }`}
+            >
+              导师
+            </button>
+          </div>
+        </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
             邮箱

@@ -395,7 +395,11 @@
         renderAuthState();
         await fetchJSON("/api/auth/login", {
           method: "POST",
-          body: JSON.stringify({ email: email, password: password }),
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            role: authRoleValue(),
+          }),
         });
         setAuthStatus("Welcome back!", "success");
       }

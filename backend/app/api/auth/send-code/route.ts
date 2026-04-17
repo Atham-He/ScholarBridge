@@ -5,6 +5,10 @@ import { emailService } from "@/lib/email";
 import { sendVerificationSchema } from "@/lib/validation";
 import { getClientIP } from "@/lib/utils";
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 export async function POST(request: NextRequest) {
   let body: unknown;
   try {
@@ -21,7 +25,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { email, role } = parsed.data;
+  const email = normalizeEmail(parsed.data.email);
+  const { role } = parsed.data;
   const ipAddress = getClientIP(request);
 
   // Check rate limiting: max 3 codes per email per hour

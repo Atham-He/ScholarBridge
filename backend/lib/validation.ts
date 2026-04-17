@@ -28,6 +28,12 @@ export const registerSchema = z
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  role: z
+    .preprocess(
+      (value) =>
+        typeof value === "string" ? value.trim().toUpperCase() : value,
+      z.enum(["MENTOR", "STUDENT"]),
+    ),
 });
 
 const publicationItemSchema = z.object({

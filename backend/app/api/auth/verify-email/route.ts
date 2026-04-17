@@ -5,6 +5,10 @@ import { verifyCode, isCodeExpired } from "@/lib/verification";
 import { hashPassword } from "@/lib/password";
 import { verifyEmailSchema } from "@/lib/validation";
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 export async function POST(request: NextRequest) {
   let body: unknown;
   try {
@@ -27,7 +31,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const data = parsed.data;
+  const data = {
+    ...parsed.data,
+    email: normalizeEmail(parsed.data.email),
+  };
 
   // Find the latest verification record
   const verification = await db.emailVerification.findFirst({
