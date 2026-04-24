@@ -23,7 +23,7 @@ export interface OpenAlexAuthor {
   h_index: number;
   i10_index: number;
   summary_stats?: {
-    2yr_mean_citedness: number;
+    '2yr_mean_citedness': number;
     h_index: number;
     i10_index: number;
   };

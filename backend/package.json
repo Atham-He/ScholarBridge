@@ -13,6 +13,8 @@
     "db:seed": "prisma db seed",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "persona:smoke": "tsx scripts/persona-supervisor-merge-smoke.ts",
+    "persona:real-e2e": "tsx scripts/persona-real-providers-e2e.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "type-check": "tsc --noEmit"

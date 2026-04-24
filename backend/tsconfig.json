@@ -23,5 +23,14 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "**/__tests__/**",
+    "lib/persona/builder.ts",
+    "lib/persona/file-parser.ts",
+    "lib/persona/openalex.ts",
+    "lib/persona/public-search.ts",
+    "lib/persona/retrieval.ts",
+    "lib/persona/web-search.ts"
+  ]
 }

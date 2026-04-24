@@ -5,4 +5,8 @@ build
 .env
 *.db
 *.db-journal
+*.tsbuildinfo
+uploads/
 .DS_Store
+tmp_*.log
+tmp_*.pid

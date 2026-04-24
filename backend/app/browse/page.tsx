@@ -6,7 +6,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { db } from '@/lib/db';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -184,7 +183,7 @@ export default function BrowsePage() {
                   className="text-[11px] py-2 px-3 rounded border border-[#E0D8CC] bg-transparent text-[#6B6B6B] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C] hover:bg-[rgba(44,95,124,0.04)]"
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.location.href = `/c/${mentor.slug}`;
+                    window.location.href = `/s/${mentor.slug}`;
                   }}
                 >
                   Chat Agent →

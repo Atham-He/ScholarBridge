@@ -21,13 +21,11 @@ const customJestConfig = {
     '<rootDir>/backend/node_modules/',
     '<rootDir>/.next/',
     '<rootDir>/backend/.next/',
-    '<rootDir>/supervisor_born/',
     '<rootDir>/web/'
   ],
   modulePathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/backend/node_modules/',
-    '<rootDir>/supervisor_born/',
     '<rootDir>/web/'
   ],
   // Test only in backend directory

@@ -4,7 +4,14 @@
  */
 
 import { Readable } from 'stream';
-import type { UploadedFile } from './persona/file-parser';
+
+export interface UploadedFile {
+  name: string;
+  mimeType: string;
+  size: number;
+  buffer: Buffer;
+  path?: string;
+}
 
 /**
  * 解析multipart/form-data

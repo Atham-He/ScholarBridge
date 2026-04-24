@@ -12,7 +12,7 @@ import { db } from '@/lib/db';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     // 验证用户身份
@@ -24,7 +24,7 @@ export async function GET(
       );
     }
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // 查询Persona
     const persona = await db.persona.findUnique({
@@ -74,6 +74,7 @@ export async function GET(
       // 元数据
       sourceCount: persona.sourceCount,
       chunkCount: persona.chunkCount,
+      privateSourceCount: (persona as any).privateSourceCount || 0,
       authorizedBy: persona.authorizedBy,
       llmProvider: persona.llmProvider,
       createdAt: persona.createdAt,
