@@ -1,0 +1,76 @@
+{
+  "domains": [
+    {
+      "slug": "logical-mathematical",
+      "name": "逻辑数理智能",
+      "shortName": "逻辑数理",
+      "description": "探索AI的数学基础，包括理论证明、形式化验证和数学推理能力",
+      "accentColor": "#3B82F6",
+      "icon": "∀",
+      "order": 1
+    },
+    {
+      "slug": "linguistic-verbal",
+      "name": "语言文字智能",
+      "shortName": "语言文字",
+      "description": "自然语言处理、大语言模型和人类语言理解的边界",
+      "accentColor": "#10B981",
+      "icon": "📝",
+      "order": 2
+    },
+    {
+      "slug": "visual-spatial",
+      "name": "视觉空间智能",
+      "shortName": "视觉空间",
+      "description": "计算机视觉、图像生成和多模态理解",
+      "accentColor": "#8B5CF6",
+      "icon": "👁️",
+      "order": 3
+    },
+    {
+      "slug": "bodily-kinesthetic",
+      "name": "身体动觉智能",
+      "shortName": "身体动觉",
+      "description": "机器人学、强化学习和物理世界交互",
+      "accentColor": "#F59E0B",
+      "icon": "🤖",
+      "order": 4
+    },
+    {
+      "slug": "musical-rhythmic",
+      "name": "音乐节奏智能",
+      "shortName": "音乐节奏",
+      "description": "音频生成、音乐理解和语音合成",
+      "accentColor": "#EC4899",
+      "icon": "🎵",
+      "order": 5
+    },
+    {
+      "slug": "interpersonal",
+      "name": "人际交往智能",
+      "shortName": "人际交往",
+      "description": "多智能体系统、社交AI和协作推理",
+      "accentColor": "#06B6D4",
+      "icon": "👥",
+      "order": 6
+    },
+    {
+      "slug": "intrapersonal",
+      "name": "内省智能",
+      "shortName": "内省",
+      "description": "元学习、自我反思和AI意识",
+      "accentColor": "#6366F1",
+      "icon": "🧠",
+      "order": 7
+    },
+    {
+      "slug": "naturalist",
+      "name": "自然观察智能",
+      "shortName": "自然观察",
+      "description": "科学发现、AI for Science和自然规律探索",
+      "accentColor": "#84CC16",
+      "icon": "🔬",
+      "order": 8
+    }
+  ]
+}

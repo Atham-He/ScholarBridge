@@ -1,0 +1,117 @@
+{
+  "nodes": [
+    {
+      "slug": "sft",
+      "title": "监督微调 (SFT)",
+      "summary": "通过高质量指令数据提升模型性能",
+      "description": "监督微调是大语言模型训练的关键阶段，通过使用精心构建的指令-响应对数据集，显著提升模型的指令遵循能力和输出质量。研究重点包括数据质量、训练策略和性能优化。",
+      "tags": ["大语言模型", "指令微调", "数据质量", "训练优化"],
+      "layerKey": "theory",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "lean",
+      "title": "Lean 形式化证明",
+      "summary": "用AI辅助数学定理的形式化验证",
+      "description": "Lean是一个交互式定理证明助手，近年来结合AI技术实现了重大突破。研究包括自动证明搜索、战术预测和形式化数学库的构建，为数学研究提供新的工具和方法。",
+      "tags": ["形式化验证", "定理证明", "Lean", "数学AI"],
+      "layerKey": "theory",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "ai4math",
+      "title": "AI for Mathematics",
+      "summary": "AI在数学发现和证明中的应用",
+      "description": "探索AI技术如何帮助数学家进行研究发现和定理证明。包括猜想生成、证明辅助、数学语言理解等方向，AI正逐渐成为数学研究的强大助手。",
+      "tags": ["数学发现", "定理证明", "AI辅助研究", "猜想生成"],
+      "layerKey": "application",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "transformer",
+      "title": "Transformer架构",
+      "summary": "现代大语言模型的基础架构",
+      "description": "Transformer架构通过自注意力机制实现了序列建模的革命性突破，成为NLP和计算机视觉等领域的主流架构。研究重点包括效率优化、长序列处理和变体设计。",
+      "tags": ["Transformer", "注意力机制", "模型架构", "效率优化"],
+      "layerKey": "theory",
+      "domainSlug": "linguistic-verbal"
+    },
+    {
+      "slug": "vision-transformer",
+      "title": "Vision Transformer",
+      "summary": "将Transformer应用于计算机视觉",
+      "description": "Vision Transformer (ViT)成功将Transformer架构引入计算机视觉领域，通过将图像分割成patches并处理为序列，实现了与CNN相媲美甚至超越的性能。",
+      "tags": ["ViT", "计算机视觉", "Transformer", "图像分类"],
+      "layerKey": "theory",
+      "domainSlug": "visual-spatial"
+    },
+    {
+      "slug": "diffusion-model",
+      "title": "扩散模型",
+      "summary": "生成式图像建模的主流方法",
+      "description": "扩散模型通过逐步去噪的过程生成高质量图像，成为当前图像生成的主流技术。研究包括采样加速、条件生成和视频扩展等方向。",
+      "tags": ["扩散模型", "图像生成", "生成式AI", "DDPM"],
+      "layerKey": "infrastructure",
+      "domainSlug": "visual-spatial"
+    },
+    {
+      "slug": "reinforcement-learning",
+      "title": "强化学习基础",
+      "summary": "智能体与环境的交互学习",
+      "description": "强化学习研究智能体如何通过与环境交互获得奖励反馈来优化行为策略。核心挑战包括样本效率、探索利用平衡和泛化能力。",
+      "tags": ["强化学习", "RL", "智能体", "策略优化"],
+      "layerKey": "theory",
+      "domainSlug": "bodily-kinesthetic"
+    },
+    {
+      "slug": "speech-synthesis",
+      "title": "语音合成",
+      "summary": "高质量语音生成技术",
+      "description": "语音合成技术已经从传统的拼接方法发展到神经网络端到端生成，实现了高度自然和表现力丰富的语音输出。研究重点包括音色克隆、情感表达和实时生成。",
+      "tags": ["语音合成", "TTS", "端到端", "语音生成"],
+      "layerKey": "application",
+      "domainSlug": "musical-rhythmic"
+    },
+    {
+      "slug": "multi-agent",
+      "title": "多智能体系统",
+      "summary": "多个AI智能体的协作与竞争",
+      "description": "多智能体系统研究多个自主智能体如何在共享环境中交互、协作或竞争。应用包括游戏AI、分布式问题求解和社会模拟等。",
+      "tags": ["多智能体", "协作", "博弈论", "社会AI"],
+      "layerKey": "application",
+      "domainSlug": "interpersonal"
+    },
+    {
+      "slug": "meta-learning",
+      "title": "元学习",
+      "summary": "学会如何学习",
+      "description": "元学习旨在让AI系统具备学习如何学习的能力，能够快速适应新任务和少样本学习场景。研究包括MAML、元强化学习和自动优化等方向。",
+      "tags": ["元学习", "Few-shot", "学习算法", "自适应"],
+      "layerKey": "theory",
+      "domainSlug": "intrapersonal"
+    }
+  ],
+  "layers": [
+    {
+      "key": "theory",
+      "name": "理论层",
+      "description": "基础理论和算法创新",
+      "icon": "📐",
+      "order": 1
+    },
+    {
+      "key": "infrastructure",
+      "name": "基础设施层",
+      "description": "核心技术和系统架构",
+      "icon": "⚙️",
+      "order": 2
+    },
+    {
+      "key": "application",
+      "name": "应用层",
+      "description": "实际应用和产品化",
+      "icon": "🚀",
+      "order": 3
+    }
+  ]
+}

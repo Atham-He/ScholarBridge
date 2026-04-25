@@ -66,6 +66,11 @@ model User {
   emailVerifications EmailVerification[]
   securityEvents   SecurityEvent[]
 
+  // AI Explore相关
+  workSignals     AIUserWorkSignal[]
+  mentorExplorations AIMentorExploration[]
+  recommendationSnapshots AIRecommendationSnapshot[]
+
   @@unique([email, role])  // KEY CHANGE: One email can have STUDENT + MENTOR
   @@index([orcidId])
   @@index([email])
@@ -376,4 +381,132 @@ model SecurityEvent {
   @@index([userId])
   @@index([eventType])
   @@index([createdAt])
+}
+
+// ============= AI Explore相关模型 =============
+
+model AIDomain {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  shortName   String
+  description String
+  accentColor String
+  icon        String?
+  order       Int      @default(0)
+
+  researchNodes AIResearchNode[]
+  mentorExplorations AIMentorExploration[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model AIResearchLayer {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String
+  icon        String?
+  order       Int      @default(0)
+
+  nodes AIResearchNode[]
+}
+
+model AIResearchNode {
+  id          String   @id @default(cuid())
+  slug        String
+  title       String
+  summary     String
+  description String
+  tags        Json?
+  layerKey    String
+  domainSlug  String
+
+  layer   AIResearchLayer  @relation(fields: [layerKey], references: [key])
+  domain  AIDomain         @relation(fields: [domainSlug], references: [slug], onDelete: Cascade)
+  works   AIWork[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([domainSlug, slug])
+  @@index([domainSlug])
+  @@index([layerKey])
+}
+
+model AIWork {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  nodeId      String
+  title       String
+  type        String   // 'paper' | 'project' | 'system' | 'benchmark'
+  year        Int
+  authors     String
+  venueOrOrg  String
+  summary     String
+  whyMilestone String
+  tags        Json?
+  url         String
+  thumbnail   String?
+
+  node AIResearchNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  userSignals AIUserWorkSignal[]
+
+  createdAt DateTime @default(now())
+
+  @@index([nodeId])
+  @@index([type])
+}
+
+model AIUserWorkSignal {
+  id        String   @id @default(cuid())
+  userId    String
+  workId    String
+  signal    String   // 'like' | 'dislike' | 'later'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  work AIWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workId])
+  @@index([userId])
+  @@index([workId])
+}
+
+model AIMentorExploration {
+  id              String   @id @default(cuid())
+  mentorUserId    String
+  domainSlug      String
+  nodeSlugs       Json?      // 关联研究节点slug列表
+  workSlugs       Json?      // 关联工作slug列表
+  videoUrl        String?    // 90秒介绍视频
+  additionalTags  Json?      // 额外的研究标签
+
+  mentor User     @relation(fields: [mentorUserId], references: [id], onDelete: Cascade)
+  domain AIDomain @relation(fields: [domainSlug], references: [slug], onDelete: Cascade)
+
+  @@unique([mentorUserId, domainSlug])
+  @@index([mentorUserId])
+  @@index([domainSlug])
+}
+
+model AIRecommendationSnapshot {
+  id          String   @id @default(cuid())
+  userId      String
+  version     String   // 推荐算法版本号，如'1.0', '1.1'
+  domains     Json     // [{domainId, score, reasons}]
+  nodes       Json     // [{nodeId, score, reasons}]
+  mentors     Json     // [{mentorId, score, reasons}]
+  route       Json?    // 学习路线
+  signalCount Json     // 生成推荐时的信号统计（用于可解释性）
+  generatedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, generatedAt(sort: Desc)])
 }

@@ -6,7 +6,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { db } from '@/lib/db';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -42,8 +41,8 @@ export default function BrowsePage() {
     try {
       const response = await fetch('/api/skills');
       const data = await response.json();
-      if (data.success) {
-        setMentors(data.data.skills);
+      if (data.skills) {
+        setMentors(data.skills);
       }
     } catch (error) {
       console.error('Failed to fetch mentors:', error);
