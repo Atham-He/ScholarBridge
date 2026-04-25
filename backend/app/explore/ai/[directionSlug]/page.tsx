@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
@@ -6,6 +7,80 @@ import './direction.css';
 
 interface PageProps {
   params: Promise<{ directionSlug: string }>;
+}
+
+type LayerKey = 'theory' | 'infrastructure' | 'application';
+
+const layerPresentation: Record<
+  LayerKey,
+  {
+    kicker: string;
+    headline: string;
+    detail: string;
+  }
+> = {
+  theory: {
+    kicker: 'Theory Core',
+    headline: '理论层',
+    detail: '训练范式、优化机制与推理方法',
+  },
+  infrastructure: {
+    kicker: 'System Stack',
+    headline: '基础设施层',
+    detail: 'serving、训练系统、数据工程与评测平台',
+  },
+  application: {
+    kicker: 'Applied Frontier',
+    headline: '应用层',
+    detail: 'AI4Math、AI4Science 与算法发现等落地场景',
+  },
+};
+
+const directionFeatureMedia: Record<
+  string,
+  {
+    videoSrc?: string;
+  }
+> = {
+  'logical-mathematical': {
+    videoSrc: '/videos/logical-mathematical-overview-reasoning.mp4',
+  },
+};
+
+const layerIconAssets: Partial<Record<LayerKey, string>> = {
+  theory: '/icons/explore/theory-layer-icon-v2.png',
+  application: '/icons/explore/application-layer-icon-v2.png',
+  infrastructure: '/icons/explore/infrastructure-layer-icon-v2.png',
+};
+
+function LayerGlyph({ layerKey }: { layerKey: LayerKey }) {
+  if (layerKey === 'theory') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 18L12 5L19 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8.5 13H15.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (layerKey === 'infrastructure') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="4.5" y="5.5" width="15" height="4" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+        <rect x="4.5" y="14.5" width="15" height="4" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M8 9.5V14.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M16 9.5V14.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7 17L17.5 6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M10 6.5H17.5V14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5.5 12.5C5.5 15.2614 7.73858 17.5 10.5 17.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 async function getDirectionDetails(directionSlug: string) {
@@ -20,7 +95,7 @@ async function getDirectionDetails(directionSlug: string) {
             orderBy: { year: 'desc' }
           }
         },
-        orderBy: { layerKey: 'asc' }
+        orderBy: [{ layerKey: 'asc' }, { createdAt: 'asc' }]
       }
     }
   });
@@ -61,6 +136,7 @@ export default async function DirectionDetailPage({ params }: PageProps) {
   }
 
   const { domain, layers } = data;
+  const featuredMedia = directionFeatureMedia[domain.slug];
 
   return (
     <div className="direction-page" style={{ '--accent-color': domain.accentColor } as React.CSSProperties}>
@@ -73,14 +149,31 @@ export default async function DirectionDetailPage({ params }: PageProps) {
 
       {/* Main Content */}
       <div className="direction-content">
-        {/* Header */}
-        <div className="direction-header">
-          {domain.icon && (
-            <span className="direction-icon">{domain.icon}</span>
+        <section className="direction-hero-shell">
+          <div className="direction-header">
+            {domain.icon && (
+              <span className="direction-icon">{domain.icon}</span>
+            )}
+            <div className="direction-kicker">AI Domain Overview</div>
+            <h1 className="direction-title">{domain.name}</h1>
+            <p className="direction-subtitle">{domain.description}</p>
+          </div>
+
+          {featuredMedia?.videoSrc && (
+            <div className="direction-feature-video" aria-label={`${domain.name} video`}>
+              <video
+                className="direction-feature-media"
+                controls
+                autoPlay
+                muted
+                loop
+                preload="metadata"
+                playsInline
+                src={featuredMedia.videoSrc}
+              />
+            </div>
           )}
-          <h1 className="direction-title">{domain.name}</h1>
-          <p className="direction-subtitle">{domain.description}</p>
-        </div>
+        </section>
 
         {/* Three Layer Structure */}
         {layers.map((layer) => {
@@ -91,14 +184,41 @@ export default async function DirectionDetailPage({ params }: PageProps) {
           if (layerNodes.length === 0) return null;
 
           return (
-            <div key={layer.id} className="direction-layer">
+            <div key={layer.id} id={`layer-${layer.key}`} className="direction-layer">
               <div className="direction-layer-header">
-                {layer.icon && (
-                  <span className="direction-layer-icon">{layer.icon}</span>
-                )}
+                <span
+                  className="direction-layer-icon"
+                  style={layerIconAssets[layer.key as LayerKey]
+                    ? {
+                        background: 'transparent',
+                        border: 'none',
+                        boxShadow: 'none',
+                      }
+                    : undefined}
+                >
+                  {layerIconAssets[layer.key as LayerKey] ? (
+                    <Image
+                      src={layerIconAssets[layer.key as LayerKey]!}
+                      alt=""
+                      width={58}
+                      height={58}
+                      className="direction-layer-icon-image"
+                      style={{ background: 'transparent' }}
+                    />
+                  ) : (
+                    <LayerGlyph layerKey={layer.key as LayerKey} />
+                  )}
+                </span>
                 <div>
+                  <p className="direction-layer-kicker">
+                    {layerPresentation[layer.key as LayerKey]?.kicker || 'Research Layer'}
+                  </p>
                   <h2 className="direction-layer-title">{layer.name}</h2>
                   <p className="direction-layer-desc">{layer.description}</p>
+                </div>
+                <div className="direction-layer-meta">
+                  <span className="direction-layer-meta-count">{layerNodes.length}</span>
+                  <span className="direction-layer-meta-label">nodes</span>
                 </div>
               </div>
 
@@ -124,9 +244,12 @@ export default async function DirectionDetailPage({ params }: PageProps) {
                       </div>
                     )}
 
-                    {node.tags && Array.isArray(node.tags) && node.tags.length > 0 && (
+                    {Array.isArray(node.tags) && node.tags.some((tag) => typeof tag === 'string') && (
                       <div className="direction-node-tags">
-                        {node.tags.slice(0, 3).map((tag: string, index: number) => (
+                        {node.tags
+                          .filter((tag): tag is string => typeof tag === 'string')
+                          .slice(0, 3)
+                          .map((tag, index) => (
                           <span key={index} className="direction-node-tag">
                             {tag}
                           </span>

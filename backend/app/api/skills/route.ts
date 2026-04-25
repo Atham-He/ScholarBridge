@@ -22,6 +22,7 @@ type ParsedCreateSkillRequest = {
     publish?: boolean;
     tags?: string[];
     hIndex?: number;
+    i10Index?: number;
     citationsDisplay?: string;
     researchSummary?: string;
     publications?: PublicationItem[];
@@ -263,6 +264,7 @@ export async function GET() {
       },
       tags,
       hIndex: skill.hIndex,
+      i10Index: skill.i10Index,
       citationsDisplay: skill.citationsDisplay,
       openPositionsCount,
       agent: {
@@ -313,6 +315,7 @@ export async function POST(request: NextRequest) {
     publish,
     tags,
     hIndex,
+    i10Index,
     citationsDisplay,
     researchSummary,
     publications,
@@ -395,6 +398,7 @@ export async function POST(request: NextRequest) {
       publishedAt: shouldPublish ? new Date() : null,
       tags: tags ?? undefined,
       hIndex: hIndex ?? undefined,
+      i10Index: i10Index ?? undefined,
       citationsDisplay: citationsDisplay ?? undefined,
       researchSummary: researchSummary ?? undefined,
       publications: publications ?? undefined,

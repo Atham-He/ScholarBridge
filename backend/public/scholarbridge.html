@@ -671,6 +671,33 @@
       margin-bottom: 18px
     }
 
+    .profile-video-block {
+      margin-top: 18px
+    }
+
+    .profile-video-label {
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 10px
+    }
+
+    .profile-video-shell {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #0F1720
+    }
+
+    .profile-video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #0F1720
+    }
+
     .profile-body {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -2012,6 +2039,20 @@
     }
 
     @media (max-width:900px) {
+      #profile .profile-hero {
+        padding: 24px 20px
+      }
+
+      .profile-top {
+        flex-direction: column;
+        max-width: none
+      }
+
+      .profile-body {
+        grid-template-columns: 1fr;
+        padding: 24px 20px
+      }
+
       #applications .apps-layout {
         grid-template-columns: 1fr
       }

@@ -684,6 +684,13 @@
       d.researchSummary ||
       "Research themes are distilled from the mentor profile and publications.";
     var slotsLeft = String(openProjects.length);
+    var introVideoUrl = m.introVideoUrl || "";
+    var introVideoPosterUrl = m.introVideoPosterUrl || "";
+    var introVideoBlock = introVideoUrl
+      ? '<div class="profile-video-block"><div class="profile-video-label">Introduction Video</div><div class="profile-video-shell"><video class="profile-video" controls preload="metadata"' +
+        (introVideoPosterUrl ? ' poster="' + escapeHtml(introVideoPosterUrl) + '"' : "") +
+        '><source src="' + escapeHtml(introVideoUrl) + '" type="video/mp4">Your browser does not support video playback.</video></div></div>'
+      : "";
 
     var content = document.querySelector("#profile .content");
     if (!content) return;
@@ -707,7 +714,9 @@
       "</div>" +
       '<p style="font-size:14px;color:var(--text-light);line-height:1.75;max-width:620px">' +
       escapeHtml(m.bioShort || "") +
-      "</p></div>" +
+      "</p>" +
+      introVideoBlock +
+      "</div>" +
       "<div>" +
       '<div class="stats-row" style="grid-template-columns:1fr 1fr 1fr;min-width:240px">' +
       '<div class="stat-box"><div class="val">' +

@@ -34,6 +34,10 @@ export default async function SkillPublicPage(props: Props) {
       .join("")
       .substring(0, 2)
       .toUpperCase() || "M";
+  const introVideoUrl = skill.owner.mentorProfile?.introVideoUrl;
+  const introVideoPosterUrl = skill.owner.mentorProfile?.introVideoPosterUrl;
+  const scholarUrl = skill.owner.mentorProfile?.scholarUrl;
+  const openRolesCount = skill.projects.filter((project) => project.status === "OPEN").length;
 
   return (
     <div className="skill-detail-page">
@@ -63,6 +67,70 @@ export default async function SkillPublicPage(props: Props) {
               </p>
             </div>
           </div>
+
+          <div className="skill-detail-header-video">
+            <h2 className="skill-detail-inline-title">导师介绍视频</h2>
+            {introVideoUrl ? (
+              <div className="skill-detail-video-shell">
+                <video
+                  className="skill-detail-video"
+                  controls
+                  preload="metadata"
+                  poster={introVideoPosterUrl ?? undefined}
+                >
+                  <source src={introVideoUrl} type="video/mp4" />
+                  当前浏览器不支持视频播放。
+                </video>
+              </div>
+            ) : (
+              <div className="skill-detail-video-placeholder">
+                <p className="skill-detail-video-placeholder-title">视频位已预留</p>
+                <p className="skill-detail-video-placeholder-copy">
+                  当前导师 Profile 已支持介绍视频字段，后续接入视频资源后会在这里展示。
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="skill-detail-stats">
+            <div className="skill-detail-stat-card">
+              <div className="skill-detail-stat-label">h-index</div>
+              <div className="skill-detail-stat-value">
+                {skill.hIndex != null ? skill.hIndex : "—"}
+              </div>
+            </div>
+            <div className="skill-detail-stat-card">
+              <div className="skill-detail-stat-label">i10-index</div>
+              <div className="skill-detail-stat-value">
+                {skill.i10Index != null ? skill.i10Index : "—"}
+              </div>
+            </div>
+            <div className="skill-detail-stat-card">
+              <div className="skill-detail-stat-label">Citations</div>
+              <div className="skill-detail-stat-value">
+                {skill.citationsDisplay ?? "—"}
+              </div>
+            </div>
+            <div className="skill-detail-stat-card">
+              <div className="skill-detail-stat-label">Open Roles</div>
+              <div className="skill-detail-stat-value">
+                {openRolesCount}
+              </div>
+            </div>
+          </div>
+
+          {scholarUrl && (
+            <div className="skill-detail-links">
+              <a
+                href={scholarUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="skill-detail-link-chip"
+              >
+                Google Scholar ↗
+              </a>
+            </div>
+          )}
         </div>
 
         {skill.owner.mentorProfile?.bioShort && (

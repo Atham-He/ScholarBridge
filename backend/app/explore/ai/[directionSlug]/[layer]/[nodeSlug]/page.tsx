@@ -11,7 +11,28 @@ interface PageProps {
   }>;
 }
 
-async function getNodeDetails(params: PageProps['params']) {
+type ResolvedParams = {
+  directionSlug: string;
+  layer: string;
+  nodeSlug: string;
+};
+
+const nodeFeatureMedia: Record<
+  string,
+  {
+    title: string;
+    description: string;
+    videoSrc: string;
+  }
+> = {
+  'rl-post-training': {
+    title: '强化学习与后训练优化导览',
+    description: '通过一段介绍视频快速建立对强化学习、奖励优化与后训练链路的整体理解。',
+    videoSrc: '/videos/rl-post-training-intro.mp4',
+  },
+};
+
+async function getNodeDetails(params: ResolvedParams) {
   const node = await db.aIResearchNode.findUnique({
     where: {
       domainSlug_slug: {
@@ -55,6 +76,11 @@ export default async function NodeDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const featuredMedia = nodeFeatureMedia[node.slug];
+  const nodeTags = Array.isArray(node.tags)
+    ? node.tags.filter((tag): tag is string => typeof tag === 'string')
+    : [];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -73,7 +99,7 @@ export default async function NodeDetailPage({ params }: PageProps) {
                 <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
                   {node.layer.name}
                 </span>
-                {node.tags && Array.isArray(node.tags) && node.tags.map((tag: string, index: number) => (
+                {nodeTags.map((tag, index) => (
                   <span
                     key={index}
                     className="inline-block bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full"
@@ -98,6 +124,23 @@ export default async function NodeDetailPage({ params }: PageProps) {
             </div>
           </div>
         </div>
+
+        {featuredMedia && (
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">{featuredMedia.title}</h2>
+              <p className="text-gray-600">{featuredMedia.description}</p>
+            </div>
+
+            <video
+              className="block w-full rounded-xl bg-slate-950 shadow-lg"
+              controls
+              preload="metadata"
+              playsInline
+              src={featuredMedia.videoSrc}
+            />
+          </div>
+        )}
 
         {/* Representative Works */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">

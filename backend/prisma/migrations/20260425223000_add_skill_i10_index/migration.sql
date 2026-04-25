@@ -1,0 +1,1 @@
+ALTER TABLE "Skill" ADD COLUMN "i10Index" INTEGER;

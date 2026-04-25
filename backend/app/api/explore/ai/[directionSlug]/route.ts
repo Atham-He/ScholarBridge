@@ -20,7 +20,7 @@ export async function GET(
               orderBy: { year: 'desc' }
             }
           },
-          orderBy: { layerKey: 'asc' }
+          orderBy: [{ layerKey: 'asc' }, { createdAt: 'asc' }]
         }
       }
     });

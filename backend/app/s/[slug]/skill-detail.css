@@ -138,6 +138,78 @@
   font-weight: 600;
 }
 
+.skill-detail-header-video {
+  margin-top: 18px;
+}
+
+.skill-detail-inline-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2C5F7C;
+  margin: 0 0 10px;
+}
+
+.skill-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.skill-detail-stat-card {
+  padding: 16px 18px;
+  background: white;
+  border: 1px solid #E0D8CC;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.skill-detail-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B6B6B;
+  margin-bottom: 8px;
+}
+
+.skill-detail-stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.skill-detail-links {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.skill-detail-link-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid #D4C6B4;
+  background: white;
+  color: #2C5F7C;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.skill-detail-link-chip:hover {
+  border-color: #2C5F7C;
+  box-shadow: 0 4px 12px rgba(44, 95, 124, 0.1);
+}
+
 /* Sections */
 .skill-detail-section {
   background: white;
@@ -162,6 +234,41 @@
   line-height: 1.7;
   color: #6B6B6B;
   margin: 0;
+}
+
+.skill-detail-video-shell {
+  overflow: hidden;
+  border: 1px solid #E0D8CC;
+  border-radius: 12px;
+  background: #F5F2ED;
+}
+
+.skill-detail-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0F1720;
+}
+
+.skill-detail-video-placeholder {
+  border: 1px dashed #C8B8A4;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(44, 95, 124, 0.04), rgba(139, 105, 20, 0.08));
+  padding: 28px;
+}
+
+.skill-detail-video-placeholder-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.skill-detail-video-placeholder-copy {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #6B6B6B;
 }
 
 .skill-detail-description {
@@ -261,6 +368,14 @@
   .skill-detail-mentor-info {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .skill-detail-header-video {
+    margin-top: 16px;
+  }
+
+  .skill-detail-stats {
+    grid-template-columns: 1fr;
   }
 
   .skill-detail-cta {

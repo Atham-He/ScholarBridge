@@ -84,6 +84,9 @@ model MentorProfile {
   title       String?
   bioShort    String?
   location    String?
+  scholarUrl          String?
+  introVideoUrl       String?
+  introVideoPosterUrl String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -111,6 +114,7 @@ model Skill {
   /// 研究标签，JSON 字符串数组，如 ["Machine Learning","NLP"]
   tags             Json?
   hIndex           Int?
+  i10Index         Int?
   citationsDisplay String?
   /// 右侧「Research Interests」自动摘要长文
   researchSummary  String?

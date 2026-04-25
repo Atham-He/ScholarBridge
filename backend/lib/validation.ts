@@ -51,6 +51,7 @@ export const skillCreateSchema = z.object({
   publish: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
   hIndex: z.number().int().min(0).optional(),
+  i10Index: z.number().int().min(0).optional(),
   citationsDisplay: z.string().optional(),
   researchSummary: z.string().optional(),
   publications: z.array(publicationItemSchema).optional(),

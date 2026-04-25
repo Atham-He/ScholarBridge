@@ -2,29 +2,110 @@
   "nodes": [
     {
       "slug": "sft",
-      "title": "监督微调 (SFT)",
-      "summary": "通过高质量指令数据提升模型性能",
-      "description": "监督微调是大语言模型训练的关键阶段，通过使用精心构建的指令-响应对数据集，显著提升模型的指令遵循能力和输出质量。研究重点包括数据质量、训练策略和性能优化。",
-      "tags": ["大语言模型", "指令微调", "数据质量", "训练优化"],
+      "title": "监督微调（SFT）",
+      "summary": "用高质量示例数据把基础模型拉到可控、稳定、可用的初始能力区间",
+      "description": "SFT 是当前大模型训练链路里最基础也最关键的一步。它决定了模型是否具备稳定的指令遵循、格式输出、基础推理和任务迁移能力，也是后续偏好对齐、强化学习和工具调用能力的起点。",
+      "tags": ["SFT", "后训练", "指令微调", "数据配方"],
       "layerKey": "theory",
       "domainSlug": "logical-mathematical"
     },
     {
-      "slug": "lean",
-      "title": "Lean 形式化证明",
-      "summary": "用AI辅助数学定理的形式化验证",
-      "description": "Lean是一个交互式定理证明助手，近年来结合AI技术实现了重大突破。研究包括自动证明搜索、战术预测和形式化数学库的构建，为数学研究提供新的工具和方法。",
-      "tags": ["形式化验证", "定理证明", "Lean", "数学AI"],
+      "slug": "rl-post-training",
+      "title": "强化学习与后训练优化",
+      "summary": "通过奖励、反馈和在线优化提升复杂推理、决策与长程任务表现",
+      "description": "强化学习在逻辑数理智能里不只是经典控制问题，更是后训练阶段提升推理、规划和策略表现的关键方法。核心关注点包括奖励设计、样本效率、探索策略，以及如何把离线偏好数据和在线交互结合起来。",
+      "tags": ["强化学习", "后训练", "奖励建模", "策略优化"],
       "layerKey": "theory",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "preference-alignment",
+      "title": "偏好对齐与奖励建模",
+      "summary": "把“更好答案”的偏好信号显式建模，连接 SFT 与 RL",
+      "description": "偏好对齐研究如何把人类或系统偏好转换成可训练的优化目标。它既包括 RLHF 这类基于奖励模型的路线，也包括 DPO 一类直接优化偏好的方法，是提升模型可控性、推理质量和输出风格的核心理论模块。",
+      "tags": ["RLHF", "DPO", "奖励模型", "偏好学习"],
+      "layerKey": "theory",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "reasoning-search",
+      "title": "推理时扩展与搜索",
+      "summary": "把搜索、采样、树结构和测试时计算预算引入推理过程",
+      "description": "逻辑数理任务常常无法靠一次前向生成解决，因此需要在推理时做候选展开、搜索、回溯、验证和选择。这个方向关注 test-time scaling、树搜索、程序搜索和 proof search，强调用额外计算换取更可靠的复杂推理结果。",
+      "tags": ["推理", "搜索", "test-time scaling", "proof search"],
+      "layerKey": "theory",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "ai-infra",
+      "title": "AI Infra",
+      "summary": "训练、存储、调度、并行与成本控制构成大模型系统的硬底座",
+      "description": "AI Infra 关注的是大模型从训练到部署的整条工程链路，包括集群调度、并行策略、显存与带宽管理、容错、观测和成本优化。没有这层能力，很多理论方法和应用形态都无法稳定放大到真实规模。",
+      "tags": ["AI Infra", "分布式训练", "系统工程", "集群调度"],
+      "layerKey": "infrastructure",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "ai4math",
-      "title": "AI for Mathematics",
-      "summary": "AI在数学发现和证明中的应用",
-      "description": "探索AI技术如何帮助数学家进行研究发现和定理证明。包括猜想生成、证明辅助、数学语言理解等方向，AI正逐渐成为数学研究的强大助手。",
-      "tags": ["数学发现", "定理证明", "AI辅助研究", "猜想生成"],
+      "title": "AI for Math",
+      "summary": "面向数学竞赛、证明、猜想与形式化问题求解的应用方向",
+      "description": "AI4Math 关注模型如何处理高结构化、高验证要求的数学任务，包括几何题求解、代数推导、定理证明、形式化数学和研究辅助。它是检验逻辑推理能力是否真正可用的重要应用场景。",
+      "tags": ["AI4Math", "数学推理", "证明", "竞赛数学"],
       "layerKey": "application",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "ai4science",
+      "title": "AI for Science",
+      "summary": "把模型能力落到蛋白质、材料、气候、生物等科学问题上",
+      "description": "AI4Science 的核心不是通用聊天，而是让模型在真实科学任务中参与预测、发现、模拟和设计。对于逻辑数理智能来说，它代表了数理推理能力从抽象 benchmark 走向科学问题求解的关键出口。",
+      "tags": ["AI4Science", "科学发现", "计算科学", "科学模型"],
+      "layerKey": "application",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "automated-theorem-systems",
+      "title": "自动定理证明系统",
+      "summary": "把证明搜索、形式系统和语言模型结合成可执行系统",
+      "description": "自动定理证明系统强调端到端能力：命题表示、搜索策略、战术生成、验证器调用和结果回收。它比单篇论文更接近真实系统工程，是逻辑数理智能最直接、最具代表性的应用场景之一。",
+      "tags": ["自动定理证明", "形式系统", "证明搜索", "系统应用"],
+      "layerKey": "application",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "algorithm-discovery",
+      "title": "算法发现与程序优化",
+      "summary": "让模型参与算法搜索、程序改写与计算性能优化",
+      "description": "这类应用把逻辑数理智能落在算法空间搜索和程序层面的优化问题上，例如矩阵乘法策略发现、排序与编译优化、启发式搜索改进等，体现模型在离散结构和优化目标上的实用价值。",
+      "tags": ["算法发现", "程序优化", "离散搜索", "系统优化"],
+      "layerKey": "application",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "vllm-serving",
+      "title": "vLLM 与推理服务",
+      "summary": "围绕高吞吐、低延迟和显存效率构建大模型推理引擎",
+      "description": "vLLM 代表了当前推理基础设施的关键方向：通过高效 KV cache 管理、continuous batching 和 serving 抽象，把大模型从研究原型变成可部署的在线服务能力。",
+      "tags": ["vLLM", "serving", "推理引擎", "系统优化"],
+      "layerKey": "infrastructure",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "posttraining-pipeline",
+      "title": "数据与后训练 Pipeline",
+      "summary": "从数据构造、清洗、偏好采样到多轮后训练形成可重复流程",
+      "description": "真正的后训练能力来自稳定的数据与流程，而不是单次实验。这个方向关注数据生成、数据清洗、合成偏好、样本配方、训练编排以及多阶段 SFT/RL 对齐流程的工程化实现。",
+      "tags": ["数据工程", "后训练", "pipeline", "合成数据"],
+      "layerKey": "infrastructure",
+      "domainSlug": "logical-mathematical"
+    },
+    {
+      "slug": "eval-benchmarking",
+      "title": "评测与 Benchmark 基础设施",
+      "summary": "用统一评测集、打分协议和实验平台衡量复杂推理能力",
+      "description": "数理与逻辑任务的进步高度依赖可信评测。这个方向关注 benchmark 设计、自动评测、可复现实验、能力剖面分析，以及如何把开放式推理问题转成可比较的系统评估。",
+      "tags": ["评测", "benchmark", "实验平台", "能力分析"],
+      "layerKey": "infrastructure",
       "domainSlug": "logical-mathematical"
     },
     {
@@ -95,22 +176,22 @@
     {
       "key": "theory",
       "name": "理论层",
-      "description": "基础理论和算法创新",
+      "description": "训练范式、优化机制与推理方法",
       "icon": "📐",
       "order": 1
     },
     {
-      "key": "infrastructure",
-      "name": "基础设施层",
-      "description": "核心技术和系统架构",
-      "icon": "⚙️",
+      "key": "application",
+      "name": "应用层",
+      "description": "AI4Math、AI4Science 与算法发现等落地场景",
+      "icon": "🚀",
       "order": 2
     },
     {
-      "key": "application",
-      "name": "应用层",
-      "description": "实际应用和产品化",
-      "icon": "🚀",
+      "key": "infrastructure",
+      "name": "基础设施层",
+      "description": "serving、训练系统、数据工程与评测平台",
+      "icon": "⚙️",
       "order": 3
     }
   ]

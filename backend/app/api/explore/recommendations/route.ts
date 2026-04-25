@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
@@ -57,7 +58,7 @@ export async function GET() {
         domains: recommendations.domains,
         nodes: recommendations.nodes,
         mentors: recommendations.mentors,
-        route: recommendations.route,
+        route: recommendations.route ?? Prisma.JsonNull,
         signalCount: {
           total: signals.length,
           byDomain: countSignalsByDomain(signals)
