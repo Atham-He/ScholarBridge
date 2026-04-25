@@ -16,7 +16,7 @@ import { nowIso } from '@/lib/persona/utils';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     // 验证用户身份
@@ -28,7 +28,7 @@ export async function POST(
       );
     }
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // 解析请求体
     const body = await request.json();
@@ -115,16 +115,18 @@ export async function POST(
     }
 
     // 解析会话历史
-    const turns: ChatTurn[] = personaSession.turnsJson as ChatTurn[];
+    const turns: ChatTurn[] = personaSession.turnsJson as unknown as ChatTurn[];
+    const personaJson = persona.personaJson as any;
+    const chunksJson = persona.chunksJson as unknown as any[];
 
     // 创建聊天服务
-    const llmProvider = createLLMProviderFromEnv();
+    const llmProvider = await createLLMProviderFromEnv();
     const chatService = new PersonaChatService(llmProvider);
 
     // 执行聊天
     const chatResponse = await chatService.chat({
-      persona: persona.personaJson,
-      chunks: persona.chunksJson as any[],
+      persona: personaJson,
+      chunks: chunksJson,
       message,
       studentProfile: personaSession.studentProfile as any,
       session: { turns }
@@ -146,7 +148,7 @@ export async function POST(
     await db.personaSession.update({
       where: { id: personaSession.id },
       data: {
-        turnsJson: turns,
+        turnsJson: turns as any,
         messageCount: turns.length,
         lastMessageAt: new Date()
       }
@@ -162,7 +164,7 @@ export async function POST(
         retrievedChunksCount: chatResponse.retrievedChunks.length,
         messageCount: turns.length,
         persona: {
-          name: persona.personaJson.mentor.name,
+          name: personaJson?.mentor?.name || '',
           slug: persona.slug
         }
       }
@@ -189,7 +191,7 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     // 验证用户身份
@@ -201,7 +203,7 @@ export async function GET(
       );
     }
 
-    const { slug } = params;
+    const { slug } = await params;
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('sessionId');
 
@@ -214,8 +216,11 @@ export async function GET(
 
     // 查找Persona
     const persona = await db.persona.findUnique({
-      where: { slug }
-    });
+        where: { slug },
+        include: {
+          skill: true
+        }
+      });
 
     if (!persona) {
       return NextResponse.json(
@@ -245,7 +250,7 @@ export async function GET(
       // 目前简单处理：允许访问
     }
 
-    const turns = personaSession.turnsJson as ChatTurn[];
+    const turns = personaSession.turnsJson as unknown as ChatTurn[];
 
     return NextResponse.json({
       success: true,

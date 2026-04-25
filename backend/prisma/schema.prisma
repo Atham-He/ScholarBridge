@@ -214,7 +214,7 @@ model Persona {
   skillId         String   @unique
   slug            String   @unique
 
-  // Persona核心数据 (JSON存储，保持与supervisor_born兼容)
+  // Persona核心数据 (JSON存储，保持与内嵌 persona runtime 兼容)
   personaJson     Json     // 完整的persona对象
   agentCard       String   // agent-card.md内容
 
@@ -239,6 +239,7 @@ model Persona {
   sourceCount     Int      @default(0)
   publicSourceCount Int    @default(0)
   uploadSourceCount Int    @default(0)
+  privateSourceCount Int   @default(0)
   chunkCount      Int      @default(0)
 
   createdAt       DateTime @default(now())

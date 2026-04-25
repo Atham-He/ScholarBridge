@@ -16,6 +16,12 @@ node_modules/
 out/
 dist/
 build/
+*.tsbuildinfo
+
+# Runtime uploads and temporary files
+uploads/
+tmp_*.log
+tmp_*.pid
 
 # IDE
 .vscode/

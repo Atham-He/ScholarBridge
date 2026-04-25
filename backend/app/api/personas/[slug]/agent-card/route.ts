@@ -12,7 +12,7 @@ import { db } from '@/lib/db';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     // 验证用户身份
@@ -24,7 +24,7 @@ export async function GET(
       );
     }
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // 查询Persona
     const persona = await db.persona.findUnique({
@@ -57,16 +57,18 @@ export async function GET(
     }
 
     // 返回Agent Card（Markdown格式）
+    const personaJson = persona.personaJson as any;
+
     return NextResponse.json({
       success: true,
       data: {
         slug: persona.slug,
         agentCard: persona.agentCard,
         persona: {
-          name: persona.personaJson.mentor.name,
-          affiliation: persona.personaJson.mentor.affiliation,
-          title: persona.personaJson.mentor.title,
-          overview: persona.personaJson.overview
+          name: personaJson?.mentor?.name || '',
+          affiliation: personaJson?.mentor?.affiliation || '',
+          title: personaJson?.mentor?.title || '',
+          overview: personaJson?.overview || ''
         },
         skill: {
           id: persona.skill.id,

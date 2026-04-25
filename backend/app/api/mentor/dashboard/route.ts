@@ -15,7 +15,7 @@ export async function GET() {
   const [skills, applications] = await Promise.all([
     db.skill.findMany({
       where: { ownerUserId: user.id },
-      include: { projects: true },
+      include: { persona: true, projects: true },
     }),
     db.application.findMany({
       where: { mentorUserId: user.id },
@@ -56,6 +56,8 @@ export async function GET() {
       title: s.title,
       openPositions: s.projects.filter((p) => p.status === "OPEN").length,
       agentActive: s.agentActive,
+      hasPersona: Boolean(s.persona),
+      personaBuildStatus: s.persona?.buildStatus ?? null,
     })),
   });
 }

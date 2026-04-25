@@ -1,19 +1,14 @@
-/**
- * Persona服务类型定义
- */
-
-// ============= LLM提供商类型 =============
-
 export type LLMProviderKind = 'mock' | 'openai' | 'anthropic' | 'deepseek';
 
 export interface LLMProvider {
   kind: LLMProviderKind;
-  generateText(prompts: string[]): Promise<string>;
-  generateJson(prompts: string[]): Promise<any>;
+  model?: string;
+  supportsVision?: boolean;
+  generateText(input: any): Promise<string>;
+  generateJson(input: any): Promise<any>;
   generateVision?(image: Buffer, prompt: string): Promise<string>;
+  describeImage?(input: any): Promise<any>;
 }
-
-// ============= Persona数据类型 =============
 
 export interface MentorInput {
   name: string;
@@ -22,6 +17,44 @@ export interface MentorInput {
   publicUrls?: string[];
   authorizedBy: string;
   consentNotes?: string;
+}
+
+export type SourceOrigin = 'public' | 'upload' | 'private';
+export type SourceKind =
+  | 'webpage'
+  | 'paper'
+  | 'upload_text'
+  | 'upload_document'
+  | 'upload_image'
+  | 'upload_pdf'
+  | 'upload_docx'
+  | 'upload_doc'
+  | 'wechat_chat'
+  | 'meeting_transcript'
+  | 'mentor_thinking_questionnaire'
+  | 'ai_chat_share';
+
+export interface Source {
+  id: string;
+  origin: SourceOrigin;
+  kind: SourceKind | string;
+  title: string;
+  url?: string | null;
+  filePath?: string | null;
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+export interface Chunk {
+  id: string;
+  sourceId: string;
+  title: string;
+  origin: SourceOrigin;
+  kind: SourceKind | string;
+  url?: string | null;
+  chunkIndex: number;
+  text: string;
+  score?: number;
 }
 
 export interface PersonaData {
@@ -33,12 +66,12 @@ export interface PersonaData {
     slug: string;
     affiliation: string;
     title: string;
-    homepage: string;
+    homepage?: string;
   };
   authorization: {
     authorized: boolean;
     authorizedBy: string;
-    consentNotes: string;
+    consentNotes?: string;
   };
   overview: string;
   researchTopics: Array<{
@@ -53,68 +86,43 @@ export interface PersonaData {
     requiredSkills: string[];
     fitSignals: string[];
   }>;
-  communicationStyle: {
-    voiceSummary: string;
-    doSay: string[];
-    avoid: string[];
+  communicationStyle?: {
+    voiceSummary?: string;
+    doSay?: string[];
+    avoid?: string[];
+    chatStyle?: Record<string, any>;
+    meetingStyle?: Record<string, any>;
+    thinkingStyle?: Record<string, any>;
+    styleGuide?: Record<string, any>;
   };
-  mentorshipStyle: {
-    expectations: string[];
-    preferredStudents: string[];
-    screeningQuestions: string[];
+  mentorshipStyle?: {
+    expectations?: string[];
+    preferredStudents?: string[];
+    screeningQuestions?: string[];
   };
-  screeningRubric: {
-    hardRequirements: string[];
-    positiveSignals: string[];
-    concerns: string[];
+  screeningRubric?: {
+    hardRequirements?: string[];
+    positiveSignals?: string[];
+    concerns?: string[];
   };
-  guardrails: string[];
-  provenance: {
-    sourceCount: number;
-    publicSourceCount: number;
-    uploadSourceCount: number;
-    topSources: string[];
-    confidenceNotes: string;
+  researchTaste?: Record<string, any>;
+  thinkingProcess?: Record<string, any>;
+  guardrails?: string[];
+  provenance?: {
+    sourceCount?: number;
+    publicSourceCount?: number;
+    uploadSourceCount?: number;
+    privateSourceCount?: number;
+    topSources?: string[];
+    confidenceNotes?: string;
+    llmDistillation?: Record<string, any>;
+    evidencePreview?: Record<string, any>;
   };
+  [key: string]: any;
 }
-
-// ============= 证据源类型 =============
-
-export type SourceOrigin = 'public' | 'upload';
-export type SourceKind = 'webpage' | 'paper' | 'upload_text' | 'upload_document' | 'upload_image';
-
-export interface Source {
-  id: string;
-  origin: SourceOrigin;
-  kind: SourceKind;
-  title: string;
-  url?: string;
-  content: string;
-  metadata: {
-    fetchedAt?: string;
-    provider?: string;
-    publicationYear?: number;
-    citedByCount?: number;
-    summary?: string;
-    [key: string]: any;
-  };
-}
-
-export interface Chunk {
-  id: string;
-  sourceId: string;
-  title: string;
-  origin: SourceOrigin;
-  kind: SourceKind;
-  url?: string;
-  chunkIndex: number;
-  text: string;
-}
-
-// ============= 聊天类型 =============
 
 export interface ChatMessage {
-  role: 'user' | 'assistant' | 'mentor';
+  role: 'user' | 'assistant' | 'mentor' | string;
   content: string;
 }
 
@@ -123,14 +131,13 @@ export interface ChatTurn {
   message: string;
   answer: string;
   citations: Array<{ sourceId: string; title: string }>;
-  retrievedChunks: Chunk[];
-  timestamp: string;
-}
-
-export interface ChatResponse {
-  answer: string;
-  citations: Array<{ sourceId: string; title: string }>;
-  retrievedChunks: Chunk[];
+  retrievedChunks?: Array<{
+    sourceId: string;
+    title: string;
+    chunkIndex: number;
+  }>;
+  timestamp?: string;
+  createdAt?: string;
 }
 
 export interface ChatParams {
@@ -143,13 +150,17 @@ export interface ChatParams {
   studentProfile?: Record<string, any>;
 }
 
-// ============= 评估类型 =============
+export interface ChatResponse {
+  answer: string;
+  citations: Array<{ sourceId: string; title: string }>;
+  retrievedChunks: Chunk[];
+}
 
 export interface EvaluationParams {
   persona: PersonaData;
   chunks: Chunk[];
   studentProfile: Record<string, any>;
-  transcript?: ChatMessage[];
+  transcript?: ChatMessage[] | ChatTurn[];
 }
 
 export interface EvaluationResult {
@@ -158,7 +169,7 @@ export interface EvaluationResult {
   researchFit: {
     score: number;
     rationale: string;
-    evidence: string[];
+    evidence: any[];
   };
   technicalDepth: {
     score: number;
@@ -168,7 +179,7 @@ export interface EvaluationResult {
   communication: {
     score: number;
     rationale: string;
-    evidence: string[];
+    evidence: any[];
   };
   initiative: {
     score: number;
@@ -193,21 +204,34 @@ export interface EvaluationResult {
     }>;
     inferred: string[];
   };
+  [key: string]: any;
 }
 
-// ============= 构建类型 =============
+export interface UploadedFileDescriptor {
+  path: string;
+  originalName: string;
+  mimeType: string;
+  size?: number;
+  sourceType?: string;
+  mentorSpeaker?: string;
+  meetingSpeaker?: string;
+  transcriptPath?: string;
+  fileUrl?: string;
+}
 
 export interface BuildPersonaParams {
   mentor: MentorInput;
   publicUrls?: string[];
-  uploads?: Array<{
-    name: string;
-    mimeType: string;
-    buffer: Buffer;
-  }>;
+  uploads?: UploadedFileDescriptor[];
+  wechatUploads?: UploadedFileDescriptor[];
+  meetingUploads?: UploadedFileDescriptor[];
+  thinkingQuestionnaireUploads?: UploadedFileDescriptor[];
+  aiChatShareUploads?: UploadedFileDescriptor[];
   projectText?: string;
   skipPublicSearch?: boolean;
   disableOpenalex?: boolean;
+  mentorSpeaker?: string;
+  meetingSpeaker?: string;
 }
 
 export interface BuildPersonaResult {
@@ -220,35 +244,5 @@ export interface BuildPersonaResult {
   chunkCount: number;
   publicSourceCount: number;
   uploadSourceCount: number;
-}
-
-// ============= 搜索类型 =============
-
-export interface PublicSearchResult {
-  url: string;
-  title: string;
-  snippet: string;
-  source: 'bing' | 'google' | 'duckduckgo';
-}
-
-export interface OpenAlexAuthor {
-  id: string;
-  displayName: string;
-  institution?: {
-    name: string;
-  };
-  worksCount: number;
-  citedByCount: number;
-}
-
-export interface OpenAlexWork {
-  id: string;
-  title: string;
-  publicationYear: number;
-  citedByCount: number;
-  primaryLocation?: {
-    source?: {
-      displayName: string;
-    };
-  };
+  privateSourceCount: number;
 }

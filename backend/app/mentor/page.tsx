@@ -24,6 +24,8 @@ interface Skill {
   title: string;
   openPositions: number;
   agentActive: boolean;
+  hasPersona?: boolean;
+  personaBuildStatus?: string | null;
 }
 
 interface Application {
@@ -300,6 +302,14 @@ export default function MentorDashboardPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {skill.agentActive && <Badge variant="green" dot>Agent Active</Badge>}
+                      {skill.hasPersona && (
+                        <button
+                          className="text-[12px] py-2 px-3 rounded border border-[#E0D8CC] bg-transparent text-[#6B6B6B] font-medium transition-all duration-200 hover:border-[#2C5F7C] hover:text-[#2C5F7C]"
+                          onClick={() => window.location.href = `/mentor/skills/${skill.slug}/persona`}
+                        >
+                          Manage Persona
+                        </button>
+                      )}
                       <button
                         className="text-[12px] py-2 px-3 rounded border border-[#E0D8CC] bg-transparent text-[#6B6B6B] font-medium transition-all duration-200 hover:border-[#2C5F7C] hover:text-[#2C5F7C]"
                         onClick={() => window.location.href = `/s/${skill.slug}`}
