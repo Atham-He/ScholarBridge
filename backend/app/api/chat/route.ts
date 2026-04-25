@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -126,12 +127,31 @@ export async function POST(request: NextRequest) {
     }));
 
   let assistantRaw = "";
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
 
-  if (!apiKey) {
+  if (!anthropicKey && !openaiKey) {
     assistantRaw = fallbackReply(mentorProfile.displayName);
+  } else if (openaiKey && process.env.LLM_PROVIDER === "openai") {
+    // 使用 OpenAI
+    const client = new OpenAI({
+      apiKey: openaiKey,
+      baseURL: process.env.OPENAI_BASE_URL,
+    });
+    const completion = await client.chat.completions.create({
+      model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+      max_tokens: 900,
+      messages: [
+        { role: "system", content: system },
+        ...anthropicMessages,
+      ],
+    });
+    assistantRaw =
+      completion.choices[0]?.message?.content?.trim() ||
+      "基于当前资料我无法确认。";
   } else {
-    const client = new Anthropic({ apiKey });
+    // 使用 Anthropic (默认)
+    const client = new Anthropic({ apiKey: anthropicKey! });
     const completion = await client.messages.create({
       model: process.env.ANTHROPIC_MODEL ?? "claude-3-5-haiku-latest",
       max_tokens: 900,
