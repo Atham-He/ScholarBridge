@@ -132,10 +132,13 @@ async function generateRuleBasedRecommendations(signals: any[]) {
   // 生成简单学习路线
   const route = generateLearningRoute(domains, nodes);
 
+  // 生成导师推荐
+  const mentors = await generateMentorRecommendations(domainScores, nodeScores);
+
   return {
     domains,
     nodes,
-    mentors: [], // TODO: 实现导师推荐
+    mentors,
     route
   };
 }
@@ -147,6 +150,128 @@ function countSignalsByDomain(signals: any[]) {
     counts[domainSlug] = (counts[domainSlug] || 0) + 1;
   }
   return counts;
+}
+
+async function generateMentorRecommendations(
+  domainScores: Map<string, { count: number; name: string; slug: string }>,
+  nodeScores: Map<string, { count: number; title: string; slug: string; domainSlug: string }>
+): Promise<Array<{mentorId: string; score: number; reasons: string[]; mentor: any}>> {
+  // 获取用户感兴趣的领域
+  const interestedDomainSlugs = Array.from(domainScores.keys())
+    .sort((a, b) => domainScores.get(b)!.count - domainScores.get(a)!.count)
+    .slice(0, 3);
+
+  if (interestedDomainSlugs.length === 0) {
+    return [];
+  }
+
+  // 查找相关导师（基于 AIMentorExploration）
+  const mentorExplorations = await db.aIMentorExploration.findMany({
+    where: {
+      domainSlug: {
+        in: interestedDomainSlugs
+      }
+    },
+    include: {
+      mentor: {
+        include: {
+          mentorProfile: true,
+          skills: {
+            where: {
+              status: 'PUBLISHED',
+              isPublic: true
+            }
+          }
+        }
+      },
+      domain: true
+    }
+  });
+
+  // 计算每个导师的匹配分数
+  const mentorMatchScores = new Map<string, {
+    mentorId: string;
+    score: number;
+    reasons: string[];
+    mentor: any;
+  }>();
+
+  for (const exploration of mentorExplorations) {
+    const mentor = exploration.mentor;
+    if (!mentor.mentorProfile) continue;
+
+    const domainSlug = exploration.domainSlug;
+    const domainScore = domainScores.get(domainSlug);
+    if (!domainScore) continue;
+
+    // 基础分数：基于领域匹配度
+    let score = domainScore.count;
+
+    // 额外加分：如果导师的研究节点与用户兴趣节点匹配
+    const mentorNodeSlugs = (exploration.nodeSlugs as string[]) || [];
+    const userInterestedNodes = Array.from(nodeScores.keys());
+    const matchingNodes = mentorNodeSlugs.filter(slug => userInterestedNodes.includes(slug));
+    score += matchingNodes.length * 2;
+
+    // 额外加分：如果导师的研究标签与用户兴趣节点匹配
+    const mentorTags = (exploration.additionalTags as string[]) || [];
+    const matchingTags = mentorTags.filter(tag =>
+      userInterestedNodes.some(nodeSlug =>
+        nodeSlug.toLowerCase().includes(tag.toLowerCase()) ||
+        tag.toLowerCase().includes(nodeSlug.toLowerCase())
+      )
+    );
+    score += matchingTags.length;
+
+    if (!mentorMatchScores.has(mentor.id)) {
+      const primarySkill = mentor.skills[0];
+      mentorMatchScores.set(mentor.id, {
+        mentorId: mentor.id,
+        score: 0,
+        reasons: [],
+        mentor: {
+          id: mentor.id,
+          displayName: mentor.mentorProfile.displayName,
+          institution: mentor.mentorProfile.institution,
+          title: mentor.mentorProfile.title,
+          location: mentor.mentorProfile.location,
+          bioShort: mentor.mentorProfile.bioShort,
+          skillSlug: primarySkill?.slug,
+          skillTitle: primarySkill?.title,
+          domainSlug: domainSlug,
+          domainName: exploration.domain.name,
+          domainColor: exploration.domain.accentColor
+        }
+      });
+    }
+
+    const match = mentorMatchScores.get(mentor.id)!;
+    match.score += score;
+
+    // 添加推荐理由
+    if (!match.reasons.some(r => r.includes(exploration.domain.name))) {
+      match.reasons.push(`研究领域与${exploration.domain.name}匹配`);
+    }
+    if (matchingNodes.length > 0) {
+      match.reasons.push(`在${matchingNodes.length}个你感兴趣的研究方向上有专长`);
+    }
+    if (matchingTags.length > 0) {
+      match.reasons.push(`研究兴趣与你标记的内容高度相关`);
+    }
+  }
+
+  // 转换为数组并排序
+  const mentors = Array.from(mentorMatchScores.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map(m => ({
+      mentorId: m.mentorId,
+      score: Math.min(m.score / 10, 1), // 归一化到0-1
+      reasons: m.reasons.slice(0, 3), // 最多显示3个理由
+      mentor: m.mentor
+    }));
+
+  return mentors;
 }
 
 function generateLearningRoute(domains: any[], nodes: any[]) {

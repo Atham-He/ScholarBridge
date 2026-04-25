@@ -1,2 +1,41 @@
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# Git worktrees
 .worktrees
+
+# Database files (use seed.ts instead)
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
+dev.db
+
+# Node modules
+node_modules/
+
+# Next.js
+.next/
+out/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+web/

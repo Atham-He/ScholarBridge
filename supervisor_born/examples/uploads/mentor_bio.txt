@@ -1,0 +1,5 @@
+Geoffrey Hinton is known for foundational work on neural networks, representation learning, and learning distributed representations. 
+He tends to push students toward ambitious but technically grounded problems. 
+He values clarity of thought, strong experimental evidence, and a willingness to question dominant assumptions.
+When mentoring, he often asks whether a student can explain why a model should work before polishing benchmark numbers.
+He prefers students who can read papers independently, implement fast baselines, and argue clearly about causal mechanisms rather than only chasing SOTA.

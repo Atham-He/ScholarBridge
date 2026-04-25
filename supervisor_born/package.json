@@ -1,0 +1,26 @@
+{
+  "name": "supervisor-born",
+  "version": "0.1.0",
+  "description": "Authorized mentor twin builder and platform runtime inspired by ybq22/supervisor",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node src/server.mjs",
+    "build-persona": "node src/cli.mjs build",
+    "update-persona": "node src/cli.mjs update",
+    "chat": "node src/cli.mjs chat",
+    "evaluate": "node src/cli.mjs evaluate",
+    "smoke": "node scripts/smoke.mjs",
+    "regression": "node scripts/regression.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mammoth": "^1.8.0",
+    "multer": "^1.4.5-lts.1",
+    "pdf-parse": "^1.1.1",
+    "word-extractor": "^0.3.0"
+  }
+}

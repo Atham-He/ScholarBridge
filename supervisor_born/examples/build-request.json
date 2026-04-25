@@ -1,0 +1,13 @@
+{
+  "name": "Geoffrey Hinton",
+  "affiliation": "University of Toronto",
+  "authorizedBy": "demo-admin",
+  "consentNotes": "Demo-only authorized build.",
+  "publicUrls": [
+    "https://www.cs.toronto.edu/~hinton/"
+  ],
+  "uploadPaths": [
+    "./examples/uploads/mentor_bio.txt",
+    "./examples/uploads/project_brief.md"
+  ]
+}

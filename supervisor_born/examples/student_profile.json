@@ -1,0 +1,11 @@
+{
+  "name": "Alice Chen",
+  "background": "Fourth-year CS undergraduate with a minor in statistics.",
+  "interests": ["representation learning", "multimodal models", "scientific machine learning"],
+  "experience": [
+    "Implemented transformer models in PyTorch",
+    "Reproduced one NeurIPS paper and wrote ablation notes",
+    "Built a data cleaning pipeline for graph and tabular data"
+  ],
+  "goals": "Join a research group where I can learn experimental design and eventually publish."
+}

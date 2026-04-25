@@ -154,6 +154,94 @@ export default async function RecommendationsPage() {
               </div>
             )}
 
+            {/* Mentor Recommendations */}
+            {recommendations.mentors.length > 0 && (
+              <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                  推荐导师
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recommendations.mentors.map((mentor: any) => (
+                    <div
+                      key={mentor.mentorId}
+                      className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                    >
+                      {/* Domain Badge */}
+                      <div className="mb-4">
+                        <span
+                          className="inline-block px-3 py-1 rounded-full text-xs font-semibold text-white"
+                          style={{
+                            background: mentor.mentor.domainColor || '#3B82F6'
+                          }}
+                        >
+                          {mentor.mentor.domainName}
+                        </span>
+                      </div>
+
+                      {/* Mentor Info */}
+                      <div className="mb-4">
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">
+                          {mentor.mentor.displayName}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {mentor.mentor.institution}
+                          {mentor.mentor.title && ` · ${mentor.mentor.title}`}
+                        </p>
+                        {mentor.mentor.location && (
+                          <p className="text-xs text-gray-500">
+                            📍 {mentor.mentor.location}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Research Focus */}
+                      {mentor.mentor.bioShort && (
+                        <p
+                          className="text-sm text-gray-700 mb-4"
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}
+                        >
+                          {mentor.mentor.bioShort}
+                        </p>
+                      )}
+
+                      {/* Match Score & Reasons */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-semibold text-gray-700">匹配度</span>
+                          <span className="text-lg font-bold text-blue-600">
+                            {(mentor.score * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          {mentor.reasons.map((reason: string, index: number) => (
+                            <p key={index} className="text-xs text-gray-600">
+                              • {reason}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      {mentor.mentor.skillSlug && (
+                        <Link
+                          href={`/mentor/${mentor.mentor.skillSlug}`}
+                          className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          了解更多
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Call to Action */}
             <div className="rounded-lg shadow-lg p-8 text-center text-white" style={{ background: 'linear-gradient(135deg, #2C5F7C 0%, #1a4a6c 100%)' }}>
               <h3 className="font-bold mb-4" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '28px', fontWeight: 600 }}>

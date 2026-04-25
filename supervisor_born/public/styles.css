@@ -1,0 +1,88 @@
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  background: #f6f8fb;
+  color: #1f2937;
+}
+
+header {
+  padding: 20px 24px 8px;
+}
+
+header h1 {
+  margin: 0 0 6px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 16px;
+  padding: 16px 24px 24px;
+}
+
+.panel {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+}
+
+label {
+  display: block;
+  margin-bottom: 12px;
+}
+
+input, textarea, button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d7e2;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  cursor: pointer;
+  font-weight: 600;
+  background: #111827;
+  color: white;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+pre {
+  background: #0f172a;
+  color: #dbeafe;
+  padding: 12px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 80px;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+li {
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

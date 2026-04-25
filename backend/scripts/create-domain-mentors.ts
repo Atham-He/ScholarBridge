@@ -4,7 +4,23 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 // 八个领域的导师数据
-const domainsData = [
+interface DomainMentorData {
+  domainSlug: string;
+  domainName: string;
+  mentors: Array<{
+    name: string;
+    institution: string;
+    department: string;
+    title: string;
+    bioShort: string;
+    location: string;
+    researchInterests: string[];
+    labName: string;
+    researchTopics: string[];
+  }>;
+}
+
+const domainsData: DomainMentorData[] = [
   {
     domainSlug: "logical-mathematical",
     domainName: "逻辑数理智能",
@@ -319,426 +335,155 @@ const domainsData = [
   },
 ];
 
-async function main() {
-  console.log("🌱 开始初始化数据库...\n");
-
+async function createMentorForDomain(domain: DomainMentorData, mentor: typeof domainsData[0]["mentors"][0]) {
+  // Generate email from name
+  const nameParts = mentor.name.split(" ");
+  const lastName = nameParts[nameParts.length - 1].toLowerCase();
+  const firstName = nameParts[0].toLowerCase();
+  const email = `mentor.${domain.domainSlug}.${firstName}.${lastName}.${Date.now()}@test.scholarbridge.local`;
   const password = await bcrypt.hash("demo123", 10);
 
-  // 1. 创建基础测试用户
-  console.log("📝 创建基础测试用户...");
-
-  const mentor = await prisma.user.upsert({
-    where: {
-      email_role: {
-        email: "mentor@demo.local",
-        role: "MENTOR",
-      },
-    },
-    create: {
-      email: "mentor@demo.local",
+  // Create user and mentor profile
+  const user = await prisma.user.create({
+    data: {
+      email,
       passwordHash: password,
-      role: "MENTOR",
+      role: UserRole.MENTOR,
       emailVerified: true,
       mentorProfile: {
         create: {
-          displayName: "Prof. Jane Chen",
-          institution: "MIT · CSAIL",
-          department: "Electrical Engineering and Computer Science",
-          title: "Associate Professor",
-          bioShort: "I lead the Autonomous Systems Lab at MIT CSAIL, focusing on multi-agent RL and real-world robotics.",
-          location: "Cambridge, MA",
+          displayName: mentor.name,
+          institution: mentor.institution,
+          department: mentor.department,
+          title: mentor.title,
+          bioShort: mentor.bioShort,
+          location: mentor.location,
         },
       },
     },
-    update: {},
     include: { mentorProfile: true },
   });
 
-  const skill = await prisma.skill.upsert({
-    where: { slug: "zhang-lab-nlp" },
-    create: {
-      ownerUserId: mentor.id,
-      slug: "zhang-lab-nlp",
-      title: "Autonomous Systems Lab — Safe MARL & Robotics",
+  // Create skill
+  const slug = `${domain.domainSlug}-${firstName}-${lastName}-${Date.now()}`;
+  const skill = await prisma.skill.create({
+    data: {
+      ownerUserId: user.id,
+      slug,
+      title: `${mentor.labName} — ${mentor.researchInterests[0]}`,
       profileMarkdown: [
-        "## Lab focus",
-        "- Multi-agent reinforcement learning under uncertainty",
-        "- Safety and sim-to-real transfer for autonomous systems",
+        `## ${mentor.labName}`,
         "",
-        "## What we look for",
-        "- Strong math / control background; RL experience is a plus",
-        "- Interest in deployment (campus shuttles, traffic scenarios)",
+        mentor.bioShort,
         "",
-        "## FAQ",
-        "Q: Funding?",
-        "A: PhD positions are fully funded (RA/TA); details vary by year.",
+        "## Research Focus",
+        ...mentor.researchTopics.map(t => `- ${t}`),
+        "",
+        "## What We Look For",
+        "- Strong background in " + mentor.researchInterests[0],
+        "- Passion for cutting-edge research",
+        "- Collaborative mindset",
+        "",
+        "## Positions",
+        "Q: What positions are available?",
+        "A: We have openings for PhD students, postdocs, and research interns. Fully funded positions available.",
       ].join("\n"),
       status: "PUBLISHED",
       isPublic: true,
       publishedAt: new Date(),
-      tags: ["Reinforcement Learning", "Multi-agent Systems", "Robotics", "Game Theory", "Safe AI"],
-      hIndex: 42,
-      citationsDisplay: "8.2K",
-      researchSummary: "Strong focus on multi-agent coordination under uncertainty. Recurring themes: safety guarantees, emergent communication, scalable decentralization, and sim-to-real transfer.",
+      tags: mentor.researchInterests,
+      hIndex: Math.floor(25 + Math.random() * 45),
+      citationsDisplay: `${(4 + Math.random() * 8).toFixed(1)}K`,
+      researchSummary: `Our lab focuses on ${mentor.researchInterests.join(", ")}. We are passionate about advancing the state of the art in ${domain.domainName} and mentoring the next generation of researchers.`,
       publications: [
         {
-          title: "Decentralized Safe MARL via Barrier Certificates",
-          detail: "NeurIPS 2024 · Chen et al. · 312 citations",
+          title: `Advances in ${mentor.researchTopics[0]}`,
+          detail: `NeurIPS 2024 · ${mentor.name}`,
         },
         {
-          title: "Emergent Language in Cooperative Games",
-          detail: "ICML 2023 · Chen, Liu, Park · 201 citations",
+          title: `${mentor.researchTopics[1] || "Novel Approaches"} for ${mentor.researchInterests[0]}`,
+          detail: `ICML 2024 · ${nameParts[0]} et al.`,
         },
         {
-          title: "Scalable Multi-Agent Policy Optimization",
-          detail: "ICLR 2023 · Chen et al. · 487 citations",
-        },
-        {
-          title: "Real-World Deployment of Cooperative Agents",
-          detail: "CoRL 2022 · 159 citations",
+          title: `Breaking Through in ${domain.domainName}`,
+          detail: `ICLR 2023 · ${mentor.name} · ${Math.floor(100 + Math.random() * 400)} citations`,
         },
       ],
       agentActive: true,
-      agentIntro: "AI agent trained on publications and lab openings. Can answer questions and forward your application to Prof. Chen.",
+      agentIntro: `AI agent for ${mentor.name}. I can answer questions about ${mentor.labName}'s research, open positions, and application process.`,
       scholarSyncedAt: new Date(),
     },
-    update: {},
   });
 
-  const existingProjects = await prisma.skillProject.count({
-    where: { skillId: skill.id },
-  });
-  if (existingProjects === 0) {
-    await prisma.skillProject.createMany({
-      data: [
-        {
-          skillId: skill.id,
-          title: "PhD — Safe MARL for Autonomous Vehicles",
-          description: "Developing safety-constrained multi-agent RL frameworks for mixed autonomy traffic, with real-world deployment on MIT campus shuttles.",
-          status: "OPEN",
-          metaTags: ["Fall 2025", "Fully Funded", "PyTorch"],
-          sortOrder: 0,
-        },
-        {
-          skillId: skill.id,
-          title: "Postdoc — Emergent Communication in MARL",
-          description: "Studying how language emerges among collaborative agents — bridging grounded language learning and game-theoretic communication.",
-          status: "OPEN",
-          metaTags: ["Immediate", "2 Years", "NLP + RL"],
-          sortOrder: 1,
-        },
-        {
-          skillId: skill.id,
-          title: "Research Intern — Multi-Agent Coordination",
-          description: "Summer internship on scalable coordination for large multi-agent systems.",
-          status: "CLOSED",
-          metaTags: ["Summer 2025", "Filled"],
-          sortOrder: 2,
-        },
-      ],
-    });
-  }
-
-  const student = await prisma.user.upsert({
-    where: {
-      email_role: {
-        email: "student@demo.local",
-        role: "STUDENT",
-      },
+  // Create exploration record
+  await prisma.aIMentorExploration.create({
+    data: {
+      mentorUserId: user.id,
+      domainSlug: domain.domainSlug,
+      nodeSlugs: mentor.researchTopics.slice(0, 3),
+      additionalTags: mentor.researchInterests.slice(2),
     },
-    create: {
-      email: "student@demo.local",
-      passwordHash: password,
-      role: "STUDENT",
-      emailVerified: true,
-      studentProfile: {
-        create: {
-          displayName: "Alex Student",
-          backgroundBrief: "Undergraduate in CS; interest in safe RL and robotics.",
-          materialsJson: [
-            { name: "CV_Fall2025.pdf", statusLabel: "Updated 3 days ago" },
-            { name: "Research_Statement.pdf", statusLabel: "Updated 1 week ago" },
-            { name: "Transcript_Unofficial.pdf", statusLabel: "Uploaded 2 weeks ago" },
-          ],
-        },
-      },
-    },
-    update: {},
   });
 
-  const notifCount = await prisma.notification.count({
-    where: { userId: student.id },
-  });
-  if (notifCount === 0) {
-    await prisma.notification.createMany({
-      data: [
-        {
-          userId: student.id,
-          message: "Prof. Jane Chen's agent sent you a message about your application",
-          read: false,
-        },
-        {
-          userId: student.id,
-          message: "Interview scheduled with Prof. Jane Chen for March 28, 2025",
-          read: true,
-        },
-      ],
-    });
-  }
-
-  const dualEmail = "dual@test.com";
-  await prisma.user.upsert({
-    where: {
-      email_role: {
-        email: dualEmail,
-        role: "STUDENT",
+  // Create projects
+  await prisma.skillProject.createMany({
+    data: [
+      {
+        skillId: skill.id,
+        title: `PhD — ${mentor.researchTopics[0] || "Research Position"}`,
+        description: `Fully funded PhD position working on ${mentor.researchTopics[0] || "cutting-edge research"}. Competitive stipend and benefits.`,
+        status: "OPEN",
+        metaTags: ["Fall 2025", "Fully Funded"],
+        sortOrder: 0,
       },
-    },
-    create: {
-      email: dualEmail,
-      passwordHash: password,
-      role: "STUDENT",
-      emailVerified: true,
-      studentProfile: {
-        create: {
-          displayName: "测试用户(学生)",
-          backgroundBrief: "可以同时登录学生和导师身份的测试账号",
-        },
+      {
+        skillId: skill.id,
+        title: `Postdoc — ${mentor.researchTopics[1] || mentor.researchTopics[0]}`,
+        description: `Postdoctoral position to advance research in ${mentor.researchTopics[1] || mentor.researchTopics[0]}.`,
+        status: "OPEN",
+        metaTags: ["Immediate", "2 Years"],
+        sortOrder: 1,
       },
-    },
-    update: {},
+      {
+        skillId: skill.id,
+        title: `Research Intern — ${mentor.labName}`,
+        description: `Summer internship opportunity to work on ${mentor.researchInterests[0]}. Great learning experience.`,
+        status: "OPEN",
+        metaTags: ["Summer 2025", "Undergrad", "Paid"],
+        sortOrder: 2,
+      },
+    ],
   });
 
-  await prisma.user.upsert({
-    where: {
-      email_role: {
-        email: dualEmail,
-        role: "MENTOR",
-      },
-    },
-    create: {
-      email: dualEmail,
-      passwordHash: password,
-      role: "MENTOR",
-      emailVerified: true,
-      mentorProfile: {
-        create: {
-          displayName: "测试用户(导师)",
-          institution: "测试大学",
-          department: "计算机科学",
-          title: "教授",
-          bioShort: "可以同时登录学生和导师身份的测试账号",
-          location: "北京",
-        },
-      },
-    },
-    update: {},
-  });
+  return { user, skill };
+}
 
-  console.log("  ✅ 基础用户创建完成\n");
+async function main() {
+  console.log("🌱 开始为8个AI领域创建测试导师...\n");
 
-  // 2. 创建24位测试导师（8个领域 × 3位）
-  console.log("👨‍🏫 创建测试导师（8个领域 × 3位 = 24位）...");
+  let totalMentors = 0;
 
   for (const domain of domainsData) {
-    console.log(`\n  📚 ${domain.domainName}`);
+    console.log(`📚 ${domain.domainName} (${domain.domainSlug})`);
 
     for (const mentorData of domain.mentors) {
-      // 生成email
-      const nameParts = mentorData.name.split(" ");
-      const lastName = nameParts[nameParts.length - 1].toLowerCase();
-      const firstName = nameParts[0].toLowerCase();
-      const email = `mentor.${domain.domainSlug}.${firstName}.${lastName}@test.scholarbridge.local`;
-
-      // 创建用户和导师profile
-      const user = await prisma.user.upsert({
-        where: {
-          email_role: {
-            email: email,
-            role: "MENTOR",
-          },
-        },
-        create: {
-          email,
-          passwordHash: password,
-          role: "MENTOR",
-          emailVerified: true,
-          mentorProfile: {
-            create: {
-              displayName: mentorData.name,
-              institution: mentorData.institution,
-              department: mentorData.department,
-              title: mentorData.title,
-              bioShort: mentorData.bioShort,
-              location: mentorData.location,
-            },
-          },
-        },
-        update: {},
-        include: { mentorProfile: true },
-      });
-
-      // 创建skill
-      const slug = `${domain.domainSlug}-${firstName}-${lastName}`;
-      const skill = await prisma.skill.upsert({
-        where: { slug: slug },
-        create: {
-          ownerUserId: user.id,
-          slug,
-          title: `${mentorData.labName} — ${mentorData.researchInterests[0]}`,
-          profileMarkdown: [
-            `## ${mentorData.labName}`,
-            "",
-            mentorData.bioShort,
-            "",
-            "## Research Focus",
-            ...mentorData.researchTopics.map(t => `- ${t}`),
-            "",
-            "## What We Look For",
-            `- Strong background in ${mentorData.researchInterests[0]}`,
-            "- Passion for cutting-edge research",
-            "- Collaborative mindset",
-            "",
-            "## Positions",
-            "Q: What positions are available?",
-            "A: We have openings for PhD students, postdocs, and research interns. Fully funded positions available.",
-          ].join("\n"),
-          status: "PUBLISHED",
-          isPublic: true,
-          publishedAt: new Date(),
-          tags: mentorData.researchInterests,
-          hIndex: Math.floor(25 + Math.random() * 45),
-          citationsDisplay: `${(4 + Math.random() * 8).toFixed(1)}K`,
-          researchSummary: `Our lab focuses on ${mentorData.researchInterests.join(", ")}. We are passionate about advancing the state of the art in ${domain.domainName} and mentoring the next generation of researchers.`,
-          publications: [
-            {
-              title: `Advances in ${mentorData.researchTopics[0]}`,
-              detail: `NeurIPS 2024 · ${mentorData.name}`,
-            },
-            {
-              title: `${mentorData.researchTopics[1] || "Novel Approaches"} for ${mentorData.researchInterests[0]}`,
-              detail: `ICML 2024 · ${nameParts[0]} et al.`,
-            },
-            {
-              title: `Breaking Through in ${domain.domainName}`,
-              detail: `ICLR 2023 · ${mentorData.name} · ${Math.floor(100 + Math.random() * 400)} citations`,
-            },
-          ],
-          agentActive: true,
-          agentIntro: `AI agent for ${mentorData.name}. I can answer questions about ${mentorData.labName}'s research, open positions, and application process.`,
-          scholarSyncedAt: new Date(),
-        },
-        update: {},
-      });
-
-      // 创建导师探索记录
-      await prisma.aIMentorExploration.upsert({
-        where: {
-          mentorUserId_domainSlug: {
-            mentorUserId: user.id,
-            domainSlug: domain.domainSlug,
-          },
-        },
-        create: {
-          mentorUserId: user.id,
-          domainSlug: domain.domainSlug,
-          nodeSlugs: mentorData.researchTopics.slice(0, 3),
-          additionalTags: mentorData.researchInterests.slice(2),
-        },
-        update: {},
-      });
-
-      // 创建项目
-      const projectCount = await prisma.skillProject.count({
-        where: { skillId: skill.id },
-      });
-
-      if (projectCount === 0) {
-        await prisma.skillProject.createMany({
-          data: [
-            {
-              skillId: skill.id,
-              title: `PhD — ${mentorData.researchTopics[0]}`,
-              description: `Fully funded PhD position working on ${mentorData.researchTopics[0]}. Competitive stipend and benefits.`,
-              status: "OPEN",
-              metaTags: ["Fall 2025", "Fully Funded"],
-              sortOrder: 0,
-            },
-            {
-              skillId: skill.id,
-              title: `Postdoc — ${mentorData.researchTopics[1] || mentorData.researchTopics[0]}`,
-              description: `Postdoctoral position to advance research in ${mentorData.researchTopics[1] || mentorData.researchTopics[0]}.`,
-              status: "OPEN",
-              metaTags: ["Immediate", "2 Years"],
-              sortOrder: 1,
-            },
-            {
-              skillId: skill.id,
-              title: `Research Intern — ${mentorData.labName}`,
-              description: `Summer internship opportunity to work on ${mentorData.researchInterests[0]}. Great learning experience.`,
-              status: "OPEN",
-              metaTags: ["Summer 2025", "Undergrad", "Paid"],
-              sortOrder: 2,
-            },
-          ],
-        });
+      try {
+        const { user, skill } = await createMentorForDomain(domain, mentorData);
+        totalMentors++;
+        console.log(`  ✅ ${mentorData.name} - ${mentorData.labName}`);
+        console.log(`     📧 ${user.email} / demo123`);
+        console.log(`     🔗 Skill: ${skill.slug}`);
+      } catch (error) {
+        console.error(`  ❌ 创建失败: ${mentorData.name}`, error);
       }
-
-      console.log(`    ✅ ${mentorData.name} - ${mentorData.labName}`);
     }
+
+    console.log("");
   }
 
-  console.log("\n  ✅ 测试导师创建完成\n");
-
-  // 3. 创建测试兴趣信号（用于推荐功能）
-  console.log("🏷️  创建测试兴趣信号...");
-
-  // 获取一些工作来标记
-  const works = await prisma.aIWork.findMany({
-    take: 5,
-    include: {
-      node: {
-        include: {
-          domain: true
-        }
-      }
-    }
-  });
-
-  if (works.length > 0) {
-    // 清理旧信号
-    await prisma.aIUserWorkSignal.deleteMany({
-      where: {
-        user: {
-          email: "student@demo.local"
-        }
-      }
-    });
-
-    // 创建新信号
-    for (const work of works) {
-      await prisma.aIUserWorkSignal.create({
-        data: {
-          userId: student.id,
-          workId: work.id,
-          signal: "like"
-        }
-      });
-    }
-
-    console.log(`  ✅ 创建了 ${works.length} 个兴趣信号`);
-    console.log(`     领域: ${works[0].node.domain.name}`);
-  } else {
-    console.log("  ⚠️  没有找到工作数据，请先运行 explore sync");
-  }
-
-  console.log("\n✨ 数据库初始化完成！\n");
-  console.log("📝 测试账号:");
-  console.log("  Mentor   mentor@demo.local / demo123");
-  console.log("  Student  student@demo.local / demo123");
-  console.log("  Dual     dual@test.com / test123 (Student + Mentor)");
-  console.log("\n👨‍🏫 已创建 24 位测试导师，覆盖 8 个 AI 领域");
-  console.log("🔗 测试推荐页面: http://localhost:3000/explore/ai/recommendations");
+  console.log(`\n✨ 完成! 共创建 ${totalMentors} 位导师，覆盖8个AI领域`);
+  console.log("📝 所有导师的密码都是: demo123");
+  console.log("🔍 这些导师现在可以在explore板块中按领域找到");
 }
 
 main()

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>supervisor_born</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>supervisor_born</h1>
+    <p>Authorized mentor twin builder and runtime</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <h2>生成导师分身</h2>
+      <form id="build-form">
+        <label>导师姓名 <input name="name" required /></label>
+        <label>机构 <input name="affiliation" required /></label>
+        <label>头衔 <input name="title" /></label>
+        <label>授权人 <input name="authorizedBy" required /></label>
+        <label>授权说明 <textarea name="consentNotes" rows="2"></textarea></label>
+        <label>公开链接（每行一个）
+          <textarea name="publicUrls" rows="5" placeholder="https://example.edu/~mentor"></textarea>
+        </label>
+        <label>项目说明（可选）
+          <textarea name="projectText" rows="6" placeholder="Paste a project brief here"></textarea>
+        </label>
+        <label>上传文件
+          <input type="file" name="files" multiple />
+        </label>
+        <div class="row">
+          <label><input type="checkbox" name="skipPublicSearch" /> 跳过公开搜索</label>
+          <label><input type="checkbox" name="disableOpenAlex" /> 跳过 OpenAlex</label>
+        </div>
+        <button type="submit">构建 persona</button>
+      </form>
+      <pre id="build-result"></pre>
+    </section>
+
+    <section class="panel">
+      <h2>已有导师</h2>
+      <button id="refresh-personas">刷新</button>
+      <ul id="persona-list"></ul>
+      <h3>导师画像</h3>
+      <pre id="persona-detail">尚未选择</pre>
+      <h3>Update selected persona</h3>
+      <form id="update-form">
+        <label>Persona slug <input name="slug" id="update-slug" required /></label>
+        <label>Name override <input name="name" /></label>
+        <label>Affiliation override <input name="affiliation" /></label>
+        <label>Title override <input name="title" /></label>
+        <label>Additional public URLs
+          <textarea name="publicUrls" rows="4" placeholder="https://example.edu/~mentor/publications"></textarea>
+        </label>
+        <label>Additional project text
+          <textarea name="projectText" rows="4" placeholder="Paste new notes here"></textarea>
+        </label>
+        <label>Additional files
+          <input type="file" name="files" multiple />
+        </label>
+        <div class="row">
+          <label><input type="checkbox" name="skipPublicSearch" /> Skip public search</label>
+          <label><input type="checkbox" name="disableOpenAlex" /> Skip OpenAlex</label>
+        </div>
+        <button type="submit">Update persona</button>
+      </form>
+      <pre id="update-result"></pre>
+    </section>
+
+    <section class="panel">
+      <h2>对话</h2>
+      <div class="row">
+        <input id="chat-mentor" placeholder="mentor slug，例如 geoffrey-hinton" />
+        <input id="chat-session" placeholder="session id（可留空）" />
+      </div>
+      <textarea id="student-profile" rows="6" placeholder='{"name":"Alice","background":"...","interests":["representation learning"]}'></textarea>
+      <textarea id="chat-message" rows="4" placeholder="输入学生问题"></textarea>
+      <button id="send-chat">发送</button>
+      <pre id="chat-output"></pre>
+    </section>
+
+    <section class="panel">
+      <h2>学生评估</h2>
+      <div class="row">
+        <input id="eval-mentor" placeholder="mentor slug" />
+        <input id="eval-session" placeholder="session id（可选）" />
+      </div>
+      <textarea id="eval-student" rows="8" placeholder='{"name":"Alice","background":"...","experience":["PyTorch"]}'></textarea>
+      <button id="run-eval">评估</button>
+      <pre id="eval-output"></pre>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
