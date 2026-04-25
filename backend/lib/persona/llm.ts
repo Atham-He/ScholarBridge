@@ -155,13 +155,18 @@ export class OpenAIProvider implements LLMProvider {
   private client: OpenAI;
   private model: string;
 
-  constructor(provider: 'openai' | 'deepseek', apiKey: string, model: string) {
+  constructor(provider: 'openai' | 'deepseek', apiKey: string, model: string, baseURL?: string) {
     this.kind = provider;
-    const baseURL = provider === 'deepseek'
-      ? 'https://api.deepseek.com/v1'
-      : undefined;
+    let defaultBaseURL: string | undefined;
 
-    this.client = new OpenAI({ apiKey, baseURL });
+    if (provider === 'deepseek') {
+      defaultBaseURL = 'https://api.deepseek.com/v1';
+    } else if (provider === 'openai') {
+      // 使用环境变量中的 OPENAI_BASE_URL（如果存在）
+      defaultBaseURL = process.env.OPENAI_BASE_URL;
+    }
+
+    this.client = new OpenAI({ apiKey, baseURL: baseURL || defaultBaseURL });
     this.model = model;
   }
 
@@ -251,10 +256,11 @@ export interface LLMProviderConfig {
   provider: LLMProviderKind;
   apiKey?: string;
   model?: string;
+  baseURL?: string;
 }
 
 export function createLLMProvider(config: LLMProviderConfig): LLMProvider {
-  const { provider, apiKey, model } = config;
+  const { provider, apiKey, model, baseURL } = config;
 
   switch (provider) {
     case 'anthropic':
@@ -267,13 +273,13 @@ export function createLLMProvider(config: LLMProviderConfig): LLMProvider {
       if (!apiKey) {
         throw new Error('OPENAI_API_KEY is required for openai provider');
       }
-      return new OpenAIProvider('openai', apiKey, model || 'gpt-4o-mini');
+      return new OpenAIProvider('openai', apiKey, model || 'gpt-4o-mini', baseURL);
 
     case 'deepseek':
       if (!apiKey) {
         throw new Error('DEEPSEEK_API_KEY is required for deepseek provider');
       }
-      return new OpenAIProvider('deepseek', apiKey, model || 'deepseek-chat');
+      return new OpenAIProvider('deepseek', apiKey, model || 'deepseek-chat', baseURL);
 
     case 'mock':
       return new MockProvider();
@@ -298,6 +304,8 @@ export function createLLMProviderFromEnv(): LLMProvider {
     case 'openai':
       config.apiKey = process.env.OPENAI_API_KEY;
       config.model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+      // OpenAI provider 可以使用自定义 baseURL
+      config.baseURL = process.env.OPENAI_BASE_URL;
       break;
 
     case 'deepseek':
