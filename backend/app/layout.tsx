@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ScholarBridge — Mentor-Student Matching",
   description:
-    "Discover research mentors and chat with AI agents. Powered by Skill Hub.",
+    "Discover open research projects and connect with academic mentors.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className="m-0 min-h-screen overflow-hidden bg-[#FAF8F5] antialiased">
+      <body className="m-0 min-h-screen bg-[#FAF8F5] antialiased">
         {children}
       </body>
     </html>

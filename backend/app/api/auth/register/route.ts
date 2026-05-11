@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { registerSchema } from "@/lib/validation";
@@ -76,10 +75,6 @@ export async function POST(request: NextRequest) {
 
   await emailService.sendVerification(user.email, code, user.role); 
   
-  // const session = await getSession();
-  // session.userId = user.id;
-  // await session.save();
-
   return NextResponse.json({
     ok: true,
     message: "注册成功，验证码已发送至邮箱",

@@ -234,8 +234,7 @@ export default function StudentProfilePage() {
                   {savedMentors.map((mentor) => (
                     <div
                       key={mentor.id}
-                      className="border border-[#E0D8CC] rounded-lg p-3 hover:border-[#2C5F7C] cursor-pointer transition-all"
-                      onClick={() => window.location.href = `/s/${mentor.slug}`}
+                      className="border border-[#E0D8CC] rounded-lg p-3"
                     >
                       <h4 className="text-[14px] font-semibold text-[#1A1A1A] mb-1">{mentor.title}</h4>
                       <p className="text-[12px] text-[#1A1A1A] mb-2">{mentor.mentor.institution}</p>

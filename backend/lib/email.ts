@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import type { Transporter } from "nodemailer";
 
 interface EmailService {
   sendVerification(
@@ -12,7 +13,7 @@ interface EmailService {
 // 开发环境：
 // ==============================================
 class DevelopmentEmailService implements EmailService {
-  private transporter: any;
+  private transporter: Transporter;
 
   constructor() {
     // 这里用 QQ 邮箱发信
@@ -49,8 +50,7 @@ ScholarBridge 团队
     // 真实发送！
     await this.transporter.sendMail(mailOptions);
 
-    console.log("✅ 邮件已发送至：", email);
-    console.log("验证码：", code);
+    console.log(`邮件已发送至 ${email}，验证码：${code}`);
   }
 }
 
@@ -60,11 +60,10 @@ ScholarBridge 团队
 class TencentEmailService implements EmailService {
   async sendVerification(
     email: string,
-    code: string,
-    role: "MENTOR" | "STUDENT"
+    code: string
   ): Promise<void> {
     // Todo:自己实现腾讯云 SES
-    console.log("☁️ 腾讯云邮件发送：", email, code);
+    console.log(`腾讯云邮件发送：${email}，验证码：${code}`);
   }
 }
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 interface EmailVerificationFormProps {
   email: string;
   role: "MENTOR" | "STUDENT";
-  onSuccess: (user: any) => void;
+  onSuccess: (user: { id: string; email: string; role: "MENTOR" | "STUDENT" }) => void;
   onBack: () => void;
 }
 
@@ -67,7 +67,7 @@ export function EmailVerificationForm({
       }
 
       onSuccess(data.user);
-    } catch (err) {
+    } catch {
       setError("网络错误，请重试");
       setLoading(false);
     }
@@ -104,7 +104,7 @@ export function EmailVerificationForm({
         });
       }, 1000);
 
-    } catch (err) {
+    } catch {
       setError("网络错误，请重试");
     } finally {
       setResendLoading(false);
@@ -144,7 +144,7 @@ export function EmailVerificationForm({
             {countdown > 0 ? `${countdown}秒` : resendLoading ? "发送中..." : "重新发送"}
           </Button>
         </div>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-900 mt-1">
           验证码已发送至 {email}，15分钟内有效
         </p>
       </div>

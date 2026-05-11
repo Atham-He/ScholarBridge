@@ -3,8 +3,6 @@
  * 用于Next.js API Routes中的multipart/form-data解析
  */
 
-import { Readable } from 'stream';
-
 export interface UploadedFile {
   name: string;
   mimeType: string;
@@ -118,7 +116,7 @@ export async function parseMultipartFormData(
 export async function extractFilesFromFormData(formData: FormData): Promise<UploadedFile[]> {
   const files: UploadedFile[] = [];
 
-  for (const [key, value] of formData.entries()) {
+  for (const value of formData.values()) {
     if (value instanceof File) {
       const buffer = Buffer.from(await value.arrayBuffer());
       files.push({
@@ -182,8 +180,8 @@ export function validateUploadFiles(files: UploadedFile[], maxSize: number = 10 
 /**
  * 将字段转换为预期的类型
  */
-export function normalizeFields(fields: Record<string, string | string[]>): Record<string, any> {
-  const result: Record<string, any> = {};
+export function normalizeFields(fields: Record<string, string | string[]>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(fields)) {
     // 尝试解析JSON值

@@ -1,75 +1,91 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ProjectStatus, type Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { skillProjectPatchSchema } from "@/lib/validation";
 
 type Params = { params: Promise<{ id: string }> };
 
-async function assertMentorOwnsProject(userId: string, projectId: string) {
-  const project = await db.skillProject.findUnique({
-    where: { id: projectId },
-    include: { skill: true },
+export async function GET(_request: NextRequest, context: Params) {
+  const { id } = await context.params;
+  const project = await db.project.findUnique({
+    where: { id },
   });
-  if (!project || project.skill.ownerUserId !== userId) {
-    return null;
+
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
-  return project;
+
+  return NextResponse.json({ project });
 }
 
 export async function PATCH(request: NextRequest, context: Params) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR" || !user.mentorProfile) {
-    return NextResponse.json({ error: "需要导师账号" }, { status: 403 });
+  if (!user || user.role !== "MENTOR") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await context.params;
-  const existing = await assertMentorOwnsProject(user.id, id);
-  if (!existing) {
-    return NextResponse.json({ error: "未找到项目" }, { status: 404 });
+
+  const project = await db.project.findUnique({
+    where: { id },
+  });
+
+  if (!project || project.mentorUserId !== user.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "请求体必须是 JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+  const payload = body && typeof body === "object" ? body as Record<string, unknown> : {};
 
-  const parsed = skillProjectPatchSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "参数校验失败", details: parsed.error.issues.map((i) => i.message) },
-      { status: 400 },
-    );
-  }
+  const status = typeof payload.status === "string" &&
+    Object.values(ProjectStatus).includes(payload.status as ProjectStatus)
+    ? payload.status as ProjectStatus
+    : undefined;
 
-  const d = parsed.data;
-  const project = await db.skillProject.update({
+  const data: Prisma.ProjectUpdateInput = {
+    ...(payload.title !== undefined && { title: String(payload.title) }),
+    ...(payload.description !== undefined && { description: String(payload.description) }),
+    ...(payload.researchArea !== undefined && { researchArea: String(payload.researchArea) }),
+    ...(payload.startTime !== undefined && { startTime: String(payload.startTime) }),
+    ...(payload.endTime !== undefined && { endTime: payload.endTime ? String(payload.endTime) : null }),
+    ...(payload.location !== undefined && { location: payload.location ? String(payload.location) : null }),
+    ...(payload.requirements !== undefined && { requirements: payload.requirements ? String(payload.requirements) : null }),
+    ...(payload.capacity !== undefined && { capacity: typeof payload.capacity === "number" ? payload.capacity : Number(payload.capacity) }),
+    ...(status !== undefined && { status }),
+  };
+
+  const updated = await db.project.update({
     where: { id },
-    data: {
-      ...(d.title !== undefined ? { title: d.title } : {}),
-      ...(d.description !== undefined ? { description: d.description } : {}),
-      ...(d.status !== undefined ? { status: d.status } : {}),
-      ...(d.metaTags !== undefined ? { metaTags: d.metaTags } : {}),
-      ...(d.sortOrder !== undefined ? { sortOrder: d.sortOrder } : {}),
-    },
+    data,
   });
 
-  return NextResponse.json({ project });
+  return NextResponse.json({ project: updated });
 }
 
 export async function DELETE(_request: NextRequest, context: Params) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR" || !user.mentorProfile) {
-    return NextResponse.json({ error: "需要导师账号" }, { status: 403 });
+  if (!user || user.role !== "MENTOR") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await context.params;
-  const existing = await assertMentorOwnsProject(user.id, id);
-  if (!existing) {
-    return NextResponse.json({ error: "未找到项目" }, { status: 404 });
+
+  const project = await db.project.findUnique({
+    where: { id },
+  });
+
+  if (!project || project.mentorUserId !== user.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  await db.skillProject.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+  await db.project.delete({
+    where: { id },
+  });
+
+  return NextResponse.json({ success: true });
 }

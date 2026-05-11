@@ -12,52 +12,30 @@ enum UserRole {
   STUDENT
 }
 
-enum SkillStatus {
-  DRAFT
-  PUBLISHED
-}
-
 enum ProjectStatus {
   OPEN
   CLOSED
-}
-
-/// 与 ScholarBridge 示例一致：对话中 → 审核/面试/录取等流水线（撤回仍保留）
-enum ApplicationStatus {
-  CHATTING
-  UNDER_REVIEW
-  INTERVIEW_SCHEDULED
-  ACCEPTED
-  REJECTED
-  WITHDRAWN
-}
-
-enum MessageRole {
-  USER
-  ASSISTANT
-  MENTOR
+  COMPLETED
 }
 
 model User {
   id           String   @id @default(cuid())
   email        String
-  passwordHash String?  // Optional for ORCID-only accounts
+  passwordHash String?
   role         UserRole
-  orcidId      String?  @unique  // ORCID unique identifier
-  orcidEmail   String?  // Email from ORCID profile
-  orcidName    String?  // Name from ORCID profile
+  orcidId      String?  @unique
+  orcidEmail   String?
+  orcidName    String?
   lastLoginAt  DateTime?
-  lastRoleAt   DateTime? // Last login time for this specific role
+  lastRoleAt   DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   emailVerified         Boolean   @default(false)
-  emailVerificationCode String?   
+  emailVerificationCode String?
 
   mentorProfile  MentorProfile?
   studentProfile StudentProfile?
-
-  skills Skill[] @relation("MentorSkills")
 
   applicationsAsStudent Application[] @relation("StudentApps")
   applicationsAsMentor  Application[] @relation("MentorApps")
@@ -66,137 +44,98 @@ model User {
   emailVerifications EmailVerification[]
   securityEvents   SecurityEvent[]
 
-  // AI Explore相关
-  workSignals     AIUserWorkSignal[]
-  mentorExplorations AIMentorExploration[]
-  recommendationSnapshots AIRecommendationSnapshot[]
-
-  @@unique([email, role])  // KEY CHANGE: One email can have STUDENT + MENTOR
+  @@unique([email, role])
   @@index([orcidId])
   @@index([email])
 }
 
 model MentorProfile {
-  userId      String  @id
-  displayName String
-  institution String
-  department  String?
-  title       String?
-  bioShort    String?
-  location    String?
-  scholarUrl          String?
-  introVideoUrl       String?
-  introVideoPosterUrl String?
+  userId          String  @id
+  displayName     String
+  institution     String
+  department      String?
+  title           String?
+  bioShort        String?
+  location        String?
+  contactEmail    String?
+  phone           String?
+  website         String?
+  researchAreas   Json?   // ["AI", "Machine Learning", "Robotics"]
+  status          String  @default("active") // active, inactive
+  updatedAt       DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects Project[]
 }
 
 model StudentProfile {
-  userId          String @id
-  displayName     String
+  userId        String @id
+  displayName   String
   backgroundBrief String?
-  /// 示例：申请材料列表 [{ "name": "CV.pdf", "updatedLabel": "3 days ago" }]
   materialsJson   Json?
+  education       String?
+  bioShort        String?
+  interests       Json?
+  skills          Json?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedMentors  SavedMentor[]
 }
 
-model Skill {
-  id              String      @id @default(cuid())
-  ownerUserId     String
-  slug            String      @unique
-  title           String
-  profileMarkdown String
-  status          SkillStatus @default(DRAFT)
-  isPublic        Boolean     @default(false)
-  publishedAt     DateTime?
-
-  /// 研究标签，JSON 字符串数组，如 ["Machine Learning","NLP"]
-  tags             Json?
-  hIndex           Int?
-  i10Index         Int?
-  citationsDisplay String?
-  /// 右侧「Research Interests」自动摘要长文
-  researchSummary  String?
-  /// [{ "title": "...", "detail": "NeurIPS 2024 · ..." }]
-  publications     Json?
-  agentActive      Boolean  @default(true)
-  /// 聊天侧栏中对 Agent 的一句话介绍
-  agentIntro       String?
-  scholarSyncedAt  DateTime?
-
-  // 关联Persona
-  persona          Persona?
-
-  owner User @relation("MentorSkills", fields: [ownerUserId], references: [id], onDelete: Cascade)
-
-  applications Application[]
-  projects     SkillProject[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([ownerUserId])
-}
-
-model SkillProject {
-  id          String        @id @default(cuid())
-  skillId     String
-  title       String
-  description String
-  status      ProjectStatus @default(OPEN)
-  metaTags    Json?
-  sortOrder   Int           @default(0)
-
-  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@index([skillId])
-}
-
-model Application {
-  id            String              @id @default(cuid())
+model SavedMentor {
+  id        String   @id @default(cuid())
   studentUserId String
   mentorUserId  String
-  skillId       String
-  status        ApplicationStatus   @default(CHATTING)
-  aiScore       Float?
-  aiFlagNotify  Boolean             @default(false)
-  lastMessageAt DateTime?
-  interviewAt   DateTime?
-
-  student User @relation("StudentApps", fields: [studentUserId], references: [id], onDelete: Cascade)
-  mentor  User @relation("MentorApps", fields: [mentorUserId], references: [id], onDelete: Cascade)
-  skill   Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  conversation Conversation?
-  evaluation    PersonaEvaluation? // 关联评估结果
-
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@unique([studentUserId, skillId])
-  @@index([mentorUserId])
+  student StudentProfile @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
+
+  @@unique([studentUserId, mentorUserId])
   @@index([studentUserId])
 }
 
-model Conversation {
-  id            String @id @default(cuid())
-  applicationId String @unique
+model Project {
+  id           String   @id @default(cuid())
+  mentorUserId String
+  title        String
+  description  String
+  researchArea String
+  startTime    String   // "2025-09"
+  endTime      String?  // "2028-09" or null for ongoing
+  location     String?  // "On-site" or "Remote" or specific location
+  requirements String?  // Project requirements
+  capacity     Int      // Total positions
+  enrolled     Int      @default(0) // Currently enrolled
+  status       ProjectStatus @default(OPEN)
 
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  messages    Message[]
+  mentor       MentorProfile  @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
+  applications Application[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([mentorUserId])
+  @@index([status])
 }
 
-model Message {
-  id             String      @id @default(cuid())
-  conversationId String
-  role           MessageRole
-  content        String
-  createdAt      DateTime    @default(now())
+model Application {
+  id            String          @id @default(cuid())
+  studentUserId String
+  mentorUserId  String
+  projectId     String
+  status        String          @default("pending") // pending, accepted, rejected, withdrawn
+  coverLetter   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  student User            @relation("StudentApps", fields: [studentUserId], references: [id], onDelete: Cascade)
+  mentor  User            @relation("MentorApps", fields: [mentorUserId], references: [id], onDelete: Cascade)
+  project Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@index([conversationId])
+  @@unique([studentUserId, projectId])
+  @@index([mentorUserId])
+  @@index([studentUserId])
+  @@index([projectId])
 }
 
 model Notification {
@@ -211,148 +150,21 @@ model Notification {
   @@index([userId])
 }
 
-// ============= Persona相关模型 =============
-
-model Persona {
-  id              String   @id @default(cuid())
-  skillId         String   @unique
-  slug            String   @unique
-
-  // Persona核心数据 (JSON存储，保持与内嵌 persona runtime 兼容)
-  personaJson     Json     // 完整的persona对象
-  agentCard       String   // agent-card.md内容
-
-  // 证据数据
-  sourcesJson     Json     // sources.json - 证据源列表
-  chunksJson      Json     // chunks.json - 检索块
-  inputJson       Json     // input.json - 构建输入记录
-
-  // 元数据
-  version         String   @default("0.1.0")
-  authorizedBy    String
-  consentNotes    String?
-  llmProvider     String   @default("mock") // mock|openai|anthropic|deepseek
-  llmModel        String?
-
-  // 构建状态
-  buildStatus     String   @default("pending") // pending|building|completed|failed
-  buildError      String?
-  builtAt         DateTime?
-
-  // 统计
-  sourceCount     Int      @default(0)
-  publicSourceCount Int    @default(0)
-  uploadSourceCount Int    @default(0)
-  privateSourceCount Int   @default(0)
-  chunkCount      Int      @default(0)
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // 关联
-  skill           Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  uploads         PersonaUpload[]
-  evaluations     PersonaEvaluation[]
-  sessions        PersonaSession[]
-
-  @@index([skillId])
-  @@index([slug])
-  @@index([buildStatus])
-}
-
-model PersonaUpload {
-  id              String   @id @default(cuid())
-  personaId       String
-
-  // 文件信息
-  originalName    String
-  storedPath      String
-  mimeType        String
-  size            Int
-
-  // 解析结果
-  parsedContent   String?  // 文本内容
-  parseError      String?
-
-  // 元数据
-  sourceId        String   // 对应sources.json中的id
-  uploadedAt      DateTime @default(now())
-
-  persona         Persona  @relation(fields: [personaId], references: [id], onDelete: Cascade)
-
-  @@index([personaId])
-  @@index([sourceId])
-}
-
-model PersonaEvaluation {
-  id              String   @id @default(cuid())
-  personaId       String
-  applicationId   String   @unique
-
-  // 评估结果
-  overallScore    Int
-  recommendation  String   // do_not_progress|needs_human_review|recommend_interview|strong_recommendation
-
-  // 详细评分 (JSON格式)
-  researchFit     Json     // {score, rationale, evidence}
-  technicalDepth  Json     // {score, rationale, evidence}
-  communication   Json     // {score, rationale, evidence}
-  initiative      Json     // {score, rationale, evidence}
-
-  // 证据质量
-  evidenceQuality Json     // {evidenceBackedCount, hasStudentProfile, hasTranscript, lowEvidence}
-  evidenceBreakdown Json   // {evidenceBacked: [], inferred: []}
-
-  // 总结
-  summary         String
-  followUpQuestions Json   // ["问题1", "问题2", ...]
-
-  createdAt       DateTime @default(now())
-
-  persona         Persona     @relation(fields: [personaId], references: [id], onDelete: Cascade)
-  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-
-  @@index([personaId])
-  @@index([applicationId])
-}
-
-model PersonaSession {
-  id              String   @id @default(cuid())
-  personaId       String
-  sessionId       String   @unique
-
-  // 会话数据
-  turnsJson       Json     // 聊天记录 [{role, message, answer, citations, retrievedChunks, timestamp}]
-
-  // 元数据
-  studentProfile  Json?    // 学生档案
-  messageCount    Int      @default(0)
-  lastMessageAt   DateTime?
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  persona         Persona  @relation(fields: [personaId], references: [id], onDelete: Cascade)
-
-  @@index([personaId])
-  @@index([sessionId])
-}
-
 model EmailVerification {
   id           String   @id @default(cuid())
   email        String
-  code         String   // Hashed verification code
+  code         String
   role         UserRole
   expiresAt    DateTime
   verified     Boolean  @default(false)
-  usedAt       DateTime? // Track when code was used to prevent replay
-  attemptCount Int      @default(0) // Track failed attempts
+  usedAt       DateTime?
+  attemptCount Int      @default(0)
   lastAttemptAt DateTime?
-  ipAddress    String?  // For security tracking
+  ipAddress    String?
   createdAt    DateTime @default(now())
 
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    String?  // Nullable to support verification before account creation
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
 
   @@index([email])
   @@index([expiresAt])
@@ -365,153 +177,25 @@ model ORCIDAccount {
   name           String
   email          String
   avatarUrl      String?
-  accessToken    String?  // Store ORCID access token
-  refreshToken   String?  // Store refresh token
-  tokenExpiresAt DateTime? // Token expiry time
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
 
 model SecurityEvent {
-  id          String   @id @default(cuid())
-  userId      String?  // Nullable for events before account creation
-  eventType   String   // ROLE_SWITCH, ORCID_LINK, VERIFY_FAIL, LOGIN_SUCCESS, etc.
-  ipAddress   String?
-  userAgent   String?
-  metadata    Json?    // Event-specific data
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String?
+  eventType String
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime @default(now())
 
-  user      User?    @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([eventType])
   @@index([createdAt])
-}
-
-// ============= AI Explore相关模型 =============
-
-model AIDomain {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  shortName   String
-  description String
-  accentColor String
-  icon        String?
-  order       Int      @default(0)
-
-  researchNodes AIResearchNode[]
-  mentorExplorations AIMentorExploration[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([slug])
-}
-
-model AIResearchLayer {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  name        String
-  description String
-  icon        String?
-  order       Int      @default(0)
-
-  nodes AIResearchNode[]
-}
-
-model AIResearchNode {
-  id          String   @id @default(cuid())
-  slug        String
-  title       String
-  summary     String
-  description String
-  tags        Json?
-  layerKey    String
-  domainSlug  String
-
-  layer   AIResearchLayer  @relation(fields: [layerKey], references: [key])
-  domain  AIDomain         @relation(fields: [domainSlug], references: [slug], onDelete: Cascade)
-  works   AIWork[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([domainSlug, slug])
-  @@index([domainSlug])
-  @@index([layerKey])
-}
-
-model AIWork {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  nodeId      String
-  title       String
-  type        String   // 'paper' | 'project' | 'system' | 'benchmark'
-  year        Int
-  authors     String
-  venueOrOrg  String
-  summary     String
-  whyMilestone String
-  tags        Json?
-  url         String
-  thumbnail   String?
-
-  node AIResearchNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
-  userSignals AIUserWorkSignal[]
-
-  createdAt DateTime @default(now())
-
-  @@index([nodeId])
-  @@index([type])
-}
-
-model AIUserWorkSignal {
-  id        String   @id @default(cuid())
-  userId    String
-  workId    String
-  signal    String   // 'like' | 'dislike' | 'later'
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  work AIWork @relation(fields: [workId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, workId])
-  @@index([userId])
-  @@index([workId])
-}
-
-model AIMentorExploration {
-  id              String   @id @default(cuid())
-  mentorUserId    String
-  domainSlug      String
-  nodeSlugs       Json?      // 关联研究节点slug列表
-  workSlugs       Json?      // 关联工作slug列表
-  videoUrl        String?    // 90秒介绍视频
-  additionalTags  Json?      // 额外的研究标签
-
-  mentor User     @relation(fields: [mentorUserId], references: [id], onDelete: Cascade)
-  domain AIDomain @relation(fields: [domainSlug], references: [slug], onDelete: Cascade)
-
-  @@unique([mentorUserId, domainSlug])
-  @@index([mentorUserId])
-  @@index([domainSlug])
-}
-
-model AIRecommendationSnapshot {
-  id          String   @id @default(cuid())
-  userId      String
-  version     String   // 推荐算法版本号，如'1.0', '1.1'
-  domains     Json     // [{domainId, score, reasons}]
-  nodes       Json     // [{nodeId, score, reasons}]
-  mentors     Json     // [{mentorId, score, reasons}]
-  route       Json?    // 学习路线
-  signalCount Json     // 生成推荐时的信号统计（用于可解释性）
-  generatedAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([userId, generatedAt(sort: Desc)])
 }

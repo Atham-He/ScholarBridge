@@ -47,7 +47,7 @@ export default function RegisterPage() {
   function handleVerificationSuccess(user: any) {
     // Redirect based on role
     if (user.role === "MENTOR") {
-      router.push("/mentor/skills/new");
+      router.push("/mentor");
     } else {
       router.push("/browse");
     }
@@ -60,7 +60,7 @@ export default function RegisterPage() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
             注册 ScholarBridge
           </h2>
-          <p className="mt-2 text-center text-sm text-slate-600">
+          <p className="mt-2 text-center text-sm text-slate-900">
             {step === "email" && "选择您的角色并输入邮箱开始注册"}
             {step === "verify" && "请输入验证码完成注册"}
           </p>
@@ -127,7 +127,7 @@ export default function RegisterPage() {
                 {loading ? "发送中..." : "发送验证码"}
               </button>
 
-              <p className="text-center text-sm text-slate-600">
+              <p className="text-center text-sm text-slate-900">
                 已有账号？{" "}
                 <Link href="/login" className="text-blue-600 hover:text-blue-500">
                   立即登录

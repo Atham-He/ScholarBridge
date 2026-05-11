@@ -7,11 +7,19 @@ import { useState } from "react";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/browse";
+  const roleParam = searchParams.get("role") as "MENTOR" | "STUDENT" | null;
+  const nextParam = searchParams.get("next");
+
+  // 根据role参数设置默认next地址
+  const getDefaultNext = (role: "MENTOR" | "STUDENT") => {
+    if (nextParam) return nextParam;
+    return role === "MENTOR" ? "/mentor" : "/browse";
+  };
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   type Role = "MENTOR" | "STUDENT";
-  const [role, setRole] = useState<Role>("STUDENT");
+  const [role, setRole] = useState<Role>(roleParam || "STUDENT");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +38,7 @@ export function LoginForm() {
       setError(data.error ?? "登录失败");
       return;
     }
-    router.push(next);
+    router.push(getDefaultNext(role));
     router.refresh();
   }
 
@@ -102,7 +110,7 @@ export function LoginForm() {
           {loading ? "登录中…" : "登录"}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-6 text-center text-sm text-slate-900 dark:text-slate-400">
         没有账号？{" "}
         <Link href="/register" className="font-medium text-blue-600 hover:underline">
           注册

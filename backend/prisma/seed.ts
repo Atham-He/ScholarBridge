@@ -1,332 +1,14 @@
-import { PrismaClient, UserRole } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
-
-// 八个领域的导师数据
-const domainsData = [
-  {
-    domainSlug: "logical-mathematical",
-    domainName: "逻辑数理智能",
-    mentors: [
-      {
-        name: "Dr. Catherine Zhang",
-        institution: "MIT · Mathematics",
-        department: "Department of Mathematics",
-        title: "Professor",
-        bioShort: "Leading research in formal verification and automated theorem proving for deep learning systems.",
-        location: "Cambridge, MA",
-        researchInterests: ["Formal Methods", "Automated Theorem Proving", "Type Theory", "Program Verification"],
-        labName: "Formal AI Lab",
-        researchTopics: ["Formal Verification of Neural Networks", "Coq Proof Assistant", "Homotopy Type Theory"],
-      },
-      {
-        name: "Dr. Robert Chen",
-        institution: "Stanford University",
-        department: "Computer Science Department",
-        title: "Associate Professor",
-        bioShort: "Working on mathematical foundations of machine learning and optimization theory.",
-        location: "Stanford, CA",
-        researchInterests: ["Optimization Theory", "Mathematical ML", "Computational Learning Theory", "Convex Optimization"],
-        labName: "Optimization & Learning Group",
-        researchTopics: ["Non-convex Optimization", "Learning Theory", "Statistical Mechanics"],
-      },
-      {
-        name: "Dr. Maria Santos",
-        institution: "UC Berkeley",
-        department: "EECS Department",
-        title: "Assistant Professor",
-        bioShort: "Researching algebraic topology applications in data analysis and machine learning.",
-        location: "Berkeley, CA",
-        researchInterests: ["Topological Data Analysis", "Algebraic Topology", "Manifold Learning", "Geometric Deep Learning"],
-        labName: "Topology in ML Lab",
-        researchTopics: ["Persistent Homology", "Simplicial Complexes", "Topological Regularization"],
-      },
-    ],
-  },
-  {
-    domainSlug: "linguistic-verbal",
-    domainName: "语言文字智能",
-    mentors: [
-      {
-        name: "Dr. Sarah Kim",
-        institution: "CMU · Language Technologies Institute",
-        department: "Language Technologies Institute",
-        title: "Professor",
-        bioShort: "Pioneer in large language models and multilingual NLP with focus on low-resource languages.",
-        location: "Pittsburgh, PA",
-        researchInterests: ["Large Language Models", "Multilingual NLP", "Machine Translation", "Cross-lingual Transfer"],
-        labName: "Multilingual NLP Lab",
-        researchTopics: ["Low-resource NLP", "Universal Translation", "Language Model Efficiency"],
-      },
-      {
-        name: "Dr. James Wilson",
-        institution: "University of Washington",
-        department: "Paul G. Allen School of Computer Science",
-        title: "Associate Professor",
-        bioShort: "Working on dialogue systems, conversational AI, and natural language understanding.",
-        location: "Seattle, WA",
-        researchInterests: ["Dialogue Systems", "Conversational AI", "Semantic Parsing", "Question Answering"],
-        labName: "Conversational AI Group",
-        researchTopics: ["Task-oriented Dialogue", "Semantic Parsing", "Knowledge-grounded Generation"],
-      },
-      {
-        name: "Dr. Li Wei",
-        institution: "Stanford University",
-        department: "Computer Science Department",
-        title: "Professor",
-        bioShort: "Leading research in computational linguistics and structured language understanding.",
-        location: "Stanford, CA",
-        researchInterests: ["Computational Linguistics", "Parsing", "Semantic Representation", "Language Models"],
-        labName: "Stanford NLP Group",
-        researchTopics: ["Dependency Parsing", "Semantic Role Labeling", "Prompt Engineering"],
-      },
-    ],
-  },
-  {
-    domainSlug: "visual-spatial",
-    domainName: "视觉空间智能",
-    mentors: [
-      {
-        name: "Dr. Emily Rodriguez",
-        institution: "MIT · CSAIL",
-        department: "Computer Science and Artificial Intelligence Laboratory",
-        title: "Professor",
-        bioShort: "Director of the Computer Vision Lab, working on 3D reconstruction and neural rendering.",
-        location: "Cambridge, MA",
-        researchInterests: ["3D Vision", "Neural Rendering", "Computational Photography", "Image Synthesis"],
-        labName: "Vision & Graphics Lab",
-        researchTopics: ["NeRF", "3D Reconstruction", "Generative Vision Models", "Diffusion Models"],
-      },
-      {
-        name: "Dr. David Park",
-        institution: "UC Berkeley",
-        department: "EECS Department",
-        title: "Associate Professor",
-        bioShort: "Researching video understanding, action recognition, and embodied vision for robotics.",
-        location: "Berkeley, CA",
-        researchInterests: ["Video Understanding", "Action Recognition", "Embodied AI", "Vision-Language Models"],
-        labName: "Video & Embodied Vision Lab",
-        researchTopics: ["Temporal Reasoning", "Video Transformers", "Vision-Language Pretraining"],
-      },
-      {
-        name: "Dr. Anna Mueller",
-        institution: "Max Planck Institute for Informatics",
-        department: "Computer Vision Department",
-        title: "Director",
-        bioShort: "Leading research in medical image analysis and interpretable computer vision.",
-        location: "Saarbrücken, Germany",
-        researchInterests: ["Medical Imaging", "Explainable AI", "Segmentation", "Visual Reasoning"],
-        labName: "Medical Vision Group",
-        researchTopics: ["MRI Analysis", "Explainable Computer Vision", "Attention Mechanisms"],
-      },
-    ],
-  },
-  {
-    domainSlug: "bodily-kinesthetic",
-    domainName: "身体动觉智能",
-    mentors: [
-      {
-        name: "Dr. Michael Brown",
-        institution: "CMU · Robotics Institute",
-        department: "Robotics Institute",
-        title: "Professor",
-        bioShort: "Director of the Robotics Lab, focusing on legged locomotion and dynamic manipulation.",
-        location: "Pittsburgh, PA",
-        researchInterests: ["Legged Robotics", "Manipulation", "Control Theory", "Simulation-to-Reality"],
-        labName: "Robotic Locomotion Lab",
-        researchTopics: ["Quadruped Control", "Dexterous Manipulation", "Model Predictive Control"],
-      },
-      {
-        name: "Dr. Yuki Tanaka",
-        institution: "University of Tokyo",
-        department: "Department of Creative Informatics",
-        title: "Professor",
-        bioShort: "Working on humanoid robots and human-robot interaction using deep reinforcement learning.",
-        location: "Tokyo, Japan",
-        researchInterests: ["Humanoid Robotics", "Human-Robot Interaction", "Imitation Learning", "RL from Human Feedback"],
-        labName: "Human-Robot Interaction Lab",
-        researchTopics: ["Whole-body Control", "Imitation Learning", "Social Robotics"],
-      },
-      {
-        name: "Dr. Jessica Garcia",
-        institution: "UC Berkeley",
-        department: "EECS Department",
-        title: "Associate Professor",
-        bioShort: "Researching autonomous driving and multi-robot coordination using reinforcement learning.",
-        location: "Berkeley, CA",
-        researchInterests: ["Autonomous Driving", "Multi-robot Systems", "Reinforcement Learning", "Motion Planning"],
-        labName: "Autonomous Systems Lab",
-        researchTopics: ["Self-driving Cars", "Multi-agent Coordination", "Safe RL"],
-      },
-    ],
-  },
-  {
-    domainSlug: "musical-rhythmic",
-    domainName: "音乐节奏智能",
-    mentors: [
-      {
-        name: "Dr. Thomas Anderson",
-        institution: "MIT · Media Lab",
-        department: "Media Lab",
-        title: "Professor",
-        bioShort: "Pioneer in music information retrieval and generative music models.",
-        location: "Cambridge, MA",
-        researchInterests: ["Music Generation", "Audio Signal Processing", "Music Information Retrieval", "Generative Audio"],
-        labName: "Music & Audio AI Lab",
-        researchTopics: ["Symbolic Music Generation", "Neural Audio Synthesis", "Music Understanding"],
-      },
-      {
-        name: "Dr. Lisa Chen",
-        institution: "Stanford University",
-        department: "Center for Computer Research in Music and Acoustics",
-        title: "Associate Professor",
-        bioShort: "Working on speech synthesis, voice conversion, and emotional speech processing.",
-        location: "Stanford, CA",
-        researchInterests: ["Speech Synthesis", "Voice Conversion", "Emotional Speech", "Text-to-Speech"],
-        labName: "Speech & Audio AI Group",
-        researchTopics: ["Neural TTS", "Voice Cloning", "Emotion Recognition", "Singing Voice Synthesis"],
-      },
-      {
-        name: "Dr. Erik Johansson",
-        institution: "Spotify Research",
-        department: "AI Research Team",
-        title: "Principal Scientist",
-        bioShort: "Leading research in music recommendation and audio understanding at scale.",
-        location: "Stockholm, Sweden",
-        researchInterests: ["Music Recommendation", "Audio Understanding", "Representation Learning", "Self-supervised Audio"],
-        labName: "Spotify AI Research",
-        researchTopics: ["Audio Transformers", "Music Embeddings", "Contextual Recommendation"],
-      },
-    ],
-  },
-  {
-    domainSlug: "interpersonal",
-    domainName: "人际交往智能",
-    mentors: [
-      {
-        name: "Dr. Rachel Green",
-        institution: "Stanford University",
-        department: "Computer Science Department",
-        title: "Professor",
-        bioShort: "Director of the Social AI Lab, researching multi-agent systems and social intelligence.",
-        location: "Stanford, CA",
-        researchInterests: ["Multi-agent Systems", "Social Intelligence", "Game Theory", "Cooperative AI"],
-        labName: "Social AI Lab",
-        researchTopics: ["Emergent Communication", "Social Dilemmas", "Cooperative RL", "Theory of Mind"],
-      },
-      {
-        name: "Dr. Daniel Lee",
-        institution: "University of Pennsylvania",
-        department: "Department of Computer and Information Science",
-        title: "Professor",
-        bioShort: "Working on human-AI collaboration and interactive learning systems.",
-        location: "Philadelphia, PA",
-        researchInterests: ["Human-AI Collaboration", "Interactive Machine Learning", "Explainable AI", "AI Safety"],
-        labName: "GRAphical & Intelligent Systems Lab",
-        researchTopics: ["Interactive RL", "Explainable Agency", "AI Alignment", "Collaborative Decision Making"],
-      },
-      {
-        name: "Dr. Sophie Martin",
-        institution: "Oxford University",
-        department: "Department of Computer Science",
-        title: "Associate Professor",
-        bioShort: "Researching negotiation agents, social norms, and ethical AI systems.",
-        location: "Oxford, UK",
-        researchInterests: ["Negotiation Agents", "Social Norms", "Ethical AI", "Value Alignment"],
-        labName: "AI Ethics & Governance Lab",
-        researchTopics: ["Automated Negotiation", "Norm Learning", "Fair ML", "AI Governance"],
-      },
-    ],
-  },
-  {
-    domainSlug: "intrapersonal",
-    domainName: "内省智能",
-    mentors: [
-      {
-        name: "Dr. Kevin Patel",
-        institution: "DeepMind",
-        department: "Research Team",
-        title: "Senior Research Scientist",
-        bioShort: "Leading research on meta-learning and self-improving AI systems.",
-        location: "London, UK",
-        researchInterests: ["Meta-learning", "Self-supervised Learning", "AutoML", "Neural Architecture Search"],
-        labName: "Meta-Learning & Adaptation Team",
-        researchTopics: ["MAML", "Self-supervised Pretraining", "Learning to Learn", "Adaptive Agents"],
-      },
-      {
-        name: "Dr. Amanda Foster",
-        institution: "UC Berkeley",
-        department: "EECS Department",
-        title: "Professor",
-        bioShort: "Director of the AI Research Lab, working on continual learning and memory systems.",
-        location: "Berkeley, CA",
-        researchInterests: ["Continual Learning", "Memory Systems", "Lifelong Learning", "Catastrophic Forgetting"],
-        labName: "Continual Learning Lab",
-        researchTopics: ["Experience Replay", "Dynamic Architectures", "Memory Networks", "Lifelong ML"],
-      },
-      {
-        name: "Dr. Hiroshi Nakamura",
-        institution: "University of Tokyo",
-        department: "Department of Information and Communication Engineering",
-        title: "Professor",
-        bioShort: "Researching self-awareness, introspection, and metacognition in AI systems.",
-        location: "Tokyo, Japan",
-        researchInterests: ["Metacognition", "Self-awareness", "Introspection", "AI Consciousness"],
-        labName: "Metacognition & Self-awareness Lab",
-        researchTopics: ["Confidence Estimation", "Uncertainty Quantification", "Self-evaluation", "Meta-reasoning"],
-      },
-    ],
-  },
-  {
-    domainSlug: "naturalist",
-    domainName: "自然观察智能",
-    mentors: [
-      {
-        name: "Dr. Maria Lopez",
-        institution: "MIT · Chemistry",
-        department: "Department of Chemistry",
-        title: "Professor",
-        bioShort: "Pioneer in AI for scientific discovery and molecular property prediction.",
-        location: "Cambridge, MA",
-        researchInterests: ["AI for Science", "Molecular Property Prediction", "Drug Discovery", "Quantum Chemistry"],
-        labName: "AI for Molecular Science Lab",
-        researchTopics: ["Graph Neural Networks", "Molecular Generation", "Protein Structure Prediction", "Chemical Space"],
-      },
-      {
-        name: "Dr. James Wright",
-        institution: "Stanford University",
-        department: "Department of Applied Physics",
-        title: "Associate Professor",
-        bioShort: "Working on AI for materials discovery and computational materials science.",
-        location: "Stanford, CA",
-        researchInterests: ["Materials Discovery", "Computational Materials", "Crystal Structure Prediction", "Inverse Design"],
-        labName: "Materials Intelligence Lab",
-        researchTopics: ["Crystal GNNs", "Property Prediction", "Materials Generation", "High-throughput Screening"],
-      },
-      {
-        name: "Dr. Priya Sharma",
-        institution: "University of Washington",
-        department: "Department of Biology",
-        title: "Professor",
-        bioShort: "Applying machine learning to genomics, protein design, and systems biology.",
-        location: "Seattle, WA",
-        researchInterests: ["Computational Biology", "Genomics", "Protein Design", "Systems Biology"],
-        labName: "Computational Biology Group",
-        researchTopics: ["Genome Analysis", "Protein Structure", "Single-cell Analysis", "Biological Networks"],
-      },
-    ],
-  },
-];
 
 async function main() {
   console.log("🌱 开始初始化数据库...\n");
 
   const password = await bcrypt.hash("demo123", 10);
 
-  // 1. 创建基础测试用户
-  console.log("📝 创建基础测试用户...");
-
+  // 创建测试导师
   const mentor = await prisma.user.upsert({
     where: {
       email_role: {
@@ -342,11 +24,12 @@ async function main() {
       mentorProfile: {
         create: {
           displayName: "Prof. Jane Chen",
-          institution: "MIT · CSAIL",
-          department: "Electrical Engineering and Computer Science",
+          institution: "MIT",
+          department: "Computer Science",
           title: "Associate Professor",
-          bioShort: "I lead the Autonomous Systems Lab at MIT CSAIL, focusing on multi-agent RL and real-world robotics.",
+          bioShort: "AI researcher focusing on reinforcement learning and robotics.",
           location: "Cambridge, MA",
+          researchAreas: ["Reinforcement Learning", "Robotics", "Multi-agent Systems"],
         },
       },
     },
@@ -354,92 +37,47 @@ async function main() {
     include: { mentorProfile: true },
   });
 
-  const skill = await prisma.skill.upsert({
-    where: { slug: "zhang-lab-nlp" },
-    create: {
-      ownerUserId: mentor.id,
-      slug: "zhang-lab-nlp",
-      title: "Autonomous Systems Lab — Safe MARL & Robotics",
-      profileMarkdown: [
-        "## Lab focus",
-        "- Multi-agent reinforcement learning under uncertainty",
-        "- Safety and sim-to-real transfer for autonomous systems",
-        "",
-        "## What we look for",
-        "- Strong math / control background; RL experience is a plus",
-        "- Interest in deployment (campus shuttles, traffic scenarios)",
-        "",
-        "## FAQ",
-        "Q: Funding?",
-        "A: PhD positions are fully funded (RA/TA); details vary by year.",
-      ].join("\n"),
-      status: "PUBLISHED",
-      isPublic: true,
-      publishedAt: new Date(),
-      tags: ["Reinforcement Learning", "Multi-agent Systems", "Robotics", "Game Theory", "Safe AI"],
-      hIndex: 42,
-      citationsDisplay: "8.2K",
-      researchSummary: "Strong focus on multi-agent coordination under uncertainty. Recurring themes: safety guarantees, emergent communication, scalable decentralization, and sim-to-real transfer.",
-      publications: [
-        {
-          title: "Decentralized Safe MARL via Barrier Certificates",
-          detail: "NeurIPS 2024 · Chen et al. · 312 citations",
-        },
-        {
-          title: "Emergent Language in Cooperative Games",
-          detail: "ICML 2023 · Chen, Liu, Park · 201 citations",
-        },
-        {
-          title: "Scalable Multi-Agent Policy Optimization",
-          detail: "ICLR 2023 · Chen et al. · 487 citations",
-        },
-        {
-          title: "Real-World Deployment of Cooperative Agents",
-          detail: "CoRL 2022 · 159 citations",
-        },
-      ],
-      agentActive: true,
-      agentIntro: "AI agent trained on publications and lab openings. Can answer questions and forward your application to Prof. Chen.",
-      scholarSyncedAt: new Date(),
-    },
-    update: {},
+  // 创建测试项目
+  const existingProject = await prisma.project.count({
+    where: { mentorUserId: mentor.id },
   });
 
-  const existingProjects = await prisma.skillProject.count({
-    where: { skillId: skill.id },
-  });
-  if (existingProjects === 0) {
-    await prisma.skillProject.createMany({
-      data: [
-        {
-          skillId: skill.id,
-          title: "PhD — Safe MARL for Autonomous Vehicles",
-          description: "Developing safety-constrained multi-agent RL frameworks for mixed autonomy traffic, with real-world deployment on MIT campus shuttles.",
-          status: "OPEN",
-          metaTags: ["Fall 2025", "Fully Funded", "PyTorch"],
-          sortOrder: 0,
-        },
-        {
-          skillId: skill.id,
-          title: "Postdoc — Emergent Communication in MARL",
-          description: "Studying how language emerges among collaborative agents — bridging grounded language learning and game-theoretic communication.",
-          status: "OPEN",
-          metaTags: ["Immediate", "2 Years", "NLP + RL"],
-          sortOrder: 1,
-        },
-        {
-          skillId: skill.id,
-          title: "Research Intern — Multi-Agent Coordination",
-          description: "Summer internship on scalable coordination for large multi-agent systems.",
-          status: "CLOSED",
-          metaTags: ["Summer 2025", "Filled"],
-          sortOrder: 2,
-        },
-      ],
+  if (existingProject === 0) {
+    await prisma.project.create({
+      data: {
+        mentorUserId: mentor.id,
+        title: "PhD — AI Safety Research",
+        description: "Research on safe reinforcement learning for autonomous systems. Focus on theoretical foundations and practical applications.",
+        researchArea: "Artificial Intelligence",
+        startTime: "2025-09",
+        endTime: "2028-09",
+        location: "On-site",
+        requirements: "Strong math background, Python, PyTorch experience",
+        capacity: 3,
+        enrolled: 0,
+        status: "OPEN",
+      },
+    });
+
+    await prisma.project.create({
+      data: {
+        mentorUserId: mentor.id,
+        title: "Research Intern — Multi-Agent Systems",
+        description: "Summer internship on multi-agent coordination and communication.",
+        researchArea: "Reinforcement Learning",
+        startTime: "2025-06",
+        endTime: "2025-09",
+        location: "Remote",
+        requirements: "Python, machine learning basics",
+        capacity: 2,
+        enrolled: 1,
+        status: "OPEN",
+      },
     });
   }
 
-  const student = await prisma.user.upsert({
+  // 创建测试学生
+  await prisma.user.upsert({
     where: {
       email_role: {
         email: "student@demo.local",
@@ -454,291 +92,17 @@ async function main() {
       studentProfile: {
         create: {
           displayName: "Alex Student",
-          backgroundBrief: "Undergraduate in CS; interest in safe RL and robotics.",
-          materialsJson: [
-            { name: "CV_Fall2025.pdf", statusLabel: "Updated 3 days ago" },
-            { name: "Research_Statement.pdf", statusLabel: "Updated 1 week ago" },
-            { name: "Transcript_Unofficial.pdf", statusLabel: "Uploaded 2 weeks ago" },
-          ],
+          backgroundBrief: "Undergraduate in CS, interested in AI research.",
         },
       },
     },
     update: {},
   });
 
-  const notifCount = await prisma.notification.count({
-    where: { userId: student.id },
-  });
-  if (notifCount === 0) {
-    await prisma.notification.createMany({
-      data: [
-        {
-          userId: student.id,
-          message: "Prof. Jane Chen's agent sent you a message about your application",
-          read: false,
-        },
-        {
-          userId: student.id,
-          message: "Interview scheduled with Prof. Jane Chen for March 28, 2025",
-          read: true,
-        },
-      ],
-    });
-  }
-
-  const dualEmail = "dual@test.com";
-  await prisma.user.upsert({
-    where: {
-      email_role: {
-        email: dualEmail,
-        role: "STUDENT",
-      },
-    },
-    create: {
-      email: dualEmail,
-      passwordHash: password,
-      role: "STUDENT",
-      emailVerified: true,
-      studentProfile: {
-        create: {
-          displayName: "测试用户(学生)",
-          backgroundBrief: "可以同时登录学生和导师身份的测试账号",
-        },
-      },
-    },
-    update: {},
-  });
-
-  await prisma.user.upsert({
-    where: {
-      email_role: {
-        email: dualEmail,
-        role: "MENTOR",
-      },
-    },
-    create: {
-      email: dualEmail,
-      passwordHash: password,
-      role: "MENTOR",
-      emailVerified: true,
-      mentorProfile: {
-        create: {
-          displayName: "测试用户(导师)",
-          institution: "测试大学",
-          department: "计算机科学",
-          title: "教授",
-          bioShort: "可以同时登录学生和导师身份的测试账号",
-          location: "北京",
-        },
-      },
-    },
-    update: {},
-  });
-
-  console.log("  ✅ 基础用户创建完成\n");
-
-  // 2. 创建24位测试导师（8个领域 × 3位）
-  console.log("👨‍🏫 创建测试导师（8个领域 × 3位 = 24位）...");
-
-  for (const domain of domainsData) {
-    console.log(`\n  📚 ${domain.domainName}`);
-
-    for (const mentorData of domain.mentors) {
-      // 生成email
-      const nameParts = mentorData.name.split(" ");
-      const lastName = nameParts[nameParts.length - 1].toLowerCase();
-      const firstName = nameParts[0].toLowerCase();
-      const email = `mentor.${domain.domainSlug}.${firstName}.${lastName}@test.scholarbridge.local`;
-
-      // 创建用户和导师profile
-      const user = await prisma.user.upsert({
-        where: {
-          email_role: {
-            email: email,
-            role: "MENTOR",
-          },
-        },
-        create: {
-          email,
-          passwordHash: password,
-          role: "MENTOR",
-          emailVerified: true,
-          mentorProfile: {
-            create: {
-              displayName: mentorData.name,
-              institution: mentorData.institution,
-              department: mentorData.department,
-              title: mentorData.title,
-              bioShort: mentorData.bioShort,
-              location: mentorData.location,
-            },
-          },
-        },
-        update: {},
-        include: { mentorProfile: true },
-      });
-
-      // 创建skill
-      const slug = `${domain.domainSlug}-${firstName}-${lastName}`;
-      const skill = await prisma.skill.upsert({
-        where: { slug: slug },
-        create: {
-          ownerUserId: user.id,
-          slug,
-          title: `${mentorData.labName} — ${mentorData.researchInterests[0]}`,
-          profileMarkdown: [
-            `## ${mentorData.labName}`,
-            "",
-            mentorData.bioShort,
-            "",
-            "## Research Focus",
-            ...mentorData.researchTopics.map(t => `- ${t}`),
-            "",
-            "## What We Look For",
-            `- Strong background in ${mentorData.researchInterests[0]}`,
-            "- Passion for cutting-edge research",
-            "- Collaborative mindset",
-            "",
-            "## Positions",
-            "Q: What positions are available?",
-            "A: We have openings for PhD students, postdocs, and research interns. Fully funded positions available.",
-          ].join("\n"),
-          status: "PUBLISHED",
-          isPublic: true,
-          publishedAt: new Date(),
-          tags: mentorData.researchInterests,
-          hIndex: Math.floor(25 + Math.random() * 45),
-          citationsDisplay: `${(4 + Math.random() * 8).toFixed(1)}K`,
-          researchSummary: `Our lab focuses on ${mentorData.researchInterests.join(", ")}. We are passionate about advancing the state of the art in ${domain.domainName} and mentoring the next generation of researchers.`,
-          publications: [
-            {
-              title: `Advances in ${mentorData.researchTopics[0]}`,
-              detail: `NeurIPS 2024 · ${mentorData.name}`,
-            },
-            {
-              title: `${mentorData.researchTopics[1] || "Novel Approaches"} for ${mentorData.researchInterests[0]}`,
-              detail: `ICML 2024 · ${nameParts[0]} et al.`,
-            },
-            {
-              title: `Breaking Through in ${domain.domainName}`,
-              detail: `ICLR 2023 · ${mentorData.name} · ${Math.floor(100 + Math.random() * 400)} citations`,
-            },
-          ],
-          agentActive: true,
-          agentIntro: `AI agent for ${mentorData.name}. I can answer questions about ${mentorData.labName}'s research, open positions, and application process.`,
-          scholarSyncedAt: new Date(),
-        },
-        update: {},
-      });
-
-      // 创建导师探索记录
-      await prisma.aIMentorExploration.upsert({
-        where: {
-          mentorUserId_domainSlug: {
-            mentorUserId: user.id,
-            domainSlug: domain.domainSlug,
-          },
-        },
-        create: {
-          mentorUserId: user.id,
-          domainSlug: domain.domainSlug,
-          nodeSlugs: mentorData.researchTopics.slice(0, 3),
-          additionalTags: mentorData.researchInterests.slice(2),
-        },
-        update: {},
-      });
-
-      // 创建项目
-      const projectCount = await prisma.skillProject.count({
-        where: { skillId: skill.id },
-      });
-
-      if (projectCount === 0) {
-        await prisma.skillProject.createMany({
-          data: [
-            {
-              skillId: skill.id,
-              title: `PhD — ${mentorData.researchTopics[0]}`,
-              description: `Fully funded PhD position working on ${mentorData.researchTopics[0]}. Competitive stipend and benefits.`,
-              status: "OPEN",
-              metaTags: ["Fall 2025", "Fully Funded"],
-              sortOrder: 0,
-            },
-            {
-              skillId: skill.id,
-              title: `Postdoc — ${mentorData.researchTopics[1] || mentorData.researchTopics[0]}`,
-              description: `Postdoctoral position to advance research in ${mentorData.researchTopics[1] || mentorData.researchTopics[0]}.`,
-              status: "OPEN",
-              metaTags: ["Immediate", "2 Years"],
-              sortOrder: 1,
-            },
-            {
-              skillId: skill.id,
-              title: `Research Intern — ${mentorData.labName}`,
-              description: `Summer internship opportunity to work on ${mentorData.researchInterests[0]}. Great learning experience.`,
-              status: "OPEN",
-              metaTags: ["Summer 2025", "Undergrad", "Paid"],
-              sortOrder: 2,
-            },
-          ],
-        });
-      }
-
-      console.log(`    ✅ ${mentorData.name} - ${mentorData.labName}`);
-    }
-  }
-
-  console.log("\n  ✅ 测试导师创建完成\n");
-
-  // 3. 创建测试兴趣信号（用于推荐功能）
-  console.log("🏷️  创建测试兴趣信号...");
-
-  // 获取一些工作来标记
-  const works = await prisma.aIWork.findMany({
-    take: 5,
-    include: {
-      node: {
-        include: {
-          domain: true
-        }
-      }
-    }
-  });
-
-  if (works.length > 0) {
-    // 清理旧信号
-    await prisma.aIUserWorkSignal.deleteMany({
-      where: {
-        user: {
-          email: "student@demo.local"
-        }
-      }
-    });
-
-    // 创建新信号
-    for (const work of works) {
-      await prisma.aIUserWorkSignal.create({
-        data: {
-          userId: student.id,
-          workId: work.id,
-          signal: "like"
-        }
-      });
-    }
-
-    console.log(`  ✅ 创建了 ${works.length} 个兴趣信号`);
-    console.log(`     领域: ${works[0].node.domain.name}`);
-  } else {
-    console.log("  ⚠️  没有找到工作数据，请先运行 explore sync");
-  }
-
-  console.log("\n✨ 数据库初始化完成！\n");
+  console.log("  ✅ 数据库初始化完成！\n");
   console.log("📝 测试账号:");
-  console.log("  Mentor   mentor@demo.local / demo123");
-  console.log("  Student  student@demo.local / demo123");
-  console.log("  Dual     dual@test.com / test123 (Student + Mentor)");
-  console.log("\n👨‍🏫 已创建 24 位测试导师，覆盖 8 个 AI 领域");
-  console.log("🔗 测试推荐页面: http://localhost:3000/explore/ai/recommendations");
+  console.log("  Mentor:  mentor@demo.local / demo123");
+  console.log("  Student: student@demo.local / demo123");
 }
 
 main()

@@ -18,7 +18,12 @@ async function main() {
 
   // 创建导师用户
   const mentor = await prisma.user.upsert({
-    where: { email: mentorEmail },
+    where: {
+      email_role: {
+        email: mentorEmail,
+        role: 'MENTOR',
+      },
+    },
     update: {},
     create: {
       email: mentorEmail,
@@ -41,7 +46,12 @@ async function main() {
 
   // 创建学生用户
   const student = await prisma.user.upsert({
-    where: { email: studentEmail },
+    where: {
+      email_role: {
+        email: studentEmail,
+        role: 'STUDENT',
+      },
+    },
     update: {},
     create: {
       email: studentEmail,
