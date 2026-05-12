@@ -11,9 +11,59 @@ export async function GET() {
   const projects = await db.project.findMany({
     where: { mentorUserId: user.id },
     orderBy: { createdAt: "desc" },
+    include: {
+      applications: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          student: {
+            select: {
+              id: true,
+              email: true,
+              studentProfile: {
+                select: {
+                  displayName: true,
+                  education: true,
+                  bioShort: true,
+                  interests: true,
+                  skills: true,
+                  resumeFileName: true,
+                  resumeSize: true,
+                  resumeUploadedAt: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
 
-  return NextResponse.json({ projects });
+  return NextResponse.json({
+    projects: projects.map((project) => ({
+      ...project,
+      applications: project.applications.map((application) => ({
+        id: application.id,
+        status: application.status,
+        coverLetter: application.coverLetter,
+        mentorFeedback: application.mentorFeedback,
+        createdAt: application.createdAt,
+        updatedAt: application.updatedAt,
+        student: {
+          id: application.student.id,
+          email: application.student.email,
+          displayName: application.student.studentProfile?.displayName || application.student.email,
+          education: application.student.studentProfile?.education,
+          bioShort: application.student.studentProfile?.bioShort,
+          interests: application.student.studentProfile?.interests,
+          skills: application.student.studentProfile?.skills,
+          resumeFileName: application.student.studentProfile?.resumeFileName,
+          resumeSize: application.student.studentProfile?.resumeSize,
+          resumeUploadedAt: application.student.studentProfile?.resumeUploadedAt,
+        },
+      })),
+      applicationCount: project.applications.filter((application) => application.status !== "WITHDRAWN").length,
+    })),
+  });
 }
 
 export async function POST(request: NextRequest) {

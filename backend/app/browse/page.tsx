@@ -292,6 +292,35 @@ export default function BrowsePage() {
   const selectedProject = selectedProjectId
     ? projects.find((project) => project.id === selectedProjectId) || null
     : null;
+  const getApplicationButtonState = (project: ProjectOpportunity) => {
+    const application = appliedApplications[project.id];
+    const status = application?.status;
+    const isFinalDecision = status === 'accepted' || status === 'rejected';
+
+    return {
+      application,
+      isFinalDecision,
+      disabled:
+        project.availableSeats <= 0 ||
+        applyingProjectId === project.id ||
+        cancellingProjectId === project.id ||
+        isFinalDecision,
+      label:
+        cancellingProjectId === project.id
+          ? 'Cancelling...'
+          : status === 'accepted'
+            ? 'Accepted'
+            : status === 'rejected'
+              ? 'Rejected'
+              : application
+                ? 'Cancel apply'
+                : applyingProjectId === project.id
+                  ? 'Applying...'
+                  : project.availableSeats <= 0
+                    ? 'Full'
+                    : 'Apply',
+    };
+  };
 
   if (loading) {
     return (
@@ -378,7 +407,7 @@ export default function BrowsePage() {
 
         <section className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-5">
           {filteredProjects.map((project) => {
-            const isApplied = Boolean(appliedApplications[project.id]);
+            const applicationButton = getApplicationButtonState(project);
             const isSaved = savedProjectIds.has(project.id);
             const isFull = project.availableSeats <= 0;
 
@@ -417,23 +446,11 @@ export default function BrowsePage() {
 
                 <div className="flex flex-wrap gap-2">
                   <Button
-                    variant={isApplied ? 'outline' : 'gold'}
-                    disabled={
-                      isFull ||
-                      applyingProjectId === project.id ||
-                      cancellingProjectId === project.id
-                    }
-                    onClick={() => isApplied ? handleCancelApply(project.id) : handleApply(project.id)}
+                    variant={applicationButton.application ? 'outline' : 'gold'}
+                    disabled={applicationButton.disabled}
+                    onClick={() => applicationButton.application ? handleCancelApply(project.id) : handleApply(project.id)}
                   >
-                    {cancellingProjectId === project.id
-                      ? 'Cancelling...'
-                      : isApplied
-                        ? 'Cancel apply'
-                        : applyingProjectId === project.id
-                          ? 'Applying...'
-                          : isFull
-                            ? 'Full'
-                            : 'Apply'}
+                    {applicationButton.label}
                   </Button>
                   <Button
                     variant="outline"
@@ -555,25 +572,19 @@ export default function BrowsePage() {
             </div>
 
             <div className="flex flex-wrap gap-2 border-t border-[#E0D8CC] px-6 py-5">
-              <Button
-                variant={appliedApplications[selectedProject.id] ? 'outline' : 'gold'}
-                disabled={
-                  selectedProject.availableSeats <= 0 ||
-                  applyingProjectId === selectedProject.id ||
-                  cancellingProjectId === selectedProject.id
-                }
-                onClick={() => appliedApplications[selectedProject.id] ? handleCancelApply(selectedProject.id) : handleApply(selectedProject.id)}
-              >
-                {cancellingProjectId === selectedProject.id
-                  ? 'Cancelling...'
-                  : appliedApplications[selectedProject.id]
-                    ? 'Cancel apply'
-                    : applyingProjectId === selectedProject.id
-                      ? 'Applying...'
-                      : selectedProject.availableSeats <= 0
-                        ? 'Full'
-                        : 'Apply'}
-              </Button>
+              {(() => {
+                const applicationButton = getApplicationButtonState(selectedProject);
+
+                return (
+                  <Button
+                    variant={applicationButton.application ? 'outline' : 'gold'}
+                    disabled={applicationButton.disabled}
+                    onClick={() => applicationButton.application ? handleCancelApply(selectedProject.id) : handleApply(selectedProject.id)}
+                  >
+                    {applicationButton.label}
+                  </Button>
+                );
+              })()}
               <Button
                 variant="ghost"
                 onClick={() => handleToggleSave(selectedProject.id)}

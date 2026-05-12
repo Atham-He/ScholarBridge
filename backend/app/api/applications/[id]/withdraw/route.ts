@@ -29,10 +29,18 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    if (application.status !== "pending") {
+      return NextResponse.json({ error: "Only pending applications can be withdrawn" }, { status: 409 });
+    }
+
     // 更新申请状态为 WITHDRAWN
-    const updated = await db.application.update({
-      where: { id: applicationId },
-      data: { status: "WITHDRAWN" },
+    const updated = await db.$transaction(async (tx) => {
+      const updatedApplication = await tx.application.update({
+        where: { id: applicationId },
+        data: { status: "WITHDRAWN" },
+      });
+
+      return updatedApplication;
     });
 
     return NextResponse.json({ application: updated });

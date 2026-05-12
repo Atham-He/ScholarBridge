@@ -89,6 +89,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ application }, { status: 200 });
       }
 
+      if (existing.status === "accepted" || existing.status === "rejected") {
+        return NextResponse.json({ error: "This application has already been decided" }, { status: 409 });
+      }
+
       return NextResponse.json({ error: "Already applied" }, { status: 409 });
     }
 

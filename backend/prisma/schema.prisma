@@ -69,14 +69,19 @@ model MentorProfile {
 }
 
 model StudentProfile {
-  userId          String  @id
-  displayName     String
-  backgroundBrief String?
-  materialsJson   Json?
-  education       String?
-  bioShort        String?
-  interests       Json?
-  skills          Json?
+  userId           String    @id
+  displayName      String
+  backgroundBrief  String?
+  materialsJson    Json?
+  education        String?
+  bioShort         String?
+  interests        Json?
+  skills           Json?
+  resumeFileName   String?
+  resumeMimeType   String?
+  resumeSize       Int?
+  resumeData       Bytes?
+  resumeUploadedAt DateTime?
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedMentors  SavedMentor[]
@@ -135,14 +140,15 @@ model Project {
 }
 
 model Application {
-  id            String   @id @default(cuid())
-  studentUserId String
-  mentorUserId  String
-  projectId     String
-  status        String   @default("pending") // pending, accepted, rejected, withdrawn
-  coverLetter   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(cuid())
+  studentUserId  String
+  mentorUserId   String
+  projectId      String
+  status         String   @default("pending") // pending, accepted, rejected, withdrawn
+  coverLetter    String?
+  mentorFeedback String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   student User    @relation("StudentApps", fields: [studentUserId], references: [id], onDelete: Cascade)
   mentor  User    @relation("MentorApps", fields: [mentorUserId], references: [id], onDelete: Cascade)

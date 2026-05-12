@@ -3,7 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function WithdrawButton({ applicationId }: { applicationId: string }) {
+export function WithdrawButton({
+  applicationId,
+  onWithdraw,
+}: {
+  applicationId: string;
+  onWithdraw?: () => void;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -15,6 +21,7 @@ export function WithdrawButton({ applicationId }: { applicationId: string }) {
     });
     setLoading(false);
     if (res.ok) {
+      onWithdraw?.();
       router.refresh();
     } else {
       alert("撤回失败，请重试");

@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+const studentProfileSelect = {
+  userId: true,
+  displayName: true,
+  backgroundBrief: true,
+  materialsJson: true,
+  education: true,
+  bioShort: true,
+  interests: true,
+  skills: true,
+  resumeFileName: true,
+  resumeMimeType: true,
+  resumeSize: true,
+  resumeUploadedAt: true,
+};
+
 // GET /api/student/profile - 获取学生个人信息
 export async function GET() {
   try {
@@ -13,6 +28,7 @@ export async function GET() {
 
     const profile = await db.studentProfile.findUnique({
       where: { userId: user.id },
+      select: studentProfileSelect,
     });
 
     if (!profile) {
@@ -22,6 +38,7 @@ export async function GET() {
           userId: user.id,
           displayName: user.email?.split("@")[0] || "Student",
         },
+        select: studentProfileSelect,
       });
       return NextResponse.json({ profile: newProfile });
     }
@@ -54,6 +71,7 @@ export async function PATCH(request: NextRequest) {
         interests: interests || undefined,
         skills: skills || undefined,
       },
+      select: studentProfileSelect,
     });
 
     return NextResponse.json({ profile });
