@@ -18,7 +18,8 @@ for (const envPath of envCandidates) {
   }
 }
 
-process.env.NODE_ENV = process.env.NODE_ENV || "test";
-process.env.SESSION_SECRET = process.env.SESSION_SECRET || "test-session-secret";
-process.env.DATABASE_URL =
-  process.env.DATABASE_URL || `file:${path.join(backendRoot, "dev.db")}`;
+const env = process.env as Record<string, string | undefined>;
+
+env.NODE_ENV = env.NODE_ENV || "test";
+env.SESSION_SECRET = env.SESSION_SECRET || "test-session-secret";
+env.DATABASE_URL = env.DATABASE_URL || `file:${path.join(backendRoot, "dev.db")}`;
