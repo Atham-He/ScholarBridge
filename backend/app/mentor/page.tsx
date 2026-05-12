@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 
@@ -20,6 +20,10 @@ interface MentorProfile {
   phone?: string;
   website?: string;
   researchAreas?: string[];
+  aiAgentEnabled?: boolean;
+  aiAgentPrompt?: string | null;
+  aiHardWeight?: number;
+  aiFitWeight?: number;
 }
 
 interface ProjectStats {
@@ -37,8 +41,9 @@ export default function MentorDashboardPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
-  useEffect(() => {
-    fetchData();
+  const showMessage = useCallback((type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3000);
   }, []);
 
   const handleLogout = async () => {
@@ -51,7 +56,7 @@ export default function MentorDashboardPage() {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [profileRes, statsRes] = await Promise.all([
         fetch('/api/mentor/profile'),
@@ -73,12 +78,11 @@ export default function MentorDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showMessage]);
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3000);
-  };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleSaveProfile = async () => {
     if (!profile) return;
@@ -96,16 +100,27 @@ export default function MentorDashboardPage() {
       }
 
       showMessage('success', '保存成功');
-    } catch (error) {
+    } catch {
       showMessage('error', '保存失败，请重试');
     } finally {
       setSaving(false);
     }
   };
 
-  const updateProfile = (field: keyof MentorProfile, value: any) => {
+  const updateProfile = (field: keyof MentorProfile, value: MentorProfile[keyof MentorProfile]) => {
     if (profile) {
       setProfile({ ...profile, [field]: value });
+    }
+  };
+
+  const updateAiHardWeight = (value: number) => {
+    if (profile) {
+      const hardWeight = Math.max(0, Math.min(100, value));
+      setProfile({
+        ...profile,
+        aiHardWeight: hardWeight,
+        aiFitWeight: 100 - hardWeight,
+      });
     }
   };
 
@@ -245,6 +260,53 @@ export default function MentorDashboardPage() {
                     className="w-full px-3 py-2 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
                     placeholder="例如：Machine Learning, Computer Vision, NLP"
                   />
+                </div>
+
+                <div className="rounded-lg border border-[#E0D8CC] bg-[#FAF8F5] p-4">
+                  <div className="mb-4 flex items-center justify-between gap-4">
+                    <div>
+                      <h4 className="text-[16px] font-semibold text-[#1A1A1A]">AI 简历筛选 Agent</h4>
+                      <p className="mt-1 text-sm text-[#1A1A1A]">自动评估申请学生的硬实力背景和项目匹配度。</p>
+                    </div>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-[#1A1A1A]">
+                      <input
+                        type="checkbox"
+                        checked={profile?.aiAgentEnabled ?? true}
+                        onChange={(event) => updateProfile('aiAgentEnabled', event.target.checked)}
+                      />
+                      启用
+                    </label>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="mb-2 block text-sm font-medium text-[#1A1A1A]">Agent 筛选偏好</label>
+                    <textarea
+                      value={profile?.aiAgentPrompt || ''}
+                      onChange={(event) => updateProfile('aiAgentPrompt', event.target.value)}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
+                      placeholder="例如：优先考虑有NLP项目经验、熟悉PyTorch、能够独立做实验和写论文的学生。"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="mb-2 flex items-center justify-between text-sm text-[#1A1A1A]">
+                      <span className="font-semibold">硬实力背景 {profile?.aiHardWeight ?? 50}%</span>
+                      <span className="font-semibold">项目匹配度 {profile?.aiFitWeight ?? 50}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={profile?.aiHardWeight ?? 50}
+                      onChange={(event) => updateAiHardWeight(Number(event.target.value))}
+                      className="w-full accent-[#2C5F7C]"
+                    />
+                    <p className="mt-2 text-xs text-[#4A4A4A]">
+                      拖动滑块调整总分权重；默认 50-50。已有申请会按新权重重新排序，无需重新调用 AI。
+                    </p>
+                  </div>
                 </div>
 
                 {message && (

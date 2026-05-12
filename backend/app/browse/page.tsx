@@ -44,6 +44,7 @@ interface User {
 interface AppliedApplication {
   id: string;
   status: string;
+  mentorFeedback?: string | null;
 }
 
 export default function BrowsePage() {
@@ -115,9 +116,13 @@ export default function BrowsePage() {
       }
       const data = await response.json();
       const activeApplications = (data.apps || []).reduce(
-        (current: Record<string, AppliedApplication>, app: { id: string; projectId: string; status: string }) => {
+        (current: Record<string, AppliedApplication>, app: { id: string; projectId: string; status: string; mentorFeedback?: string | null }) => {
           if (app.status !== 'WITHDRAWN') {
-            current[app.projectId] = { id: app.id, status: app.status };
+            current[app.projectId] = {
+              id: app.id,
+              status: app.status,
+              mentorFeedback: app.mentorFeedback || null,
+            };
           }
           return current;
         },
@@ -173,7 +178,11 @@ export default function BrowsePage() {
         if (data.application?.id) {
           setAppliedApplications((current) => ({
             ...current,
-            [projectId]: { id: data.application.id, status: data.application.status },
+            [projectId]: {
+              id: data.application.id,
+              status: data.application.status,
+              mentorFeedback: data.application.mentorFeedback || null,
+            },
           }));
         }
         return;
@@ -562,6 +571,13 @@ export default function BrowsePage() {
                 <p className="mb-2 font-semibold">Requirements</p>
                 <p>{selectedProject.requirements || 'No formal requirements listed yet.'}</p>
               </div>
+
+              {appliedApplications[selectedProject.id]?.mentorFeedback && (
+                <div className="rounded border border-[#A8D0E8] bg-[#EBF3F8] p-4">
+                  <p className="mb-2 font-semibold">导师反馈</p>
+                  <p>{appliedApplications[selectedProject.id].mentorFeedback}</p>
+                </div>
+              )}
 
               {selectedProject.mentor.bioShort && (
                 <div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { scoreApplicationResume } from "@/lib/resume-ai";
 
 // GET /api/student/applications - 获取学生的所有申请
 export async function GET() {
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
           },
         });
 
+        await scoreApplicationResume(application.id);
         return NextResponse.json({ application }, { status: 200 });
       }
 
@@ -109,6 +111,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    await scoreApplicationResume(application.id);
     return NextResponse.json({ application }, { status: 201 });
   } catch (error) {
     console.error("Failed to create application:", error);

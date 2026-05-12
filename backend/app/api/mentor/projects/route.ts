@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { calculateWeightedAiScore } from "@/lib/resume-ai";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -37,32 +38,56 @@ export async function GET() {
       },
     },
   });
+  const hardWeight = user.mentorProfile?.aiHardWeight ?? 50;
 
   return NextResponse.json({
     projects: projects.map((project) => ({
       ...project,
-      applications: project.applications.map((application) => ({
-        id: application.id,
-        status: application.status,
-        coverLetter: application.coverLetter,
-        mentorFeedback: application.mentorFeedback,
-        createdAt: application.createdAt,
-        updatedAt: application.updatedAt,
-        student: {
-          id: application.student.id,
-          email: application.student.email,
-          displayName: application.student.studentProfile?.displayName || application.student.email,
-          education: application.student.studentProfile?.education,
-          bioShort: application.student.studentProfile?.bioShort,
-          interests: application.student.studentProfile?.interests,
-          skills: application.student.studentProfile?.skills,
-          resumeFileName: application.student.studentProfile?.resumeFileName,
-          resumeSize: application.student.studentProfile?.resumeSize,
-          resumeUploadedAt: application.student.studentProfile?.resumeUploadedAt,
-        },
-      })),
+      applications: project.applications.map((application) => {
+        const aiWeightedScore = calculateWeightedAiScore(application.aiHardScore, application.aiFitScore, hardWeight);
+
+        return {
+          id: application.id,
+          status: application.status,
+          coverLetter: application.coverLetter,
+          mentorFeedback: application.mentorFeedback,
+          aiHardScore: application.aiHardScore,
+          aiFitScore: application.aiFitScore,
+          aiWeightedScore,
+          aiScoreSummary: application.aiScoreSummary,
+          aiScoreError: application.aiScoreError,
+          aiScoredAt: application.aiScoredAt,
+          createdAt: application.createdAt,
+          updatedAt: application.updatedAt,
+          student: {
+            id: application.student.id,
+            email: application.student.email,
+            displayName: application.student.studentProfile?.displayName || application.student.email,
+            education: application.student.studentProfile?.education,
+            bioShort: application.student.studentProfile?.bioShort,
+            interests: application.student.studentProfile?.interests,
+            skills: application.student.studentProfile?.skills,
+            resumeFileName: application.student.studentProfile?.resumeFileName,
+            resumeSize: application.student.studentProfile?.resumeSize,
+            resumeUploadedAt: application.student.studentProfile?.resumeUploadedAt,
+          },
+        };
+      }).sort((a, b) => {
+        const scoreA = a.aiWeightedScore ?? -1;
+        const scoreB = b.aiWeightedScore ?? -1;
+        if (scoreA !== scoreB) {
+          return scoreB - scoreA;
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }),
       applicationCount: project.applications.filter((application) => application.status !== "WITHDRAWN").length,
     })),
+    aiConfig: {
+      aiAgentEnabled: user.mentorProfile?.aiAgentEnabled ?? true,
+      aiAgentPrompt: user.mentorProfile?.aiAgentPrompt || "",
+      aiHardWeight: hardWeight,
+      aiFitWeight: user.mentorProfile?.aiFitWeight ?? 50,
+    },
   });
 }
 

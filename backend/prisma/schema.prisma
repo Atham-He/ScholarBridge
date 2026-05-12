@@ -50,19 +50,23 @@ model User {
 }
 
 model MentorProfile {
-  userId        String   @id
-  displayName   String
-  institution   String
-  department    String?
-  title         String?
-  bioShort      String?
-  location      String?
-  contactEmail  String?
-  phone         String?
-  website       String?
-  researchAreas Json? // ["AI", "Machine Learning", "Robotics"]
-  status        String   @default("active") // active, inactive
-  updatedAt     DateTime @updatedAt
+  userId         String   @id
+  displayName    String
+  institution    String
+  department     String?
+  title          String?
+  bioShort       String?
+  location       String?
+  contactEmail   String?
+  phone          String?
+  website        String?
+  researchAreas  Json? // ["AI", "Machine Learning", "Robotics"]
+  status         String   @default("active") // active, inactive
+  aiAgentEnabled Boolean  @default(true)
+  aiAgentPrompt  String?
+  aiHardWeight   Int      @default(50)
+  aiFitWeight    Int      @default(50)
+  updatedAt      DateTime @updatedAt
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   projects Project[]
@@ -81,6 +85,7 @@ model StudentProfile {
   resumeMimeType   String?
   resumeSize       Int?
   resumeData       Bytes?
+  resumeText       String?
   resumeUploadedAt DateTime?
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -140,15 +145,20 @@ model Project {
 }
 
 model Application {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   studentUserId  String
   mentorUserId   String
   projectId      String
-  status         String   @default("pending") // pending, accepted, rejected, withdrawn
+  status         String    @default("pending") // pending, accepted, rejected, withdrawn
   coverLetter    String?
   mentorFeedback String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  aiHardScore    Float?
+  aiFitScore     Float?
+  aiScoreSummary String?
+  aiScoreError   String?
+  aiScoredAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   student User    @relation("StudentApps", fields: [studentUserId], references: [id], onDelete: Cascade)
   mentor  User    @relation("MentorApps", fields: [mentorUserId], references: [id], onDelete: Cascade)

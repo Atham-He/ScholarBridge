@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { extractPdfText, scoreApplicationResume } from "@/lib/resume-ai";
 
 const MAX_RESUME_SIZE = 10 * 1024 * 1024;
 
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
     if (buffer.subarray(0, 4).toString("utf8") !== "%PDF") {
       return NextResponse.json({ error: "Uploaded file is not a valid PDF" }, { status: 400 });
     }
+    const resumeText = await extractPdfText(buffer);
 
     const profile = await db.studentProfile.upsert({
       where: { userId: user.id },
@@ -74,6 +76,7 @@ export async function POST(request: NextRequest) {
         resumeMimeType: resume.type,
         resumeSize: resume.size,
         resumeData: buffer,
+        resumeText,
         resumeUploadedAt: new Date(),
       },
       create: {
@@ -83,6 +86,7 @@ export async function POST(request: NextRequest) {
         resumeMimeType: resume.type,
         resumeSize: resume.size,
         resumeData: buffer,
+        resumeText,
         resumeUploadedAt: new Date(),
       },
       select: {
@@ -92,6 +96,15 @@ export async function POST(request: NextRequest) {
         resumeUploadedAt: true,
       },
     });
+
+    const applications = await db.application.findMany({
+      where: {
+        studentUserId: user.id,
+        status: { not: "WITHDRAWN" },
+      },
+      select: { id: true },
+    });
+    await Promise.all(applications.map((application) => scoreApplicationResume(application.id)));
 
     return NextResponse.json({ resume: profile });
   } catch (error) {

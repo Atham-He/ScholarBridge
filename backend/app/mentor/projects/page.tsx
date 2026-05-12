@@ -30,6 +30,12 @@ interface ProjectApplication {
   status: string;
   coverLetter?: string | null;
   mentorFeedback?: string | null;
+  aiHardScore?: number | null;
+  aiFitScore?: number | null;
+  aiWeightedScore?: number | null;
+  aiScoreSummary?: string | null;
+  aiScoreError?: string | null;
+  aiScoredAt?: string | null;
   createdAt: string;
   student: {
     id: string;
@@ -45,6 +51,13 @@ interface ProjectApplication {
   };
 }
 
+interface AiConfig {
+  aiAgentEnabled: boolean;
+  aiAgentPrompt: string;
+  aiHardWeight: number;
+  aiFitWeight: number;
+}
+
 export default function MentorProjectsPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -52,6 +65,13 @@ export default function MentorProjectsPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [updatingApplicationId, setUpdatingApplicationId] = useState<string | null>(null);
+  const [scoringApplicationId, setScoringApplicationId] = useState<string | null>(null);
+  const [aiConfig, setAiConfig] = useState<AiConfig>({
+    aiAgentEnabled: true,
+    aiAgentPrompt: '',
+    aiHardWeight: 50,
+    aiFitWeight: 50,
+  });
 
   useEffect(() => {
     fetchProjects();
@@ -73,6 +93,9 @@ export default function MentorProjectsPage() {
       if (response.ok) {
         const data = await response.json();
         setProjects(data.projects || []);
+        if (data.aiConfig) {
+          setAiConfig(data.aiConfig);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch projects:', error);
@@ -169,6 +192,27 @@ export default function MentorProjectsPage() {
 
   const openApplicationResume = (applicationId: string) => {
     window.open(`/api/applications/${applicationId}/resume`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleScoreApplication = async (application: ProjectApplication) => {
+    setScoringApplicationId(application.id);
+    try {
+      const response = await fetch(`/api/applications/${application.id}/score`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert(data.error || 'AI 评分失败');
+        return;
+      }
+
+      await fetchProjects();
+    } catch {
+      alert('AI 评分失败');
+    } finally {
+      setScoringApplicationId(null);
+    }
   };
 
   const updateApplication = async (
@@ -383,6 +427,9 @@ export default function MentorProjectsPage() {
                   <p className="mt-2 text-sm text-[#1A1A1A]">
                     {activeApplications.length} 个有效申请 · {selectedProject.applications.length} 个历史记录
                   </p>
+                  <p className="mt-2 text-xs text-[#4A4A4A]">
+                    AI 默认按总分排序：硬实力 {aiConfig.aiHardWeight}% · 项目匹配度 {aiConfig.aiFitWeight}%
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -416,6 +463,11 @@ export default function MentorProjectsPage() {
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2 md:justify-end">
+                        {typeof application.aiWeightedScore === 'number' && (
+                          <span className="rounded border border-[#A8D0E8] bg-[#EBF3F8] px-3 py-1 text-xs font-semibold text-[#2C5F7C]">
+                            AI {application.aiWeightedScore}
+                          </span>
+                        )}
                         <span className={`rounded border px-3 py-1 text-xs font-semibold ${getApplicationStatusClassName(application.status)}`}>
                           {getApplicationStatusText(application.status)}
                         </span>
@@ -441,6 +493,38 @@ export default function MentorProjectsPage() {
                     {application.student.bioShort && (
                       <p className="mt-4 text-sm leading-6 text-[#1A1A1A]">{application.student.bioShort}</p>
                     )}
+
+                    <div className="mt-4 rounded border border-[#A8D0E8] bg-[#EBF3F8] p-3 text-sm text-[#1A1A1A]">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <p className="font-semibold">AI 简历评分</p>
+                          {typeof application.aiWeightedScore === 'number' ? (
+                            <div className="mt-2 grid gap-1">
+                              <p>
+                                <span className="font-semibold">总分：</span>{application.aiWeightedScore}
+                                <span className="ml-3">硬实力 {application.aiHardScore ?? '-'} · 匹配度 {application.aiFitScore ?? '-'}</span>
+                              </p>
+                              {application.aiScoreSummary && (
+                                <p className="leading-6">{application.aiScoreSummary}</p>
+                              )}
+                              {application.aiScoredAt && (
+                                <p className="text-xs text-[#4A4A4A]">评分时间：{formatDate(application.aiScoredAt)}</p>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="mt-2">{application.aiScoreError || '尚未评分。学生上传 PDF 简历后会自动评分。'}</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          disabled={scoringApplicationId === application.id || !application.student.resumeFileName}
+                          onClick={() => handleScoreApplication(application)}
+                          className="rounded border border-[#2C5F7C] bg-white px-4 py-2 text-sm font-semibold text-[#2C5F7C] transition-all hover:bg-[#EBF3F8] disabled:cursor-not-allowed disabled:border-[#E0D8CC] disabled:bg-[#F5F2ED] disabled:text-[#6B6B6B]"
+                        >
+                          {scoringApplicationId === application.id ? '评分中...' : '重新评分'}
+                        </button>
+                      </div>
+                    </div>
 
                     <div className="mt-4 rounded border border-[#E0D8CC] bg-[#FAF8F5] p-3 text-sm text-[#1A1A1A]">
                       <p className="font-semibold">PDF 简历</p>
@@ -562,6 +646,39 @@ export default function MentorProjectsPage() {
                 <p><span className="font-semibold">申请时间：</span>{formatDate(selectedApplication.createdAt)}</p>
                 {selectedApplication.student.education && (
                   <p><span className="font-semibold">教育背景：</span>{selectedApplication.student.education}</p>
+                )}
+              </div>
+
+              <div className="rounded border border-[#A8D0E8] bg-[#EBF3F8] p-4">
+                <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <p className="font-semibold">AI 简历评分</p>
+                    <p className="mt-1 text-xs text-[#4A4A4A]">
+                      当前权重：硬实力 {aiConfig.aiHardWeight}% · 项目匹配度 {aiConfig.aiFitWeight}%
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={scoringApplicationId === selectedApplication.id || !selectedApplication.student.resumeFileName}
+                    onClick={() => handleScoreApplication(selectedApplication)}
+                    className="rounded border border-[#2C5F7C] bg-white px-4 py-2 text-sm font-semibold text-[#2C5F7C] transition-all hover:bg-[#EBF3F8] disabled:cursor-not-allowed disabled:border-[#E0D8CC] disabled:bg-[#F5F2ED] disabled:text-[#6B6B6B]"
+                  >
+                    {scoringApplicationId === selectedApplication.id ? '评分中...' : '重新评分'}
+                  </button>
+                </div>
+                {typeof selectedApplication.aiWeightedScore === 'number' ? (
+                  <div className="grid gap-2">
+                    <p className="text-[20px] font-semibold text-[#1A1A1A]">总分 {selectedApplication.aiWeightedScore}</p>
+                    <p>硬实力背景：{selectedApplication.aiHardScore ?? '-'} · 项目匹配度：{selectedApplication.aiFitScore ?? '-'}</p>
+                    {selectedApplication.aiScoreSummary && (
+                      <p className="leading-6">{selectedApplication.aiScoreSummary}</p>
+                    )}
+                    {selectedApplication.aiScoredAt && (
+                      <p className="text-xs text-[#4A4A4A]">评分时间：{formatDate(selectedApplication.aiScoredAt)}</p>
+                    )}
+                  </div>
+                ) : (
+                  <p>{selectedApplication.aiScoreError || '尚未评分。学生上传 PDF 简历后会自动评分。'}</p>
                 )}
               </div>
 

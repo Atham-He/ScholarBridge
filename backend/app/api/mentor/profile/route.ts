@@ -47,6 +47,12 @@ export async function PATCH(request: NextRequest) {
     ...(payload.researchAreas !== undefined && {
       researchAreas: payload.researchAreas as Prisma.InputJsonValue,
     }),
+    ...(payload.aiAgentEnabled !== undefined && { aiAgentEnabled: Boolean(payload.aiAgentEnabled) }),
+    ...(payload.aiAgentPrompt !== undefined && { aiAgentPrompt: String(payload.aiAgentPrompt) }),
+    ...(payload.aiHardWeight !== undefined && {
+      aiHardWeight: Math.max(0, Math.min(100, Number(payload.aiHardWeight) || 0)),
+      aiFitWeight: 100 - Math.max(0, Math.min(100, Number(payload.aiHardWeight) || 0)),
+    }),
   };
 
   const profile = await db.mentorProfile.update({
