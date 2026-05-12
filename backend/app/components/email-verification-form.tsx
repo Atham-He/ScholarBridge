@@ -112,25 +112,25 @@ export function EmailVerificationForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
+        <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
           验证码
         </label>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <input
             type="text"
             inputMode="numeric"
             maxLength={6}
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-            className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="min-w-0 flex-1 rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
             placeholder="6位验证码"
             required
           />
@@ -139,59 +139,59 @@ export function EmailVerificationForm({
             variant="outline"
             onClick={handleResendCode}
             disabled={resendLoading || countdown > 0}
-            className="px-4 py-2"
+            className="shrink-0 px-4 py-3"
           >
             {countdown > 0 ? `${countdown}秒` : resendLoading ? "发送中..." : "重新发送"}
           </Button>
         </div>
-        <p className="text-xs text-slate-900 mt-1">
+        <p className="mt-2 text-xs leading-5 text-[#1A1A1A]">
           验证码已发送至 {email}，15分钟内有效
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
+        <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
           密码
         </label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
           placeholder="至少6位密码"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
+        <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
           确认密码
         </label>
         <input
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
           placeholder="再次输入密码"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
+        <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
           姓名/昵称
         </label>
         <input
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
           placeholder="请输入您的姓名或昵称"
           required
         />
       </div>
 
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-2">
         <Button
           type="button"
           variant="outline"

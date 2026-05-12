@@ -64,8 +64,8 @@ export default function NewProjectPage() {
           ScholarBridge
         </div>
         <div className="flex gap-2.5">
-          <button className="nav-btn text-[#1A1A1A]" onClick={() => router.push('/mentor')}>Dashboard</button>
-          <button className="nav-btn active">New Project</button>
+          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => router.push('/mentor')}>Dashboard</button>
+          <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease">New Project</button>
         </div>
       </nav>
 
@@ -199,7 +199,7 @@ export default function NewProjectPage() {
               <Link href="/mentor/projects">
                 <button
                   type="button"
-                  className="px-6 py-3 border border-[#E0D8CC] rounded-lg hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all"
+                  className="px-6 py-3 border border-[#E0D8CC] rounded-lg bg-white text-[#1A1A1A] hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all"
                 >
                   取消
                 </button>
@@ -207,7 +207,7 @@ export default function NewProjectPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-[#2C5F7C] text-white rounded-lg hover:bg-[#1a4a5f] transition-colors disabled:opacity-50"
+                className="px-6 py-3 bg-[#2C5F7C] text-white border border-[#2C5F7C] rounded-lg hover:bg-[#1a4a5f] hover:border-[#1a4a5f] transition-colors disabled:cursor-not-allowed disabled:border-[#D8D0C5] disabled:bg-[#D8D0C5] disabled:text-[#1A1A1A]"
               >
                 {loading ? '创建中...' : '创建项目'}
               </button>
@@ -219,12 +219,6 @@ export default function NewProjectPage() {
       <style jsx>{`
         .font-display {
           font-family: 'Cormorant Garamond', serif;
-        }
-        .nav-btn {
-          @apply bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C];
-        }
-        .nav-btn.active {
-          @apply bg-[#2C5F7C] text-white border-[#2C5F7C];
         }
       `}</style>
     </div>

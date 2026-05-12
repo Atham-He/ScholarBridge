@@ -115,9 +115,9 @@ export default function MentorProjectsPage() {
           ScholarBridge
         </div>
         <div className="flex gap-2.5">
-          <button className="nav-btn text-[#1A1A1A]" onClick={() => window.location.href = '/mentor'}>Dashboard</button>
-          <button className="nav-btn active text-[#1A1A1A]">Projects</button>
-          <button className="nav-btn text-[#1A1A1A]" onClick={handleLogout}>Logout</button>
+          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => window.location.href = '/mentor'}>Dashboard</button>
+          <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease">Projects</button>
+          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={handleLogout}>Logout</button>
         </div>
       </nav>
 
@@ -132,7 +132,7 @@ export default function MentorProjectsPage() {
             <p className="text-[#1A1A1A] mt-2">管理您发布的研究项目</p>
           </div>
           <Link href="/mentor/projects/new">
-            <button className="bg-[#2C5F7C] text-white px-6 py-3 rounded-lg hover:bg-[#1a4a5f] transition-colors font-medium">
+            <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] px-6 py-3 rounded-lg hover:bg-[#1a4a5f] hover:border-[#1a4a5f] transition-colors font-medium">
               + 新建项目
             </button>
           </Link>
@@ -149,7 +149,7 @@ export default function MentorProjectsPage() {
             <p className="text-[#1A1A1A] text-lg font-medium mb-2">还没有项目</p>
             <p className="text-[#1A1A1A] mb-6">创建您的第一个研究项目吧</p>
             <Link href="/mentor/projects/new">
-              <button className="bg-[#2C5F7C] text-white px-6 py-3 rounded-lg hover:bg-[#1a4a5f] transition-colors font-medium">
+              <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] px-6 py-3 rounded-lg hover:bg-[#1a4a5f] hover:border-[#1a4a5f] transition-colors font-medium">
                 + 新建项目
               </button>
             </Link>
@@ -185,19 +185,19 @@ export default function MentorProjectsPage() {
                   </div>
                   <div className="flex items-center gap-2 ml-4">
                     <Link href={`/mentor/projects/${project.id}`}>
-                      <button className="px-4 py-2 border border-[#E0D8CC] rounded-lg hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all text-sm text-[#1A1A1A]">
+                      <button className="px-4 py-2 border border-[#E0D8CC] rounded-lg bg-white hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all text-sm text-[#1A1A1A]">
                         编辑
                       </button>
                     </Link>
                     <button
                       onClick={() => handleToggleStatus(project)}
-                      className="px-4 py-2 border border-[#E0D8CC] rounded-lg hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all text-sm text-[#1A1A1A]"
+                      className="px-4 py-2 border border-[#E0D8CC] rounded-lg bg-white hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all text-sm text-[#1A1A1A]"
                     >
                       {project.status === 'OPEN' ? '关闭' : '开启'}
                     </button>
                     <button
                       onClick={() => handleDelete(project.id)}
-                      className="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:border-red-400 hover:bg-red-50 transition-all text-sm"
+                      className="px-4 py-2 border border-red-200 bg-white text-red-700 rounded-lg hover:border-red-400 hover:bg-red-50 transition-all text-sm"
                     >
                       删除
                     </button>
@@ -212,12 +212,6 @@ export default function MentorProjectsPage() {
       <style jsx>{`
         .font-display {
           font-family: 'Cormorant Garamond', serif;
-        }
-        .nav-btn {
-          @apply bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C];
-        }
-        .nav-btn.active {
-          @apply bg-[#2C5F7C] text-white border-[#2C5F7C];
         }
       `}</style>
     </div>

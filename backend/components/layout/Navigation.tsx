@@ -14,7 +14,7 @@ interface NavLinkProps {
 }
 
 function NavLink({ href, children, active = false, primary = false }: NavLinkProps) {
-  const baseStyles = 'nav-btn bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease font-family-body hover:border-[#2C5F7C] hover:text-[#2C5F7C] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]';
+  const baseStyles = 'bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease font-family-body hover:border-[#2C5F7C] hover:text-[#2C5F7C] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]';
 
   const activeStyles = active ? 'bg-[#2C5F7C] text-white border-[#2C5F7C]' : '';
   const primaryStyles = primary ? 'bg-[#2C5F7C] text-white border-[#2C5F7C] font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.1)]' : '';
@@ -40,7 +40,7 @@ export function Navigation({ user }: NavigationProps) {
     <nav className="flex items-center justify-between py-5 px-10 border-b border-[#E0D8CC] bg-[rgba(250,248,245,0.95)] backdrop-blur-[10px] sticky top-0 z-[100]">
       <Link href="/" className="font-display text-[22px] font-semibold text-[#1A1A1A] tracking-[-0.02em] cursor-pointer relative">
         ScholarBridge
-        <span className="text-[#6B6B6B] text-xs font-family-body ml-2.5 opacity-50 font-normal">/ AI-Powered Research Matching</span>
+        <span className="text-[#6B6B6B] text-xs font-family-body ml-2.5 font-normal">/ AI-Powered Research Matching</span>
       </Link>
 
       <div className="flex gap-2.5">

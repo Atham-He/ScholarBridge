@@ -131,9 +131,9 @@ export default function MentorDashboardPage() {
           ScholarBridge
         </div>
         <div className="flex gap-2.5">
-          <button className="nav-btn active text-[#1A1A1A]">Dashboard</button>
-          <button className="nav-btn text-[#1A1A1A]" onClick={() => window.location.href = '/mentor/projects'}>Projects</button>
-          <button className="nav-btn text-[#1A1A1A]" onClick={handleLogout}>Logout</button>
+          <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease">Dashboard</button>
+          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => window.location.href = '/mentor/projects'}>Projects</button>
+          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={handleLogout}>Logout</button>
         </div>
       </nav>
 
@@ -299,14 +299,14 @@ export default function MentorDashboardPage() {
               <h3 className="text-[18px] font-semibold text-[#1A1A1A] mb-4">快捷操作</h3>
               <div className="space-y-3">
                 <button
-                  className="w-full text-left px-4 py-3 border border-[#E0D8CC] rounded-lg hover:border-[#2C5F7C] hover:bg-[rgba(44,95,124,0.04)] transition-all"
+                  className="w-full text-left px-4 py-3 border border-[#E0D8CC] rounded-lg bg-white text-[#1A1A1A] hover:border-[#2C5F7C] hover:bg-[rgba(44,95,124,0.04)] transition-all"
                   onClick={() => window.location.href = '/mentor/projects/new'}
                 >
                   <div className="font-medium text-[#1A1A1A]">+ 新建项目</div>
                   <div className="text-sm text-[#1A1A1A]">发布新的研究项目</div>
                 </button>
                 <button
-                  className="w-full text-left px-4 py-3 border border-[#E0D8CC] rounded-lg hover:border-[#2C5F7C] hover:bg-[rgba(44,95,124,0.04)] transition-all"
+                  className="w-full text-left px-4 py-3 border border-[#E0D8CC] rounded-lg bg-white text-[#1A1A1A] hover:border-[#2C5F7C] hover:bg-[rgba(44,95,124,0.04)] transition-all"
                   onClick={() => window.location.href = '/browse'}
                 >
                   <div className="font-medium text-[#1A1A1A]">浏览导师</div>
@@ -321,12 +321,6 @@ export default function MentorDashboardPage() {
       <style jsx>{`
         .font-display {
           font-family: 'Cormorant Garamond', serif;
-        }
-        .nav-btn {
-          @apply bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C];
-        }
-        .nav-btn.active {
-          @apply bg-[#2C5F7C] text-white border-[#2C5F7C];
         }
       `}</style>
     </div>

@@ -26,7 +26,7 @@ export function WithdrawButton({ applicationId }: { applicationId: string }) {
       type="button"
       onClick={() => void withdraw()}
       disabled={loading}
-      className="px-4 py-2 border border-[#E0D8CC] rounded-lg hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all text-sm text-[#1A1A1A] disabled:opacity-50"
+      className="px-4 py-2 border border-[#E0D8CC] rounded-lg bg-white hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all text-sm text-[#1A1A1A] disabled:cursor-not-allowed disabled:bg-[#F5F2ED] disabled:text-[#6B6B6B]"
     >
       {loading ? "处理中..." : "撤回申请"}
     </button>

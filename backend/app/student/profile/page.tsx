@@ -16,15 +16,18 @@ interface StudentProfile {
   skills?: string[];
 }
 
-interface SavedMentor {
+interface SavedProject {
   id: string;
-  slug: string;
-  title: string;
-  mentor: {
-    displayName: string;
-    institution: string;
+  project: {
+    id: string;
+    title: string;
+    researchArea: string;
+    availableSeats: number;
+    mentor: {
+      displayName: string;
+      institution: string;
+    };
   };
-  tags: string[];
 }
 
 export default function StudentProfilePage() {
@@ -38,7 +41,7 @@ export default function StudentProfilePage() {
     education: '',
     skills: [],
   });
-  const [savedMentors, setSavedMentors] = useState<SavedMentor[]>([]);
+  const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -57,11 +60,11 @@ export default function StudentProfilePage() {
         return;
       }
 
-      // 获取收藏的导师
-      const savedRes = await fetch('/api/student/saved');
+      // 获取收藏的项目
+      const savedRes = await fetch('/api/student/saved-projects');
       if (savedRes.ok) {
         const data = await savedRes.json();
-        setSavedMentors(data.mentors || []);
+        setSavedProjects(data.projects || []);
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -123,7 +126,7 @@ export default function StudentProfilePage() {
           ScholarBridge
         </div>
         <div className="flex gap-2.5">
-          <button className="nav-btn text-[#1A1A1A]" onClick={() => router.push('/browse')}>Browse</button>
+          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => router.push('/browse')}>Browse</button>
           <Button variant="gold" size="sm" onClick={handleLogout}>Sign Out</Button>
         </div>
       </nav>
@@ -213,37 +216,40 @@ export default function StudentProfilePage() {
             </div>
           </div>
 
-          {/* 右侧：收藏的导师 */}
+          {/* 右侧：收藏夹 */}
           <div>
             <div className="bg-white border border-[#E0D8CC] rounded-[10px] p-6">
-              <h3 className="text-[18px] font-semibold text-[#1A1A1A] mb-4">收藏的导师</h3>
+              <h3 className="text-[18px] font-semibold text-[#1A1A1A] mb-4">收藏夹</h3>
 
-              {savedMentors.length === 0 ? (
+              {savedProjects.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-[#1A1A1A] text-sm mb-4">还没有收藏任何导师</p>
+                  <p className="text-[#1A1A1A] text-sm mb-4">还没有收藏任何项目</p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => router.push('/browse')}
                   >
-                    去浏览导师
+                    去浏览项目
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {savedMentors.map((mentor) => (
+                  {savedProjects.map((saved) => (
                     <div
-                      key={mentor.id}
+                      key={saved.id}
                       className="border border-[#E0D8CC] rounded-lg p-3"
                     >
-                      <h4 className="text-[14px] font-semibold text-[#1A1A1A] mb-1">{mentor.title}</h4>
-                      <p className="text-[12px] text-[#1A1A1A] mb-2">{mentor.mentor.institution}</p>
-                      <div className="flex flex-wrap gap-1">
-                        {mentor.tags.slice(0, 3).map(tag => (
-                          <span key={tag} className="bg-[#F5F2ED] text-[#1A1A1A] text-[10px] px-2 py-1 rounded">
-                            {tag}
-                          </span>
-                        ))}
+                      <h4 className="text-[14px] font-semibold text-[#1A1A1A] mb-1">{saved.project.title}</h4>
+                      <p className="text-[12px] text-[#1A1A1A] mb-2">
+                        {saved.project.mentor.displayName} · {saved.project.mentor.institution}
+                      </p>
+                      <div className="flex flex-wrap gap-2 text-[10px]">
+                        <span className="bg-[#F5F2ED] text-[#1A1A1A] px-2 py-1 rounded">
+                          {saved.project.researchArea}
+                        </span>
+                        <span className="bg-[#F5F2ED] text-[#1A1A1A] px-2 py-1 rounded">
+                          {saved.project.availableSeats} seats
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -257,12 +263,6 @@ export default function StudentProfilePage() {
       <style jsx>{`
         .font-display {
           font-family: 'Cormorant Garamond', serif;
-        }
-        .nav-btn {
-          @apply bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C];
-        }
-        .nav-btn.active {
-          @apply bg-[#2C5F7C] text-white border-[#2C5F7C];
         }
       `}</style>
     </div>

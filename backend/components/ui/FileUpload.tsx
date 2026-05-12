@@ -170,7 +170,7 @@ export function FileUpload({
           isDragging
             ? 'border-[#2C5F7C] bg-[rgba(44,95,124,0.05)]'
             : 'border-[#E0D8CC] bg-white'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        } ${disabled ? 'bg-[#F5F2ED] text-[#6B6B6B] cursor-not-allowed' : 'cursor-pointer'}`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -233,7 +233,7 @@ export function FileUpload({
                     e.stopPropagation();
                     removeFile(file.id);
                   }}
-                  className="text-[#6B6B6B] hover:text-red-600 transition-colors p-1"
+                  className="rounded border border-[#E0D8CC] bg-white px-2 py-1 text-[#1A1A1A] hover:border-red-300 hover:bg-red-50 hover:text-red-700 transition-colors"
                   title="Remove file"
                 >
                   ✕

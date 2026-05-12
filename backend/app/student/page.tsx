@@ -85,7 +85,7 @@ export default function StudentDashboardPage() {
           ScholarBridge
         </div>
         <div className="flex gap-2.5">
-          <button className="nav-btn text-[#1A1A1A]" onClick={() => router.push('/browse')}>Browse</button>
+          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => router.push('/browse')}>Browse</button>
           <Button variant="gold" size="sm" onClick={handleLogout}>Sign Out</Button>
         </div>
       </nav>
@@ -111,7 +111,7 @@ export default function StudentDashboardPage() {
             <p className="text-[#1A1A1A] text-lg font-medium mb-2">还没有申请任何项目</p>
             <p className="text-[#1A1A1A] mb-6">去浏览导师，找到你感兴趣的研究机会</p>
             <Link href="/browse">
-              <button className="bg-[#2C5F7C] text-white px-6 py-3 rounded-lg hover:bg-[#1a4a5f] transition-colors font-medium">
+              <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] px-6 py-3 rounded-lg hover:bg-[#1a4a5f] hover:border-[#1a4a5f] transition-colors font-medium">
                 浏览导师
               </button>
             </Link>
@@ -167,12 +167,6 @@ export default function StudentDashboardPage() {
       <style jsx>{`
         .font-display {
           font-family: 'Cormorant Garamond', serif;
-        }
-        .nav-btn {
-          @apply bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C];
-        }
-        .nav-btn.active {
-          @apply bg-[#2C5F7C] text-white border-[#2C5F7C];
         }
       `}</style>
     </div>

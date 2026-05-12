@@ -73,6 +73,22 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
+      if (existing.status === "WITHDRAWN") {
+        const application = await db.application.update({
+          where: { id: existing.id },
+          data: {
+            status: "pending",
+            coverLetter,
+          },
+          include: {
+            project: true,
+            mentor: { include: { mentorProfile: true } },
+          },
+        });
+
+        return NextResponse.json({ application }, { status: 200 });
+      }
+
       return NextResponse.json({ error: "Already applied" }, { status: 409 });
     }
 

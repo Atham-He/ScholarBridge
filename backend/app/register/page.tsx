@@ -4,9 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EmailVerificationForm } from "@/app/components/email-verification-form";
+import { Button } from "@/components/ui/Button";
 
 type Role = "MENTOR" | "STUDENT";
 type Step = "email" | "verify";
+type RegisteredUser = {
+  id: string;
+  email: string;
+  role: Role;
+};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,6 +21,13 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const roleButtonClassName = (active: boolean) =>
+    [
+      "flex-1 rounded border px-4 py-3 text-center text-[13px] font-semibold transition-all duration-200 ease",
+      active
+        ? "border-[#2C5F7C] bg-[#EBF3F8] text-[#1A1A1A]"
+        : "border-[#E0D8CC] bg-white text-[#1A1A1A] hover:border-[#2C5F7C] hover:text-[#2C5F7C]"
+    ].join(" ");
 
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
@@ -37,15 +50,14 @@ export default function RegisterPage() {
       }
 
       setStep("verify");
-    } catch (err) {
+    } catch {
       setError("网络错误，请重试");
     } finally {
       setLoading(false);
     }
   }
 
-  function handleVerificationSuccess(user: any) {
-    // Redirect based on role
+  function handleVerificationSuccess(user: RegisteredUser) {
     if (user.role === "MENTOR") {
       router.push("/mentor");
     } else {
@@ -54,82 +66,80 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
-            注册 ScholarBridge
-          </h2>
-          <p className="mt-2 text-center text-sm text-slate-900">
-            {step === "email" && "选择您的角色并输入邮箱开始注册"}
-            {step === "verify" && "请输入验证码完成注册"}
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#FAF8F5]">
+      <nav className="flex items-center justify-between border-b border-[#E0D8CC] bg-[rgba(250,248,245,0.95)] px-10 py-5 backdrop-blur-[10px]">
+        <Link href="/" className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#1A1A1A]">
+          ScholarBridge
+        </Link>
+        <Link href="/browse">
+          <Button variant="outline" size="sm">Browse</Button>
+        </Link>
+      </nav>
 
-        <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <main className="mx-auto flex min-h-[calc(100vh-81px)] max-w-6xl items-center justify-center px-6 py-12">
+        <section className="w-full max-w-[460px] rounded-[10px] border border-[#E0D8CC] bg-white p-8 shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
+          <div className="mb-7">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#2C5F7C]">Create account</p>
+            <h1 className="font-display text-[34px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1A1A]">
+              注册 ScholarBridge
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-[#1A1A1A]">
+              {step === "email" && "选择身份并输入邮箱，开始发现或发布研究机会。"}
+              {step === "verify" && "输入验证码并设置账号信息，完成注册。"}
+            </p>
+          </div>
+
           {step === "email" && (
-            <form onSubmit={handleSendCode} className="space-y-4">
+            <form onSubmit={handleSendCode} className="space-y-5">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
                   我要注册为
                 </label>
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={() => setRole("STUDENT")}
-                    className={`flex-1 py-3 px-4 border rounded-lg text-center ${
-                      role === "STUDENT"
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-slate-300 text-slate-700"
-                    }`}
+                    className={roleButtonClassName(role === "STUDENT")}
                   >
-                    👤 学生
+                    学生
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole("MENTOR")}
-                    className={`flex-1 py-3 px-4 border rounded-lg text-center ${
-                      role === "MENTOR"
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-slate-300 text-slate-700"
-                    }`}
+                    className={roleButtonClassName(role === "MENTOR")}
                   >
-                    👨‍🏫 导师
+                    导师
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
                   邮箱地址
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
                   placeholder="your@email.com"
                   required
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-400"
-              >
+              <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "发送中..." : "发送验证码"}
-              </button>
+              </Button>
 
-              <p className="text-center text-sm text-slate-900">
+              <p className="text-center text-sm text-[#1A1A1A]">
                 已有账号？{" "}
-                <Link href="/login" className="text-blue-600 hover:text-blue-500">
+                <Link href="/login" className="font-semibold text-[#2C5F7C] hover:underline">
                   立即登录
                 </Link>
               </p>
@@ -144,8 +154,14 @@ export default function RegisterPage() {
               onBack={() => setStep("email")}
             />
           )}
-        </div>
-      </div>
+        </section>
+      </main>
+
+      <style jsx>{`
+        .font-display {
+          font-family: 'Cormorant Garamond', serif;
+        }
+      `}</style>
     </div>
   );
 }
