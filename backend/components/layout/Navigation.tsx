@@ -29,7 +29,6 @@ function NavLink({ href, children, active = false, primary = false }: NavLinkPro
 interface NavigationProps {
   user?: {
     email: string;
-    role: 'MENTOR' | 'STUDENT';
   } | null;
 }
 
@@ -46,25 +45,18 @@ export function Navigation({ user }: NavigationProps) {
       <div className="flex gap-2.5">
         {user ? (
           <>
-            {user.role === 'STUDENT' && (
-              <>
-                <NavLink href="/browse" active={pathname === '/browse'}>Discover</NavLink>
-                <NavLink href="/applications" active={pathname === '/applications'}>My Applications</NavLink>
-              </>
-            )}
-            {user.role === 'MENTOR' && (
-              <>
-                <NavLink href="/mentor/dashboard" active={pathname === '/mentor/dashboard'}>Dashboard</NavLink>
-                <NavLink href="/browse" active={pathname === '/browse'}>Preview Public View</NavLink>
-              </>
-            )}
+            <NavLink href="/" active={pathname === '/'}>Home</NavLink>
+            <NavLink href="/browse" active={pathname === '/browse'}>Browse</NavLink>
+            <NavLink href="/profile" active={pathname === '/profile'}>Profile</NavLink>
             <Button variant="outline" size="sm" onClick={() => window.location.href = '/api/auth/logout'}>
               Sign Out
             </Button>
           </>
         ) : (
           <>
-            <NavLink href="/browse">Browse Mentors</NavLink>
+            <NavLink href="/" active={pathname === '/'}>Home</NavLink>
+            <NavLink href="/browse">Browse</NavLink>
+            <NavLink href="/profile">Profile</NavLink>
             <Button variant="gold" size="sm" onClick={() => window.location.href = '/login'}>
               Sign In
             </Button>

@@ -1,1 +1,0 @@
-ALTER TABLE "Persona" ADD COLUMN "privateSourceCount" INTEGER NOT NULL DEFAULT 0;

@@ -18,29 +18,32 @@ describe("POST /api/auth/login", () => {
     await db.user.deleteMany({
       where: {
         email: {
-          in: ["mentor-login-test@example.com", "dual-login-test@example.com"],
+          in: ["login-test@example.com", "missing-password-login@example.com"],
         },
       },
     });
   });
 
-  it("允许导师账号按导师身份正常登录", async () => {
+  it("allows a unified account to log in", async () => {
     const passwordHash = await bcrypt.hash("password123", 10);
 
     await db.user.create({
       data: {
-        email: "mentor-login-test@example.com",
+        email: "login-test@example.com",
         passwordHash,
-        role: "MENTOR",
+        profile: {
+          create: {
+            displayName: "Login Test",
+          },
+        },
       },
     });
 
     const request = new Request("http://localhost:3000/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
-        email: "mentor-login-test@example.com",
+        email: "login-test@example.com",
         password: "password123",
-        role: "MENTOR",
       }),
     });
 
@@ -49,27 +52,25 @@ describe("POST /api/auth/login", () => {
 
     expect(response.status).toBe(200);
     expect(data.ok).toBe(true);
-    expect(data.user.email).toBe("mentor-login-test@example.com");
-    expect(data.user.role).toBe("MENTOR");
+    expect(data.user.email).toBe("login-test@example.com");
+    expect(data.user.role).toBeUndefined();
   });
 
-  it("同邮箱仅有一个角色账号时，选错身份会登录失败", async () => {
+  it("rejects wrong passwords", async () => {
     const passwordHash = await bcrypt.hash("password123", 10);
 
     await db.user.create({
       data: {
-        email: "dual-login-test@example.com",
+        email: "login-test@example.com",
         passwordHash,
-        role: "MENTOR",
       },
     });
 
     const request = new Request("http://localhost:3000/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
-        email: "dual-login-test@example.com",
-        password: "password123",
-        role: "STUDENT",
+        email: "login-test@example.com",
+        password: "wrong",
       }),
     });
 
@@ -80,110 +81,44 @@ describe("POST /api/auth/login", () => {
     expect(data.error).toBe("邮箱或密码错误");
   });
 
-  it("未传 role 时直接返回 400", async () => {
+  it("does not require role in the request body", async () => {
     const passwordHash = await bcrypt.hash("password123", 10);
 
     await db.user.create({
       data: {
-        email: "dual-login-test@example.com",
+        email: "login-test@example.com",
         passwordHash,
-        role: "STUDENT",
       },
     });
 
     const request = new Request("http://localhost:3000/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
-        email: "dual-login-test@example.com",
+        email: "login-test@example.com",
         password: "password123",
       }),
     });
 
     const response = await POST(request as any);
-    const data = await response.json();
-
-    expect(response.status).toBe(400);
-    expect(data.error).toBe("邮箱或密码无效");
-  });
-
-  it("允许小写 role 登录", async () => {
-    const passwordHash = await bcrypt.hash("password123", 10);
-
-    await db.user.create({
-      data: {
-        email: "mentor-login-test@example.com",
-        passwordHash,
-        role: "MENTOR",
-      },
-    });
-
-    const request = new Request("http://localhost:3000/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({
-        email: "mentor-login-test@example.com",
-        password: "password123",
-        role: "mentor",
-      }),
-    });
-
-    const response = await POST(request as any);
-    const data = await response.json();
-
     expect(response.status).toBe(200);
-    expect(data.ok).toBe(true);
-    expect(data.user.role).toBe("MENTOR");
   });
 
-  it("同邮箱双角色时，不同 role 登录不同账号", async () => {
-    const mentorPasswordHash = await bcrypt.hash("mentor123", 10);
-    const studentPasswordHash = await bcrypt.hash("student123", 10);
-
-    const student = await db.user.create({
+  it("rejects accounts without passwords", async () => {
+    await db.user.create({
       data: {
-        email: "dual-login-test@example.com",
-        passwordHash: studentPasswordHash,
-        role: "STUDENT",
+        email: "missing-password-login@example.com",
       },
     });
 
-    const mentor = await db.user.create({
-      data: {
-        email: "dual-login-test@example.com",
-        passwordHash: mentorPasswordHash,
-        role: "MENTOR",
-      },
-    });
-
-    const studentRequest = new Request("http://localhost:3000/api/auth/login", {
+    const request = new Request("http://localhost:3000/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
-        email: "dual-login-test@example.com",
-        password: "student123",
-        role: "STUDENT",
+        email: "missing-password-login@example.com",
+        password: "password123",
       }),
     });
 
-    const studentResponse = await POST(studentRequest as any);
-    const studentData = await studentResponse.json();
-
-    expect(studentResponse.status).toBe(200);
-    expect(studentData.user.id).toBe(student.id);
-    expect(studentData.user.role).toBe("STUDENT");
-
-    const mentorRequest = new Request("http://localhost:3000/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({
-        email: "dual-login-test@example.com",
-        password: "mentor123",
-        role: "MENTOR",
-      }),
-    });
-
-    const mentorResponse = await POST(mentorRequest as any);
-    const mentorData = await mentorResponse.json();
-
-    expect(mentorResponse.status).toBe(200);
-    expect(mentorData.user.id).toBe(mentor.id);
-    expect(mentorData.user.role).toBe("MENTOR");
+    const response = await POST(request as any);
+    expect(response.status).toBe(401);
   });
 });

@@ -41,8 +41,8 @@ export async function scoreApplicationResume(applicationId: string) {
     where: { id: applicationId },
     include: {
       project: true,
-      mentor: { include: { mentorProfile: true } },
-      student: { include: { studentProfile: true } },
+      owner: { include: { profile: true } },
+      applicant: { include: { profile: true } },
     },
   });
 
@@ -50,12 +50,12 @@ export async function scoreApplicationResume(applicationId: string) {
     return null;
   }
 
-  const mentorProfile = application.mentor.mentorProfile;
-  if (!mentorProfile?.aiAgentEnabled) {
+  const profile = application.owner.profile;
+  if (!profile?.aiAgentEnabled) {
     return null;
   }
 
-  const resumeText = application.student.studentProfile?.resumeText || "";
+  const resumeText = application.applicant.profile?.resumeText || "";
   if (!resumeText.trim()) {
     await db.application.update({
       where: { id: applicationId },
@@ -63,7 +63,7 @@ export async function scoreApplicationResume(applicationId: string) {
         aiHardScore: null,
         aiFitScore: null,
         aiScoreSummary: null,
-        aiScoreError: "学生尚未上传可解析的 PDF 简历",
+        aiScoreError: "申请者尚未上传可解析的 PDF 简历",
         aiScoredAt: new Date(),
       },
     });
@@ -78,7 +78,7 @@ export async function scoreApplicationResume(applicationId: string) {
       projectDescription: application.project.description,
       projectResearchArea: application.project.researchArea,
       projectRequirements: application.project.requirements || "",
-      mentorAgentPrompt: mentorProfile.aiAgentPrompt || "",
+      ownerAgentPrompt: profile.aiAgentPrompt || "",
     });
 
     const updated = await db.application.update({
@@ -113,7 +113,7 @@ async function scoreWithAiOrFallback(params: {
   projectDescription: string;
   projectResearchArea: string;
   projectRequirements: string;
-  mentorAgentPrompt: string;
+  ownerAgentPrompt: string;
 }): Promise<ScoreResult> {
   if (!process.env.OPENAI_API_KEY) {
     return heuristicScore(params);
@@ -141,13 +141,13 @@ async function scoreWithAiOrFallback(params: {
       {
         role: "user",
         content: [
-          params.mentorAgentPrompt ? `导师自定义筛选偏好：\n${params.mentorAgentPrompt}` : "",
+          params.ownerAgentPrompt ? `发布者自定义筛选偏好：\n${params.ownerAgentPrompt}` : "",
           `项目标题：${params.projectTitle}`,
           `研究方向：${params.projectResearchArea}`,
           `项目描述：${params.projectDescription}`,
           `项目要求：${params.projectRequirements || "未列出"}`,
           `申请说明：${params.coverLetter || "未填写"}`,
-          `学生 PDF 简历文本：\n${truncate(params.resumeText, 12000)}`,
+          `申请者 PDF 简历文本：\n${truncate(params.resumeText, 12000)}`,
         ].filter(Boolean).join("\n\n"),
       },
     ],
@@ -170,7 +170,7 @@ function heuristicScore(params: {
   projectDescription: string;
   projectResearchArea: string;
   projectRequirements: string;
-  mentorAgentPrompt: string;
+  ownerAgentPrompt: string;
 }): ScoreResult {
   const resume = params.resumeText.toLowerCase();
   const projectText = [

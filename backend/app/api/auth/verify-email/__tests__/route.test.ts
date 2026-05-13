@@ -32,7 +32,6 @@ describe('POST /api/auth/verify-email', () => {
     await db.emailVerification.create({
       data: {
         email: 'verify-test@example.com',
-        role: 'STUDENT',
         code: codeHash,
         expiresAt: new Date(Date.now() + 15 * 60 * 1000)
       }
@@ -43,7 +42,6 @@ describe('POST /api/auth/verify-email', () => {
       body: JSON.stringify({
         email: 'verify-test@example.com',
         code: '123456',
-        role: 'STUDENT',
         password: 'password123',
         displayName: 'Test User'
       })
@@ -63,7 +61,6 @@ describe('POST /api/auth/verify-email', () => {
       body: JSON.stringify({
         email: 'verify-test@example.com',
         code: '000000',
-        role: 'STUDENT',
         password: 'password123',
         displayName: 'Test User'
       })
@@ -83,7 +80,6 @@ describe('POST /api/auth/verify-email', () => {
     await db.emailVerification.create({
       data: {
         email: 'verify-test@example.com',
-        role: 'STUDENT',
         code: codeHash,
         expiresAt: new Date(Date.now() + 15 * 60 * 1000)
       }
@@ -94,7 +90,6 @@ describe('POST /api/auth/verify-email', () => {
       body: JSON.stringify({
         email: 'verify-test@example.com',
         code: '000000', // Wrong code
-        role: 'STUDENT',
         password: 'password123',
         displayName: 'Test User'
       })
@@ -112,7 +107,6 @@ describe('POST /api/auth/verify-email', () => {
     await db.emailVerification.create({
       data: {
         email: 'verify-test@example.com',
-        role: 'STUDENT',
         code: codeHash,
         expiresAt: new Date(Date.now() - 1000) // Expired
       }
@@ -123,7 +117,6 @@ describe('POST /api/auth/verify-email', () => {
       body: JSON.stringify({
         email: 'verify-test@example.com',
         code: '123456',
-        role: 'STUDENT',
         password: 'password123',
         displayName: 'Test User'
       })

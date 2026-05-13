@@ -4,24 +4,65 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 开始初始化数据库...\n");
+  console.log("Seeding unified ScholarBridge demo data...");
 
-  const password = await bcrypt.hash("demo123", 10);
+  const passwordHash = await bcrypt.hash("demo123", 10);
 
-  // 创建测试导师
-  const mentor = await prisma.user.upsert({
-    where: {
-      email_role: {
-        email: "mentor@demo.local",
-        role: "MENTOR",
+  await prisma.application.deleteMany();
+  await prisma.savedProject.deleteMany();
+  await prisma.project.deleteMany();
+  await prisma.profile.deleteMany();
+  await prisma.user.deleteMany();
+
+  const alex = await prisma.user.create({
+    data: {
+      email: "alex@demo.local",
+      passwordHash,
+      emailVerified: true,
+      profile: {
+        create: {
+          displayName: "Alex Wang",
+          institution: "UC Berkeley",
+          education: "B.S. Computer Science",
+          bioShort: "Interested in NLP and trustworthy AI research.",
+          backgroundBrief: "Undergraduate researcher with Python, PyTorch, and NLP project experience.",
+          interests: ["NLP", "AI Safety"],
+          skills: ["Python", "PyTorch", "Transformers"],
+        },
       },
     },
-    create: {
-      email: "mentor@demo.local",
-      passwordHash: password,
-      role: "MENTOR",
+  });
+
+  const priya = await prisma.user.create({
+    data: {
+      email: "priya@demo.local",
+      passwordHash,
       emailVerified: true,
-      mentorProfile: {
+      profile: {
+        create: {
+          displayName: "Priya Shah",
+          institution: "Stanford University",
+          department: "Computer Science",
+          title: "PhD Candidate",
+          education: "PhD Computer Science",
+          bioShort: "PhD candidate publishing projects while applying to collaborations.",
+          researchAreas: ["Human-AI Interaction", "NLP"],
+          interests: ["Human-AI Interaction", "NLP", "Evaluation"],
+          skills: ["Python", "User Studies", "LLM Evaluation"],
+          aiAgentEnabled: true,
+          aiHardWeight: 45,
+          aiFitWeight: 55,
+        },
+      },
+    },
+  });
+
+  const chen = await prisma.user.create({
+    data: {
+      email: "chen@demo.local",
+      passwordHash,
+      emailVerified: true,
+      profile: {
         create: {
           displayName: "Prof. Jane Chen",
           institution: "MIT",
@@ -30,85 +71,104 @@ async function main() {
           bioShort: "AI researcher focusing on reinforcement learning and robotics.",
           location: "Cambridge, MA",
           researchAreas: ["Reinforcement Learning", "Robotics", "Multi-agent Systems"],
+          aiAgentEnabled: true,
+          aiHardWeight: 60,
+          aiFitWeight: 40,
         },
       },
     },
-    update: {},
-    include: { mentorProfile: true },
   });
 
-  // 创建测试项目
-  const existingProject = await prisma.project.count({
-    where: { mentorUserId: mentor.id },
-  });
-
-  if (existingProject === 0) {
-    await prisma.project.create({
-      data: {
-        mentorUserId: mentor.id,
-        title: "PhD — AI Safety Research",
-        description: "Research on safe reinforcement learning for autonomous systems. Focus on theoretical foundations and practical applications.",
-        researchArea: "Artificial Intelligence",
-        startTime: "2025-09",
-        endTime: "2028-09",
-        location: "On-site",
-        requirements: "Strong math background, Python, PyTorch experience",
-        capacity: 3,
-        enrolled: 0,
-        status: "OPEN",
-      },
-    });
-
-    await prisma.project.create({
-      data: {
-        mentorUserId: mentor.id,
-        title: "Research Intern — Multi-Agent Systems",
-        description: "Summer internship on multi-agent coordination and communication.",
-        researchArea: "Reinforcement Learning",
-        startTime: "2025-06",
-        endTime: "2025-09",
-        location: "Remote",
-        requirements: "Python, machine learning basics",
-        capacity: 2,
-        enrolled: 1,
-        status: "OPEN",
-      },
-    });
-  }
-
-  // 创建测试学生
-  await prisma.user.upsert({
-    where: {
-      email_role: {
-        email: "student@demo.local",
-        role: "STUDENT",
-      },
+  const safetyProject = await prisma.project.create({
+    data: {
+      ownerUserId: chen.id,
+      title: "AI Safety for Autonomous Systems",
+      description: "Research on safe reinforcement learning for autonomous systems, combining theoretical foundations and practical robotics experiments.",
+      researchArea: "Artificial Intelligence",
+      startTime: "2026-09",
+      endTime: "2028-09",
+      location: "On-site",
+      requirements: "Strong math background, Python, PyTorch, and reinforcement learning experience.",
+      capacity: 3,
+      status: "OPEN",
     },
-    create: {
-      email: "student@demo.local",
-      passwordHash: password,
-      role: "STUDENT",
-      emailVerified: true,
-      studentProfile: {
-        create: {
-          displayName: "Alex Student",
-          backgroundBrief: "Undergraduate in CS, interested in AI research.",
-        },
-      },
-    },
-    update: {},
   });
 
-  console.log("  ✅ 数据库初始化完成！\n");
-  console.log("📝 测试账号:");
-  console.log("  Mentor:  mentor@demo.local / demo123");
-  console.log("  Student: student@demo.local / demo123");
+  const nlpProject = await prisma.project.create({
+    data: {
+      ownerUserId: priya.id,
+      title: "LLM Evaluation for Research Assistants",
+      description: "Build evaluation methods for AI research assistants that help students discover and compare research opportunities.",
+      researchArea: "NLP",
+      startTime: "2026-06",
+      endTime: "2026-12",
+      location: "Remote",
+      requirements: "Experience with LLM APIs, evaluation design, or human-centered research.",
+      capacity: 2,
+      status: "OPEN",
+    },
+  });
+
+  await prisma.savedProject.create({
+    data: {
+      userId: alex.id,
+      projectId: safetyProject.id,
+    },
+  });
+
+  await prisma.application.create({
+    data: {
+      applicantUserId: alex.id,
+      ownerUserId: chen.id,
+      projectId: safetyProject.id,
+      coverLetter: "I have worked on PyTorch-based RL experiments and would like to contribute to safety evaluation.",
+      status: "pending",
+      aiHardScore: 78,
+      aiFitScore: 84,
+      aiScoreSummary: "硬实力较强，RL 项目经历与课题方向匹配度高。",
+      aiScoredAt: new Date(),
+    },
+  });
+
+  await prisma.application.create({
+    data: {
+      applicantUserId: priya.id,
+      ownerUserId: chen.id,
+      projectId: safetyProject.id,
+      coverLetter: "My HAI background may help with evaluating safety behavior in user-facing systems.",
+      status: "rejected",
+      ownerFeedback: "Your profile is strong, but this project currently needs deeper RL systems experience.",
+      aiHardScore: 86,
+      aiFitScore: 58,
+      aiScoreSummary: "硬实力突出，但与强化学习实验方向匹配度一般。",
+      aiScoredAt: new Date(),
+    },
+  });
+
+  await prisma.application.create({
+    data: {
+      applicantUserId: alex.id,
+      ownerUserId: priya.id,
+      projectId: nlpProject.id,
+      coverLetter: "I am interested in LLM evaluation and have built a small retrieval QA benchmark.",
+      status: "accepted",
+      ownerFeedback: "Good fit. Please prepare a short summary of your benchmark work.",
+      aiHardScore: 74,
+      aiFitScore: 88,
+      aiScoreSummary: "NLP 和评测经历与项目高度相关。",
+      aiScoredAt: new Date(),
+    },
+  });
+
+  console.log("Seed complete.");
+  console.log("Demo users: alex@demo.local, priya@demo.local, chen@demo.local");
+  console.log("Password: demo123");
 }
 
 main()
   .then(() => prisma.$disconnect())
-  .catch((e) => {
-    console.error(e);
+  .catch((error) => {
+    console.error(error);
     prisma.$disconnect();
     process.exit(1);
   });

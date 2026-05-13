@@ -6,28 +6,18 @@ import { useState } from "react";
 import { EmailVerificationForm } from "@/app/components/email-verification-form";
 import { Button } from "@/components/ui/Button";
 
-type Role = "MENTOR" | "STUDENT";
 type Step = "email" | "verify";
 type RegisteredUser = {
   id: string;
   email: string;
-  role: Role;
 };
 
 export default function RegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("email");
-  const [role, setRole] = useState<Role>("STUDENT");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const roleButtonClassName = (active: boolean) =>
-    [
-      "flex-1 rounded border px-4 py-3 text-center text-[13px] font-semibold transition-all duration-200 ease",
-      active
-        ? "border-[#2C5F7C] bg-[#EBF3F8] text-[#1A1A1A]"
-        : "border-[#E0D8CC] bg-white text-[#1A1A1A] hover:border-[#2C5F7C] hover:text-[#2C5F7C]"
-    ].join(" ");
 
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
@@ -38,7 +28,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, role }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await res.json();
@@ -57,12 +47,8 @@ export default function RegisterPage() {
     }
   }
 
-  function handleVerificationSuccess(user: RegisteredUser) {
-    if (user.role === "MENTOR") {
-      router.push("/mentor");
-    } else {
-      router.push("/browse");
-    }
+  function handleVerificationSuccess(_user: RegisteredUser) {
+    router.push("/browse");
   }
 
   return (
@@ -71,9 +57,17 @@ export default function RegisterPage() {
         <Link href="/" className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#1A1A1A]">
           ScholarBridge
         </Link>
-        <Link href="/browse">
-          <Button variant="outline" size="sm">Browse</Button>
-        </Link>
+        <div className="flex gap-2.5">
+          <Link href="/">
+            <Button variant="outline" size="sm">Home</Button>
+          </Link>
+          <Link href="/browse">
+            <Button variant="outline" size="sm">Browse</Button>
+          </Link>
+          <Link href="/profile">
+            <Button variant="outline" size="sm">Profile</Button>
+          </Link>
+        </div>
       </nav>
 
       <main className="mx-auto flex min-h-[calc(100vh-81px)] max-w-6xl items-center justify-center px-6 py-12">
@@ -84,7 +78,7 @@ export default function RegisterPage() {
               注册 ScholarBridge
             </h1>
             <p className="mt-3 text-sm leading-6 text-[#1A1A1A]">
-              {step === "email" && "选择身份并输入邮箱，开始发现或发布研究机会。"}
+              {step === "email" && "输入邮箱，开始发现、申请或发布研究机会。"}
               {step === "verify" && "输入验证码并设置账号信息，完成注册。"}
             </p>
           </div>
@@ -96,28 +90,6 @@ export default function RegisterPage() {
                   {error}
                 </div>
               )}
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-                  我要注册为
-                </label>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setRole("STUDENT")}
-                    className={roleButtonClassName(role === "STUDENT")}
-                  >
-                    学生
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole("MENTOR")}
-                    className={roleButtonClassName(role === "MENTOR")}
-                  >
-                    导师
-                  </button>
-                </div>
-              </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
@@ -149,7 +121,6 @@ export default function RegisterPage() {
           {step === "verify" && (
             <EmailVerificationForm
               email={email}
-              role={role}
               onSuccess={handleVerificationSuccess}
               onBack={() => setStep("email")}
             />

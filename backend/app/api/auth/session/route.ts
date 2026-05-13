@@ -14,8 +14,7 @@ export async function GET() {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role,
-        displayName: user.studentProfile?.displayName || user.mentorProfile?.displayName || user.email,
+        displayName: user.profile?.displayName || user.email,
       },
     });
   } catch (error) {

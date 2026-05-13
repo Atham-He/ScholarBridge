@@ -1,10 +1,8 @@
 import { z } from "zod";
 
-export const registerSchema = z
-  .object({
+export const registerSchema = z.object({
     email: z.string().email("邮箱格式不正确"),
     password: z.string().min(6, "密码至少 6 位"),
-    role: z.enum(["MENTOR", "STUDENT"]),
     displayName: z.string().min(1, "请填写姓名或昵称"),
     institution: z.string().optional(),
     department: z.string().optional(),
@@ -12,48 +10,27 @@ export const registerSchema = z
     bioShort: z.string().optional(),
     location: z.string().optional(),
     backgroundBrief: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.role === "MENTOR") {
-      if (!data.institution?.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          message: "导师需填写院校/机构",
-          path: ["institution"],
-        });
-      }
-    }
-  });
+});
 
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-  role: z
-    .preprocess(
-      (value) =>
-        typeof value === "string" ? value.trim().toUpperCase() : value,
-      z.enum(["MENTOR", "STUDENT"]),
-    ),
 });
 
 export const sendVerificationSchema = z.object({
   email: z.string().email("邮箱格式不正确"),
-  role: z.enum(["MENTOR", "STUDENT"]),
 });
 
 export const verifyEmailSchema = z.object({
   email: z.string().email("邮箱格式不正确"),
   code: z.string().regex(/^\d{6}$/, "验证码必须是6位数字"),
-  role: z.enum(["MENTOR", "STUDENT"]),
   password: z.string().min(6, "密码至少 6 位"),
   displayName: z.string().min(1, "请填写姓名或昵称"),
-  // Optional mentor fields
   institution: z.string().optional(),
   department: z.string().optional(),
   title: z.string().optional(),
   bioShort: z.string().optional(),
   location: z.string().optional(),
-  // Optional student fields
   backgroundBrief: z.string().optional(),
 });
 

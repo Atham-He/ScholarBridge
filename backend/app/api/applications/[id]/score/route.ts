@@ -9,7 +9,7 @@ export async function POST(_request: Request, context: Params) {
   try {
     const user = await getCurrentUser();
 
-    if (!user || user.role !== "MENTOR") {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,7 +23,7 @@ export async function POST(_request: Request, context: Params) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
-    if (application.mentorUserId !== user.id || application.project.mentorUserId !== user.id) {
+    if (application.ownerUserId !== user.id || application.project.ownerUserId !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

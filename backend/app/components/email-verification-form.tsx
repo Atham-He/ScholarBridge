@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/Button";
 
 interface EmailVerificationFormProps {
   email: string;
-  role: "MENTOR" | "STUDENT";
-  onSuccess: (user: { id: string; email: string; role: "MENTOR" | "STUDENT" }) => void;
+  onSuccess: (user: { id: string; email: string }) => void;
   onBack: () => void;
 }
 
 export function EmailVerificationForm({
   email,
-  role,
   onSuccess,
   onBack
 }: EmailVerificationFormProps) {
@@ -46,7 +44,6 @@ export function EmailVerificationForm({
     const body = {
       email,
       code,
-      role,
       password,
       displayName
     };
@@ -81,7 +78,7 @@ export function EmailVerificationForm({
       const res = await fetch("/api/auth/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, role }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await res.json();

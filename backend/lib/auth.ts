@@ -8,31 +8,41 @@ const userWithProfileSelect = {
   id: true,
   email: true,
   passwordHash: true,
-  role: true,
   orcidId: true,
   orcidEmail: true,
   orcidName: true,
   lastLoginAt: true,
-  lastRoleAt: true,
   createdAt: true,
   updatedAt: true,
   emailVerified: true,
   emailVerificationCode: true,
-  mentorProfile: true,
-  studentProfile: {
+  profile: {
     select: {
       userId: true,
       displayName: true,
+      institution: true,
+      department: true,
+      title: true,
       backgroundBrief: true,
       materialsJson: true,
       education: true,
       bioShort: true,
+      location: true,
+      contactEmail: true,
+      phone: true,
+      website: true,
+      researchAreas: true,
       interests: true,
       skills: true,
+      status: true,
       resumeFileName: true,
       resumeMimeType: true,
       resumeSize: true,
       resumeUploadedAt: true,
+      aiAgentEnabled: true,
+      aiAgentPrompt: true,
+      aiHardWeight: true,
+      aiFitWeight: true,
     },
   },
 };
@@ -53,7 +63,6 @@ export async function getCurrentUser() {
   });
 }
 
-// NEW: Get user with specific role
 export async function getUserById(userId: string) {
   return db.user.findUnique({
     where: { id: userId },
@@ -61,10 +70,22 @@ export async function getUserById(userId: string) {
   });
 }
 
-// NEW: Get all users by email (for dual-role support)
-export async function getUsersByEmail(email: string) {
-  return db.user.findMany({
+export async function getUserByEmail(email: string) {
+  return db.user.findUnique({
     where: { email },
     select: userWithProfileSelect,
+  });
+}
+
+export async function ensureProfile(userId: string, email?: string | null) {
+  const displayName = email?.split("@")[0] || "ScholarBridge User";
+
+  return db.profile.upsert({
+    where: { userId },
+    update: {},
+    create: {
+      userId,
+      displayName,
+    },
   });
 }

@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
   const verification = await db.emailVerification.findFirst({
     where: {
       email: data.email,
-      role: data.role,
       verified: false,
     },
     orderBy: {
@@ -90,20 +89,12 @@ export async function POST(request: NextRequest) {
 
   // Check for existing user
   const existingUser = await db.user.findFirst({
-    where: {
-      email: data.email,
-      role: data.role,
-    },
+    where: { email: data.email },
   });
 
   if (existingUser) {
     return NextResponse.json(
-      {
-        error:
-          data.role === "MENTOR"
-            ? "A mentor account with this email already exists"
-            : "A student account with this email already exists",
-      },
+      { error: "A user with this email already exists" },
       { status: 409 }
     );
   }
@@ -125,33 +116,22 @@ export async function POST(request: NextRequest) {
       data: {
         email: data.email,
         passwordHash,
-        role: data.role,
         lastLoginAt: new Date(),
-        lastRoleAt: new Date(),
       },
     });
 
-    if (data.role === "MENTOR") {
-      await tx.mentorProfile.create({
-        data: {
-          userId: created.id,
-          displayName: data.displayName,
-          institution: data.institution ?? "",
-          department: data.department,
-          title: data.title,
-          bioShort: data.bioShort,
-          location: data.location,
-        },
-      });
-    } else {
-      await tx.studentProfile.create({
-        data: {
-          userId: created.id,
-          displayName: data.displayName,
-          backgroundBrief: data.backgroundBrief,
-        },
-      });
-    }
+    await tx.profile.create({
+      data: {
+        userId: created.id,
+        displayName: data.displayName,
+        institution: data.institution,
+        department: data.department,
+        title: data.title,
+        bioShort: data.bioShort,
+        location: data.location,
+        backgroundBrief: data.backgroundBrief,
+      },
+    });
 
     return created;
   });
@@ -159,7 +139,6 @@ export async function POST(request: NextRequest) {
   // Create session
   const session = await getSession();
   session.userId = user.id;
-  session.role = user.role;
   await session.save();
 
   return NextResponse.json({
@@ -167,7 +146,6 @@ export async function POST(request: NextRequest) {
     user: {
       id: user.id,
       email: user.email,
-      role: user.role,
     },
   });
 }

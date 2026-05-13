@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-describe('Database Schema - Dual Role Support', () => {
+describe("Database Schema - Unified Account", () => {
   let prisma: PrismaClient;
 
   beforeAll(() => {
@@ -11,34 +11,46 @@ describe('Database Schema - Dual Role Support', () => {
     await prisma.$disconnect();
   });
 
-  it('should allow multiple users with same email but different roles', async () => {
-    // This test will pass after schema migration
-    const email = 'test-dual@example.com';
+  it("enforces one account per email and supports both publishing and applying", async () => {
+    const email = "test-unified@example.com";
 
-    // Create student user
-    const student = await prisma.user.create({
-      data: {
-        email,
-        passwordHash: 'hash1',
-        role: 'STUDENT'
-      }
-    });
-
-    // Create mentor user with same email
-    const mentor = await prisma.user.create({
-      data: {
-        email,
-        passwordHash: 'hash2',
-        role: 'MENTOR'
-      }
-    });
-
-    expect(student.email).toBe(mentor.email);
-    expect(student.role).toBe('STUDENT');
-    expect(mentor.role).toBe('MENTOR');
-    expect(student.id).not.toBe(mentor.id);
-
-    // Cleanup
     await prisma.user.deleteMany({ where: { email } });
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash: "hash",
+        profile: {
+          create: {
+            displayName: "Unified Tester",
+          },
+        },
+      },
+    });
+
+    await expect(
+      prisma.user.create({
+        data: {
+          email,
+          passwordHash: "hash2",
+        },
+      }),
+    ).rejects.toThrow();
+
+    const project = await prisma.project.create({
+      data: {
+        ownerUserId: user.id,
+        title: "Unified Project",
+        description: "A project owned by the same account model.",
+        researchArea: "AI",
+        startTime: "2026-09",
+        capacity: 1,
+      },
+    });
+
+    expect(project.ownerUserId).toBe(user.id);
+
+    await prisma.project.delete({ where: { id: project.id } });
+    await prisma.user.delete({ where: { id: user.id } });
   });
 });

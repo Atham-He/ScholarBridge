@@ -2,11 +2,7 @@ import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
 
 interface EmailService {
-  sendVerification(
-    email: string,
-    code: string,
-    role: "MENTOR" | "STUDENT"
-  ): Promise<void>;
+  sendVerification(email: string, code: string): Promise<void>;
 }
 
 // ==============================================
@@ -26,21 +22,15 @@ class DevelopmentEmailService implements EmailService {
     });
   }
 
-  async sendVerification(
-    email: string,
-    code: string,
-    role: "MENTOR" | "STUDENT"
-  ): Promise<void> {
-    const roleText = role === "MENTOR" ? "导师" : "学生";
-
+  async sendVerification(email: string, code: string): Promise<void> {
     const mailOptions = {
       from: `"ScholarBridge 验证" <2212360065@qq.com>`,
       to: email,
-      subject: `ScholarBridge 注册验证码 - ${roleText}`,
+      subject: "ScholarBridge 注册验证码",
       text: `
 您的验证码是：${code}
 
-此验证码15分钟内有效，用于${roleText}账号注册。
+此验证码15分钟内有效，用于账号注册。
 如果不是你本人操作，请忽略。
 
 ScholarBridge 团队

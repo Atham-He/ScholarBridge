@@ -8,7 +8,7 @@ export async function PATCH(request: NextRequest, context: Params) {
   try {
     const user = await getCurrentUser();
 
-    if (!user || user.role !== "MENTOR") {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,8 +23,8 @@ export async function PATCH(request: NextRequest, context: Params) {
 
     const payload = body && typeof body === "object" ? body as Record<string, unknown> : {};
     const status = typeof payload.status === "string" ? payload.status : "";
-    const hasMentorFeedback = Object.prototype.hasOwnProperty.call(payload, "mentorFeedback");
-    const mentorFeedback = typeof payload.mentorFeedback === "string" ? payload.mentorFeedback.trim() : "";
+    const hasOwnerFeedback = Object.prototype.hasOwnProperty.call(payload, "ownerFeedback");
+    const ownerFeedback = typeof payload.ownerFeedback === "string" ? payload.ownerFeedback.trim() : "";
 
     if (!["pending", "accepted", "rejected"].includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
@@ -39,7 +39,7 @@ export async function PATCH(request: NextRequest, context: Params) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
-    if (application.mentorUserId !== user.id || application.project.mentorUserId !== user.id) {
+    if (application.ownerUserId !== user.id || application.project.ownerUserId !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -65,13 +65,13 @@ export async function PATCH(request: NextRequest, context: Params) {
         where: { id: applicationId },
         data: {
           status,
-          ...(hasMentorFeedback && { mentorFeedback: mentorFeedback || null }),
+          ...(hasOwnerFeedback && { ownerFeedback: ownerFeedback || null }),
         },
         include: {
           project: true,
-          student: {
+          applicant: {
             include: {
-              studentProfile: {
+              profile: {
                 select: {
                   userId: true,
                   displayName: true,

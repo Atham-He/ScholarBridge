@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
   }
 
   const email = normalizeEmail(parsed.data.email);
-  const { role } = parsed.data;
   const ipAddress = getClientIP(request);
 
   // Check rate limiting: max 3 codes per email per hour
@@ -45,17 +44,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Check if email+role combination already verified
-  const existingUser = await db.user.findFirst({
-    where: {
-      email,
-      role
-    }
-  });
+  const existingUser = await db.user.findUnique({ where: { email } });
 
   if (existingUser) {
     return NextResponse.json(
-      { error: role === 'MENTOR' ? '该邮箱已注册导师账号' : '该邮箱已注册学生账号' },
+      { error: "该邮箱已注册" },
       { status: 409 }
     );
   }
@@ -65,11 +58,9 @@ export async function POST(request: NextRequest) {
   const codeHash = await hashcode(code);
   const expiresAt = calculateExpiry(15); // 15 minutes
 
-  // Delete any existing unused codes for this email+role to keep only one active code
   await db.emailVerification.deleteMany({
     where: {
       email,
-      role,
       verified: false
     }
   });
@@ -78,7 +69,6 @@ export async function POST(request: NextRequest) {
   await db.emailVerification.create({
     data: {
       email,
-      role,
       code: codeHash,
       expiresAt,
       ipAddress
@@ -87,7 +77,7 @@ export async function POST(request: NextRequest) {
 
   // Send email
   try {
-    await emailService.sendVerification(email, code, role);
+    await emailService.sendVerification(email, code);
   } catch (error) {
     console.error('Failed to send email:', error);
     return NextResponse.json(

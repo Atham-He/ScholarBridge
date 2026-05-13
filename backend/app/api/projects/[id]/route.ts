@@ -20,7 +20,7 @@ export async function GET(_request: NextRequest, context: Params) {
 
 export async function PATCH(request: NextRequest, context: Params) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR") {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -30,7 +30,7 @@ export async function PATCH(request: NextRequest, context: Params) {
     where: { id },
   });
 
-  if (!project || project.mentorUserId !== user.id) {
+  if (!project || project.ownerUserId !== user.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest, context: Params) {
 
 export async function DELETE(_request: NextRequest, context: Params) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "MENTOR") {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -79,7 +79,7 @@ export async function DELETE(_request: NextRequest, context: Params) {
     where: { id },
   });
 
-  if (!project || project.mentorUserId !== user.id) {
+  if (!project || project.ownerUserId !== user.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 

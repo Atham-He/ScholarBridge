@@ -8,28 +8,12 @@ import { Button } from "@/components/ui/Button";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const roleParam = searchParams.get("role") as "MENTOR" | "STUDENT" | null;
   const nextParam = searchParams.get("next");
-
-  // 根据role参数设置默认next地址
-  const getDefaultNext = (role: "MENTOR" | "STUDENT") => {
-    if (nextParam) return nextParam;
-    return role === "MENTOR" ? "/mentor" : "/browse";
-  };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  type Role = "MENTOR" | "STUDENT";
-  const [role, setRole] = useState<Role>(roleParam || "STUDENT");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const roleButtonClassName = (active: boolean) =>
-    [
-      "flex-1 rounded border px-4 py-3 text-center text-[13px] font-semibold transition-all duration-200 ease",
-      active
-        ? "border-[#2C5F7C] bg-[#EBF3F8] text-[#1A1A1A]"
-        : "border-[#E0D8CC] bg-white text-[#1A1A1A] hover:border-[#2C5F7C] hover:text-[#2C5F7C]"
-    ].join(" ");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,7 +22,7 @@ export function LoginForm() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, role }),
+      body: JSON.stringify({ email, password }),
     });
     setLoading(false);
     if (!res.ok) {
@@ -46,7 +30,7 @@ export function LoginForm() {
       setError(data.error ?? "登录失败");
       return;
     }
-    router.push(getDefaultNext(role));
+    router.push(nextParam || "/browse");
     router.refresh();
   }
 
@@ -56,9 +40,17 @@ export function LoginForm() {
         <Link href="/" className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#1A1A1A]">
           ScholarBridge
         </Link>
-        <Link href="/browse">
-          <Button variant="outline" size="sm">Browse</Button>
-        </Link>
+        <div className="flex gap-2.5">
+          <Link href="/">
+            <Button variant="outline" size="sm">Home</Button>
+          </Link>
+          <Link href="/browse">
+            <Button variant="outline" size="sm">Browse</Button>
+          </Link>
+          <Link href="/profile">
+            <Button variant="outline" size="sm">Profile</Button>
+          </Link>
+        </div>
       </nav>
 
       <main className="mx-auto flex min-h-[calc(100vh-81px)] max-w-6xl items-center justify-center px-6 py-12">
@@ -69,33 +61,11 @@ export function LoginForm() {
               登录 ScholarBridge
             </h1>
             <p className="mt-3 text-sm leading-6 text-[#1A1A1A]">
-              选择身份后登录，继续管理研究项目或收藏的机会。
+              登录后可以申请项目、收藏机会，也可以发布和管理自己的研究项目。
             </p>
           </div>
 
           <form onSubmit={onSubmit} className="space-y-5">
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-                身份
-              </label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRole("STUDENT")}
-                  className={roleButtonClassName(role === "STUDENT")}
-                >
-                  学生
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole("MENTOR")}
-                  className={roleButtonClassName(role === "MENTOR")}
-                >
-                  导师
-                </button>
-              </div>
-            </div>
-
             <div>
               <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
                 邮箱

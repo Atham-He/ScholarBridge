@@ -1,5 +1,5 @@
 /**
- * Browse page - project-first student discovery.
+ * Browse page - project-first applicant discovery.
  */
 
 'use client';
@@ -21,7 +21,7 @@ interface ProjectOpportunity {
   capacity: number;
   enrolled: number;
   availableSeats: number;
-  mentor: {
+  owner: {
     id: string;
     slug: string;
     displayName: string;
@@ -37,14 +37,13 @@ interface ProjectOpportunity {
 interface User {
   id: string;
   email: string;
-  role: string;
   displayName: string;
 }
 
 interface AppliedApplication {
   id: string;
   status: string;
-  mentorFeedback?: string | null;
+  ownerFeedback?: string | null;
 }
 
 export default function BrowsePage() {
@@ -85,7 +84,7 @@ export default function BrowsePage() {
       const response = await fetch('/api/auth/session');
       const data = await response.json();
       setUser(data.user);
-      if (data.user?.role === 'STUDENT') {
+      if (data.user) {
         fetchSavedProjects();
         fetchApplications();
       }
@@ -96,7 +95,7 @@ export default function BrowsePage() {
 
   const fetchSavedProjects = async () => {
     try {
-      const response = await fetch('/api/student/saved-projects');
+      const response = await fetch('/api/saved-projects');
       if (!response.ok) {
         return;
       }
@@ -110,18 +109,18 @@ export default function BrowsePage() {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch('/api/student/applications');
+      const response = await fetch('/api/applications');
       if (!response.ok) {
         return;
       }
       const data = await response.json();
       const activeApplications = (data.apps || []).reduce(
-        (current: Record<string, AppliedApplication>, app: { id: string; projectId: string; status: string; mentorFeedback?: string | null }) => {
+        (current: Record<string, AppliedApplication>, app: { id: string; projectId: string; status: string; ownerFeedback?: string | null }) => {
           if (app.status !== 'WITHDRAWN') {
             current[app.projectId] = {
               id: app.id,
               status: app.status,
-              mentorFeedback: app.mentorFeedback || null,
+              ownerFeedback: app.ownerFeedback || null,
             };
           }
           return current;
@@ -167,7 +166,7 @@ export default function BrowsePage() {
 
     setApplyingProjectId(projectId);
     try {
-      const response = await fetch('/api/student/applications', {
+      const response = await fetch('/api/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId }),
@@ -181,7 +180,7 @@ export default function BrowsePage() {
             [projectId]: {
               id: data.application.id,
               status: data.application.status,
-              mentorFeedback: data.application.mentorFeedback || null,
+              ownerFeedback: data.application.ownerFeedback || null,
             },
           }));
         }
@@ -243,7 +242,7 @@ export default function BrowsePage() {
 
     const isSaved = savedProjectIds.has(projectId);
     const response = await fetch(
-      isSaved ? `/api/student/saved-projects?projectId=${encodeURIComponent(projectId)}` : '/api/student/saved-projects',
+      isSaved ? `/api/saved-projects?projectId=${encodeURIComponent(projectId)}` : '/api/saved-projects',
       {
         method: isSaved ? 'DELETE' : 'POST',
         headers: isSaved ? undefined : { 'Content-Type': 'application/json' },
@@ -280,8 +279,8 @@ export default function BrowsePage() {
       project.title.toLowerCase().includes(normalizedQuery) ||
       project.description.toLowerCase().includes(normalizedQuery) ||
       project.researchArea.toLowerCase().includes(normalizedQuery) ||
-      project.mentor.displayName.toLowerCase().includes(normalizedQuery) ||
-      project.mentor.institution.toLowerCase().includes(normalizedQuery);
+      project.owner.displayName.toLowerCase().includes(normalizedQuery) ||
+      project.owner.institution.toLowerCase().includes(normalizedQuery);
 
     const matchesArea = !selectedArea || project.researchArea === selectedArea;
     const matchesOpenSeats = !openOnly || project.availableSeats > 0;
@@ -349,14 +348,18 @@ export default function BrowsePage() {
           ScholarBridge
         </div>
         <div className="flex gap-2.5">
+          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease font-family-body hover:border-[#2C5F7C] hover:text-[#2C5F7C] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]" onClick={() => window.location.href = '/'}>Home</button>
           <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease font-family-body">Discover</button>
           {user ? (
             <>
-              <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease font-family-body hover:border-[#2C5F7C] hover:text-[#2C5F7C] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]" onClick={() => window.location.href = '/student/profile'}>Profile</button>
+              <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease font-family-body hover:border-[#2C5F7C] hover:text-[#2C5F7C] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]" onClick={() => window.location.href = '/profile'}>Profile</button>
               <Button variant="gold" size="sm" onClick={handleLogout}>Sign Out</Button>
             </>
           ) : (
-            <Button variant="gold" size="sm" onClick={() => window.location.href = '/login'}>Sign In</Button>
+            <>
+              <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease font-family-body hover:border-[#2C5F7C] hover:text-[#2C5F7C] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]" onClick={() => window.location.href = '/profile'}>Profile</button>
+              <Button variant="gold" size="sm" onClick={() => window.location.href = '/login'}>Sign In</Button>
+            </>
           )}
         </div>
       </nav>
@@ -370,7 +373,7 @@ export default function BrowsePage() {
                 Discover Research Opportunities
               </h2>
               <p className="text-[14px] text-[#1A1A1A] max-w-3xl">
-                Start with open projects, then use each mentor profile as context for research fit.
+                Start with open projects, then use each owner profile as context for research fit.
               </p>
             </div>
             <div className="flex gap-3 text-sm text-[#1A1A1A]">
@@ -382,7 +385,7 @@ export default function BrowsePage() {
         <section className="mb-6 flex flex-col gap-3 lg:flex-row">
           <input
             type="text"
-            placeholder="Search by project, research area, mentor, or institution..."
+            placeholder="Search by project, research area, owner, or institution..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className="flex-1 py-[11px] px-4 border border-[#E0D8CC] rounded text-[14px] text-[#1A1A1A] placeholder:text-[#4A4A4A] font-family-body outline-none transition-all duration-200 ease bg-white focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
@@ -444,11 +447,11 @@ export default function BrowsePage() {
                 </div>
 
                 <div className="mb-5 flex items-start gap-3 rounded border border-[#E0D8CC] bg-[#FAF8F5] p-3">
-                  <Avatar name={project.mentor.displayName} size="sm" />
+                  <Avatar name={project.owner.displayName} size="sm" />
                   <div className="min-w-0">
-                    <p className="font-semibold text-[#1A1A1A]">{project.mentor.displayName}</p>
+                    <p className="font-semibold text-[#1A1A1A]">{project.owner.displayName}</p>
                     <p className="text-xs leading-5 text-[#1A1A1A]">
-                      {[project.mentor.title, project.mentor.department, project.mentor.institution].filter(Boolean).join(' - ')}
+                      {[project.owner.title, project.owner.department, project.owner.institution].filter(Boolean).join(' - ')}
                     </p>
                   </div>
                 </div>
@@ -545,11 +548,11 @@ export default function BrowsePage() {
 
             <div className="grid gap-5 px-6 py-5 text-sm leading-6 text-[#1A1A1A]">
               <div className="flex items-start gap-3 rounded border border-[#E0D8CC] bg-[#FAF8F5] p-4">
-                <Avatar name={selectedProject.mentor.displayName} size="sm" />
+                <Avatar name={selectedProject.owner.displayName} size="sm" />
                 <div className="min-w-0">
-                  <p className="font-semibold text-[#1A1A1A]">{selectedProject.mentor.displayName}</p>
+                  <p className="font-semibold text-[#1A1A1A]">{selectedProject.owner.displayName}</p>
                   <p className="text-xs leading-5 text-[#1A1A1A]">
-                    {[selectedProject.mentor.title, selectedProject.mentor.department, selectedProject.mentor.institution].filter(Boolean).join(' - ')}
+                    {[selectedProject.owner.title, selectedProject.owner.department, selectedProject.owner.institution].filter(Boolean).join(' - ')}
                   </p>
                 </div>
               </div>
@@ -572,17 +575,17 @@ export default function BrowsePage() {
                 <p>{selectedProject.requirements || 'No formal requirements listed yet.'}</p>
               </div>
 
-              {appliedApplications[selectedProject.id]?.mentorFeedback && (
+              {appliedApplications[selectedProject.id]?.ownerFeedback && (
                 <div className="rounded border border-[#A8D0E8] bg-[#EBF3F8] p-4">
-                  <p className="mb-2 font-semibold">导师反馈</p>
-                  <p>{appliedApplications[selectedProject.id].mentorFeedback}</p>
+                  <p className="mb-2 font-semibold">发布者反馈</p>
+                  <p>{appliedApplications[selectedProject.id].ownerFeedback}</p>
                 </div>
               )}
 
-              {selectedProject.mentor.bioShort && (
+              {selectedProject.owner.bioShort && (
                 <div>
                   <p className="mb-2 font-semibold">Mentor focus</p>
-                  <p>{selectedProject.mentor.bioShort}</p>
+                  <p>{selectedProject.owner.bioShort}</p>
                 </div>
               )}
             </div>

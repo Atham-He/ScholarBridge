@@ -4,7 +4,7 @@ describe('Email Service', () => {
   it('should log verification code in development mode', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-    await emailService.sendVerification('test@example.com', '123456', 'STUDENT');
+    await emailService.sendVerification('test@example.com', '123456');
 
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining('123456')
@@ -16,7 +16,7 @@ describe('Email Service', () => {
   it('should handle email sending errors gracefully', async () => {
     // Test error handling when implemented
     await expect(
-      emailService.sendVerification('test@example.com', '123456', 'STUDENT')
+      emailService.sendVerification('test@example.com', '123456')
     ).resolves.not.toThrow();
   });
 });

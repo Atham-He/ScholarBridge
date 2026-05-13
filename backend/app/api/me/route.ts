@@ -11,9 +11,7 @@ export async function GET() {
     user: {
       id: user.id,
       email: user.email,
-      role: user.role,
-      mentorProfile: user.mentorProfile,
-      studentProfile: user.studentProfile,
+      profile: user.profile,
     },
   });
 }

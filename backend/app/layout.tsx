@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ScholarBridge — Mentor-Student Matching",
   description:
-    "Discover open research projects and connect with academic mentors.",
+    "Discover open research projects and connect with research collaborators.",
 };
 
 export default function RootLayout({

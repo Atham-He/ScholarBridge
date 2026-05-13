@@ -1,12 +1,11 @@
 import { POST } from '../route';
 
 describe('POST /api/auth/send-code', () => {
-  it('should send verification code for valid email and role', async () => {
+  it('should send verification code for valid email', async () => {
     const request = new Request('http://localhost:3000/api/auth/send-code', {
       method: 'POST',
       body: JSON.stringify({
-        email: 'test@example.com',
-        role: 'STUDENT'
+        email: 'test@example.com'
       })
     });
 
@@ -22,8 +21,7 @@ describe('POST /api/auth/send-code', () => {
     const request = new Request('http://localhost:3000/api/auth/send-code', {
       method: 'POST',
       body: JSON.stringify({
-        email: 'invalid-email',
-        role: 'STUDENT'
+        email: 'invalid-email'
       })
     });
 
@@ -34,13 +32,10 @@ describe('POST /api/auth/send-code', () => {
     expect(data.error).toBeDefined();
   });
 
-  it('should reject invalid role', async () => {
+  it('should reject missing email', async () => {
     const request = new Request('http://localhost:3000/api/auth/send-code', {
       method: 'POST',
-      body: JSON.stringify({
-        email: 'test@example.com',
-        role: 'INVALID'
-      })
+      body: JSON.stringify({})
     });
 
     const response = await POST(request);

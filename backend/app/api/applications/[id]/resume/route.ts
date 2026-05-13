@@ -8,7 +8,7 @@ export async function GET(_request: Request, context: Params) {
   try {
     const user = await getCurrentUser();
 
-    if (!user || user.role !== "MENTOR") {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -16,15 +16,15 @@ export async function GET(_request: Request, context: Params) {
     const application = await db.application.findUnique({
       where: { id: applicationId },
       select: {
-        mentorUserId: true,
+        ownerUserId: true,
         project: {
           select: {
-            mentorUserId: true,
+            ownerUserId: true,
           },
         },
-        student: {
+        applicant: {
           select: {
-            studentProfile: {
+            profile: {
               select: {
                 resumeFileName: true,
                 resumeMimeType: true,
@@ -40,11 +40,11 @@ export async function GET(_request: Request, context: Params) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
-    if (application.mentorUserId !== user.id || application.project.mentorUserId !== user.id) {
+    if (application.ownerUserId !== user.id || application.project.ownerUserId !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const resume = application.student.studentProfile;
+    const resume = application.applicant.profile;
     if (!resume?.resumeData) {
       return NextResponse.json({ error: "Resume not found" }, { status: 404 });
     }

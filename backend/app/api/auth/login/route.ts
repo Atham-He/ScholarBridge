@@ -28,22 +28,20 @@ export async function POST(request: NextRequest) {
     id: string;
     email: string;
     passwordHash: string | null;
-    role: "MENTOR" | "STUDENT";
-    lastRoleAt: Date | null;
   }>>`
-    SELECT id, email, passwordHash, role, lastRoleAt
+    SELECT id, email, passwordHash
     FROM User
     WHERE lower(email) = ${normalizedEmail}
-    ORDER BY lastRoleAt DESC
+    LIMIT 1
   `;
 
   if (users.length === 0) {
     return NextResponse.json({ error: "邮箱或密码错误" }, { status: 401 });
   }
 
-  const user = users.find((candidate) => candidate.role === data.role);
+  const user = users[0];
 
-  if (!user || !user.passwordHash) {
+  if (!user.passwordHash) {
     return NextResponse.json({ error: "邮箱或密码错误" }, { status: 401 });
   }
 
@@ -54,14 +52,12 @@ export async function POST(request: NextRequest) {
 
   const session = await getSession();
   session.userId = user.id;
-  session.role = user.role;
   await session.save();
 
   await db.user.update({
     where: { id: user.id },
     data: {
       lastLoginAt: new Date(),
-      lastRoleAt: new Date(),
     },
   });
 
@@ -70,7 +66,6 @@ export async function POST(request: NextRequest) {
     user: {
       id: user.id,
       email: user.email,
-      role: user.role,
     },
   });
 }

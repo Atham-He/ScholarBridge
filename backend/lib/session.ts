@@ -2,9 +2,7 @@ import type { SessionOptions } from "iron-session";
 
 export type SessionData = {
   userId?: string;
-  role?: 'MENTOR' | 'STUDENT';  // NEW: Track active role
-  lastRoleSwitchAt?: Date;  // NEW: For security tracking
-  oauthState?: string;  // NEW: For OAuth CSRF protection
+  oauthState?: string;
 };
 
 /** 生产环境务必设置 SESSION_SECRET（≥32 字符） */

@@ -1,5 +1,5 @@
 export function buildMentorSystemPrompt(params: {
-  mentorDisplayName: string;
+  ownerDisplayName: string;
   institution: string;
   title: string | null;
   profileMarkdown: string;
@@ -18,19 +18,19 @@ export function buildMentorSystemPrompt(params: {
     .join("\n\n");
 
   return [
-    "（ScholarBridge）你是导师的 AI 研究助理分身，基于公开资料与课题组信息回答潜在学生。",
-    `导师：${params.mentorDisplayName}；机构：${params.institution}${params.title ? `；职称：${params.title}` : ""}`,
+    "（ScholarBridge）你是发布者的 AI 研究助理分身，基于公开资料与课题组信息回答潜在申请者。",
+    `发布者：${params.ownerDisplayName}；机构：${params.institution}${params.title ? `；职称：${params.title}` : ""}`,
     "",
     extra ? `${extra}\n\n` : "",
-    "【导师 / 课题组资料】",
+    "【发布者 / 课题组资料】",
     params.profileMarkdown,
     "",
     "【行为规则】",
-    "1) 以导师第一人称或「我们实验室」口吻回复，保持专业、友好。",
+    "1) 以发布者第一人称或「我们实验室」口吻回复，保持专业、友好。",
     "2) 不得承诺录取、名额或奖学金；可说明一般申请流程与资料中有的要求。",
     "3) 每次回复末尾必须包含匹配分：[[SCORE:1到10的整数]]（对应前端可展示为百分制）。",
-    "4) 若学生背景与课题组高度匹配（分数应≥8），在回复末尾另起一行输出 [[NOTIFY_MENTOR]]。",
-    "5) 若问题超出资料范围，明确说明需导师本人确认。",
+    "4) 若申请者背景与课题组高度匹配（分数应≥8），在回复末尾另起一行输出 [[NOTIFY_OWNER]]。",
+    "5) 若问题超出资料范围，明确说明需发布者本人确认。",
   ].join("\n");
 }
 
@@ -44,14 +44,14 @@ export function parseAiMarkers(text: string) {
     }
   }
 
-  const notify = text.includes("[[NOTIFY_MENTOR]]");
+  const notify = text.includes("[[NOTIFY_OWNER]]");
   return { score, notify };
 }
 
 export function stripAiMarkers(text: string) {
   return text
     .replace(/\[\[SCORE:\d+\]\]/g, "")
-    .replace(/\[\[NOTIFY_MENTOR\]\]/g, "")
+    .replace(/\[\[NOTIFY_OWNER\]\]/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }

@@ -21,14 +21,8 @@ export async function POST(request: NextRequest) {
   }
 
   const data = parsed.data;
-  //const existing = await db.user.findUnique({ where: { email: data.email } });
   const existing = await db.user.findUnique({
-    where: {
-      email_role: {
-        email: data.email,
-        role: data.role,
-      },
-    },
+    where: { email: data.email },
   });
   if (existing) {
     return NextResponse.json({ error: "该邮箱已注册" }, { status: 409 });
@@ -42,38 +36,28 @@ export async function POST(request: NextRequest) {
       data: {
         email: data.email,
         passwordHash,
-        role: data.role,
         emailVerificationCode: code, 
         emailVerified: false,        
       },
     });
 
-    if (data.role === "MENTOR") {
-      await tx.mentorProfile.create({
-        data: {
-          userId: created.id,
-          displayName: data.displayName,
-          institution: data.institution ?? "",
-          department: data.department,
-          title: data.title,
-          bioShort: data.bioShort,
-          location: data.location,
-        },
-      });
-    } else {
-      await tx.studentProfile.create({
-        data: {
-          userId: created.id,
-          displayName: data.displayName,
-          backgroundBrief: data.backgroundBrief,
-        },
-      });
-    }
+    await tx.profile.create({
+      data: {
+        userId: created.id,
+        displayName: data.displayName,
+        institution: data.institution,
+        department: data.department,
+        title: data.title,
+        bioShort: data.bioShort,
+        location: data.location,
+        backgroundBrief: data.backgroundBrief,
+      },
+    });
 
     return created;
   });
 
-  await emailService.sendVerification(user.email, code, user.role); 
+  await emailService.sendVerification(user.email, code); 
   
   return NextResponse.json({
     ok: true,
@@ -81,7 +65,6 @@ export async function POST(request: NextRequest) {
     user: {
       id: user.id,
       email: user.email,
-      role: user.role,
     },
   });
 }

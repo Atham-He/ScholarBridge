@@ -7,11 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  MENTOR
-  STUDENT
-}
-
 enum ProjectStatus {
   OPEN
   CLOSED
@@ -20,67 +15,51 @@ enum ProjectStatus {
 
 model User {
   id           String    @id @default(cuid())
-  email        String
+  email        String    @unique
   passwordHash String?
-  role         UserRole
   orcidId      String?   @unique
   orcidEmail   String?
   orcidName    String?
   lastLoginAt  DateTime?
-  lastRoleAt   DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   emailVerified         Boolean @default(false)
   emailVerificationCode String?
 
-  mentorProfile  MentorProfile?
-  studentProfile StudentProfile?
+  profile Profile?
 
-  applicationsAsStudent Application[] @relation("StudentApps")
-  applicationsAsMentor  Application[] @relation("MentorApps")
+  ownedProjects          Project[]     @relation("OwnedProjects")
+  savedProjects          SavedProject[]
+  applicationsSubmitted  Application[] @relation("ApplicationsSubmitted")
+  applicationsReceived   Application[] @relation("ApplicationsReceived")
+  notifications          Notification[]
+  emailVerifications     EmailVerification[]
+  securityEvents         SecurityEvent[]
 
-  notifications      Notification[]
-  emailVerifications EmailVerification[]
-  securityEvents     SecurityEvent[]
-
-  @@unique([email, role])
   @@index([orcidId])
   @@index([email])
 }
 
-model MentorProfile {
-  userId         String   @id
-  displayName    String
-  institution    String
-  department     String?
-  title          String?
-  bioShort       String?
-  location       String?
-  contactEmail   String?
-  phone          String?
-  website        String?
-  researchAreas  Json? // ["AI", "Machine Learning", "Robotics"]
-  status         String   @default("active") // active, inactive
-  aiAgentEnabled Boolean  @default(true)
-  aiAgentPrompt  String?
-  aiHardWeight   Int      @default(50)
-  aiFitWeight    Int      @default(50)
-  updatedAt      DateTime @updatedAt
+model Profile {
+  userId          String   @id
+  displayName     String
+  institution     String?
+  department      String?
+  title           String?
+  education       String?
+  bioShort        String?
+  backgroundBrief String?
+  location        String?
+  contactEmail    String?
+  phone           String?
+  website         String?
+  researchAreas   Json?
+  interests       Json?
+  skills          Json?
+  materialsJson   Json?
+  status          String   @default("active")
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projects Project[]
-}
-
-model StudentProfile {
-  userId           String    @id
-  displayName      String
-  backgroundBrief  String?
-  materialsJson    Json?
-  education        String?
-  bioShort         String?
-  interests        Json?
-  skills           Json?
   resumeFileName   String?
   resumeMimeType   String?
   resumeSize       Int?
@@ -88,85 +67,78 @@ model StudentProfile {
   resumeText       String?
   resumeUploadedAt DateTime?
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  savedMentors  SavedMentor[]
-  savedProjects SavedProject[]
-}
+  aiAgentEnabled Boolean @default(true)
+  aiAgentPrompt  String?
+  aiHardWeight   Int     @default(50)
+  aiFitWeight    Int     @default(50)
 
-model SavedMentor {
-  id            String   @id @default(cuid())
-  studentUserId String
-  mentorUserId  String
-  createdAt     DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  student StudentProfile @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
-
-  @@unique([studentUserId, mentorUserId])
-  @@index([studentUserId])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SavedProject {
-  id            String   @id @default(cuid())
-  studentUserId String
-  projectId     String
-  createdAt     DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
 
-  student StudentProfile @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
-  project Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@unique([studentUserId, projectId])
-  @@index([studentUserId])
+  @@unique([userId, projectId])
+  @@index([userId])
   @@index([projectId])
 }
 
 model Project {
   id           String        @id @default(cuid())
-  mentorUserId String
+  ownerUserId  String
   title        String
   description  String
   researchArea String
-  startTime    String // "2025-09"
-  endTime      String? // "2028-09" or null for ongoing
-  location     String? // "On-site" or "Remote" or specific location
-  requirements String? // Project requirements
-  capacity     Int // Total positions
-  enrolled     Int           @default(0) // Currently enrolled
+  startTime    String
+  endTime      String?
+  location     String?
+  requirements String?
+  capacity     Int
+  enrolled     Int           @default(0)
   status       ProjectStatus @default(OPEN)
 
-  mentor       MentorProfile  @relation(fields: [mentorUserId], references: [userId], onDelete: Cascade)
+  owner        User          @relation("OwnedProjects", fields: [ownerUserId], references: [id], onDelete: Cascade)
   applications Application[]
   savedBy      SavedProject[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([mentorUserId])
+  @@index([ownerUserId])
   @@index([status])
 }
 
 model Application {
-  id             String    @id @default(cuid())
-  studentUserId  String
-  mentorUserId   String
-  projectId      String
-  status         String    @default("pending") // pending, accepted, rejected, withdrawn
-  coverLetter    String?
-  mentorFeedback String?
-  aiHardScore    Float?
-  aiFitScore     Float?
-  aiScoreSummary String?
-  aiScoreError   String?
-  aiScoredAt     DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  applicantUserId String
+  ownerUserId     String
+  projectId       String
+  status          String    @default("pending")
+  coverLetter     String?
+  ownerFeedback   String?
+  aiHardScore     Float?
+  aiFitScore      Float?
+  aiScoreSummary  String?
+  aiScoreError    String?
+  aiScoredAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  student User    @relation("StudentApps", fields: [studentUserId], references: [id], onDelete: Cascade)
-  mentor  User    @relation("MentorApps", fields: [mentorUserId], references: [id], onDelete: Cascade)
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  applicant User    @relation("ApplicationsSubmitted", fields: [applicantUserId], references: [id], onDelete: Cascade)
+  owner     User    @relation("ApplicationsReceived", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@unique([studentUserId, projectId])
-  @@index([mentorUserId])
-  @@index([studentUserId])
+  @@unique([applicantUserId, projectId])
+  @@index([ownerUserId])
+  @@index([applicantUserId])
   @@index([projectId])
 }
 
@@ -186,7 +158,6 @@ model EmailVerification {
   id            String    @id @default(cuid())
   email         String
   code          String
-  role          UserRole
   expiresAt     DateTime
   verified      Boolean   @default(false)
   usedAt        DateTime?
