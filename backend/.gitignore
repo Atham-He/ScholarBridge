@@ -17,6 +17,8 @@ out/
 dist/
 build/
 *.tsbuildinfo
+playwright-report/
+test-results/
 
 # Runtime uploads and temporary files
 uploads/
