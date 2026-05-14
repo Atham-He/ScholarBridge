@@ -104,7 +104,8 @@ export async function POST(request: NextRequest) {
       },
       select: { id: true },
     });
-    await Promise.all(applications.map((application) => scoreApplicationResume(application.id)));
+    type ApplicationItem = (typeof applications)[number];
+    await Promise.all(applications.map((application: ApplicationItem) => scoreApplicationResume(application.id)));
 
     return NextResponse.json({ resume: profile });
   } catch (error) {

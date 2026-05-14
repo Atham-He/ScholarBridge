@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   const parsed = registerSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "参数校验失败", details: parsed.error.issues.map((i) => i.message) },
+      { error: "参数校验失败", details: parsed.error.issues.map((i: { message: string }) => i.message) },
       { status: 400 },
     );
   }
