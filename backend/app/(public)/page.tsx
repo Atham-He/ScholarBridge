@@ -30,7 +30,7 @@ export default function HomePage() {
             <Button variant="outline" size="sm">Profile</Button>
           </Link>
           <Link href="/login">
-            <Button variant="outline" size="sm">登录</Button>
+            <Button variant="outline" size="sm">Sign In</Button>
           </Link>
         </div>
       </nav>
@@ -44,45 +44,51 @@ export default function HomePage() {
             ScholarBridge
           </h1>
           <p className="max-w-2xl text-[18px] leading-[1.8] text-[#1A1A1A]">
-            ScholarBridge 是一个面向研究机会匹配的平台。它把项目发布、项目发现、申请管理、简历材料和 AI 辅助筛选放在同一个统一账号体系下，让研究者既可以参与别人的项目，也可以发布自己的项目。
+            ScholarBridge is a research opportunity matching platform. It brings project publishing, discovery,
+            application management, resume materials, and AI-assisted screening into one unified account system,
+            so researchers can both join other projects and publish their own.
           </p>
         </section>
 
         <section className="mt-16 grid gap-5 md:grid-cols-3">
           <article className="rounded-[10px] border border-[#E0D8CC] bg-white p-6">
-            <h2 className="mb-3 font-display text-[24px] font-semibold text-[#1A1A1A]">统一身份</h2>
+            <h2 className="mb-3 font-display text-[24px] font-semibold text-[#1A1A1A]">Unified Identity</h2>
             <p className="text-sm leading-7 text-[#1A1A1A]">
-              不再把用户固定成“学生”或“导师”。同一个账号可以浏览、申请、收藏项目，也可以发布项目并处理收到的申请。
+              Users are no longer locked into a single role like "student" or "mentor." One account can browse,
+              apply for, and save projects, while also publishing projects and managing incoming applications.
             </p>
           </article>
 
           <article className="rounded-[10px] border border-[#E0D8CC] bg-white p-6">
-            <h2 className="mb-3 font-display text-[24px] font-semibold text-[#1A1A1A]">项目优先</h2>
+            <h2 className="mb-3 font-display text-[24px] font-semibold text-[#1A1A1A]">Project First</h2>
             <p className="text-sm leading-7 text-[#1A1A1A]">
-              Browse 页面以研究项目为核心，帮助用户先判断研究方向、要求、名额和时间，再进一步查看详情和提交申请。
+              The Browse page is centered on research projects, helping users assess research area, requirements,
+              capacity, and timeline before exploring details and applying.
             </p>
           </article>
 
           <article className="rounded-[10px] border border-[#E0D8CC] bg-white p-6">
-            <h2 className="mb-3 font-display text-[24px] font-semibold text-[#1A1A1A]">AI 辅助筛选</h2>
+            <h2 className="mb-3 font-display text-[24px] font-semibold text-[#1A1A1A]">AI-Assisted Screening</h2>
             <p className="text-sm leading-7 text-[#1A1A1A]">
-              项目发布者可以根据硬实力背景和项目匹配度设置权重，让系统辅助整理申请材料和简历评分。
+              Project owners can weight academic strength and project fit to help the system organize applications
+              and score resumes.
             </p>
           </article>
         </section>
 
         <section className="mt-12 rounded-[10px] border border-[#E0D8CC] bg-white p-7">
           <h2 className="mb-3 font-display text-[26px] font-semibold text-[#1A1A1A]">
-            当前主要页面
+            Main Pages
           </h2>
           <div className="grid gap-4 text-sm leading-7 text-[#1A1A1A] md:grid-cols-2">
             <p>
-              <span className="font-semibold">Browse：</span>
-              查看开放项目、阅读项目详情、收藏项目、提交或撤回申请。
+              <span className="font-semibold">Browse:</span>
+              Discover open projects, review details, save opportunities, and submit or withdraw applications.
             </p>
             <p>
-              <span className="font-semibold">Profile：</span>
-              管理个人信息、PDF 简历、收藏、申请记录，以及自己发布的项目和收到的申请。
+              <span className="font-semibold">Profile:</span>
+              Manage personal information, PDF resume, saved projects, application history, and the projects and
+              incoming applications you own.
             </p>
           </div>
         </section>

@@ -78,7 +78,7 @@ describe("POST /api/auth/login", () => {
     const data = await response.json();
 
     expect(response.status).toBe(401);
-    expect(data.error).toBe("邮箱或密码错误");
+    expect(data.error).toBe("Incorrect email or password");
   });
 
   it("does not require role in the request body", async () => {

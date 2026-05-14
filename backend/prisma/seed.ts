@@ -125,7 +125,7 @@ async function main() {
       status: "pending",
       aiHardScore: 78,
       aiFitScore: 84,
-      aiScoreSummary: "硬实力较强，RL 项目经历与课题方向匹配度高。",
+      aiScoreSummary: "Strong academic signals, and the applicant's RL project experience aligns well with the project focus.",
       aiScoredAt: new Date(),
     },
   });
@@ -140,7 +140,7 @@ async function main() {
       ownerFeedback: "Your profile is strong, but this project currently needs deeper RL systems experience.",
       aiHardScore: 86,
       aiFitScore: 58,
-      aiScoreSummary: "硬实力突出，但与强化学习实验方向匹配度一般。",
+      aiScoreSummary: "Strong overall profile, but the fit with the reinforcement learning experimentation focus is only moderate.",
       aiScoredAt: new Date(),
     },
   });
@@ -155,7 +155,7 @@ async function main() {
       ownerFeedback: "Good fit. Please prepare a short summary of your benchmark work.",
       aiHardScore: 74,
       aiFitScore: 88,
-      aiScoreSummary: "NLP 和评测经历与项目高度相关。",
+      aiScoreSummary: "The applicant's NLP and evaluation background is highly relevant to this project.",
       aiScoredAt: new Date(),
     },
   });

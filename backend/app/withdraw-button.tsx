@@ -14,7 +14,7 @@ export function WithdrawButton({
   const [loading, setLoading] = useState(false);
 
   async function withdraw() {
-    if (!confirm("确定撤回该申请？")) return;
+    if (!confirm("Are you sure you want to withdraw this application?")) return;
     setLoading(true);
     const res = await fetch(`/api/applications/${applicationId}/withdraw`, {
       method: "POST",
@@ -24,7 +24,7 @@ export function WithdrawButton({
       onWithdraw?.();
       router.refresh();
     } else {
-      alert("撤回失败，请重试");
+      alert("Failed to withdraw the application. Please try again.");
     }
   }
 
@@ -35,7 +35,7 @@ export function WithdrawButton({
       disabled={loading}
       className="px-4 py-2 border border-[#E0D8CC] rounded-lg bg-white hover:border-[#2C5F7C] hover:text-[#2C5F7C] transition-all text-sm text-[#1A1A1A] disabled:cursor-not-allowed disabled:bg-[#F5F2ED] disabled:text-[#6B6B6B]"
     >
-      {loading ? "处理中..." : "撤回申请"}
+      {loading ? "Processing..." : "Withdraw application"}
     </button>
   );
 }

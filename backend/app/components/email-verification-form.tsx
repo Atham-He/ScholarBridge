@@ -30,13 +30,13 @@ export function EmailVerificationForm({
 
     // Validation
     if (password !== confirmPassword) {
-      setError("两次密码输入不一致");
+      setError("Passwords do not match.");
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError("密码至少需要6位");
+      setError("Password must be at least 6 characters.");
       setLoading(false);
       return;
     }
@@ -58,14 +58,14 @@ export function EmailVerificationForm({
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "验证失败");
+        setError(data.error || "Verification failed.");
         setLoading(false);
         return;
       }
 
       onSuccess(data.user);
     } catch {
-      setError("网络错误，请重试");
+      setError("Network error. Please try again.");
       setLoading(false);
     }
   };
@@ -84,7 +84,7 @@ export function EmailVerificationForm({
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "发送失败");
+        setError(data.error || "Failed to resend code.");
         setResendLoading(false);
         return;
       }
@@ -102,7 +102,7 @@ export function EmailVerificationForm({
       }, 1000);
 
     } catch {
-      setError("网络错误，请重试");
+      setError("Network error. Please try again.");
     } finally {
       setResendLoading(false);
     }
@@ -118,7 +118,7 @@ export function EmailVerificationForm({
 
       <div>
         <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-          验证码
+          Verification code
         </label>
         <div className="flex gap-3">
           <input
@@ -128,7 +128,7 @@ export function EmailVerificationForm({
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
             className="min-w-0 flex-1 rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
-            placeholder="6位验证码"
+            placeholder="6-digit code"
             required
           />
           <Button
@@ -138,52 +138,52 @@ export function EmailVerificationForm({
             disabled={resendLoading || countdown > 0}
             className="shrink-0 px-4 py-3"
           >
-            {countdown > 0 ? `${countdown}秒` : resendLoading ? "发送中..." : "重新发送"}
+            {countdown > 0 ? `${countdown}s` : resendLoading ? "Sending..." : "Resend"}
           </Button>
         </div>
         <p className="mt-2 text-xs leading-5 text-[#1A1A1A]">
-          验证码已发送至 {email}，15分钟内有效
+          A verification code was sent to {email}. It expires in 15 minutes.
         </p>
       </div>
 
       <div>
         <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-          密码
+          Password
         </label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
-          placeholder="至少6位密码"
+          placeholder="At least 6 characters"
           required
         />
       </div>
 
       <div>
         <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-          确认密码
+          Confirm password
         </label>
         <input
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           className="w-full rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
-          placeholder="再次输入密码"
+          placeholder="Enter your password again"
           required
         />
       </div>
 
       <div>
         <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-          姓名/昵称
+          Name / display name
         </label>
         <input
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           className="w-full rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
-          placeholder="请输入您的姓名或昵称"
+          placeholder="Enter your name or display name"
           required
         />
       </div>
@@ -195,14 +195,14 @@ export function EmailVerificationForm({
           onClick={onBack}
           className="flex-1"
         >
-          返回
+          Back
         </Button>
         <Button
           type="submit"
           disabled={loading}
           className="flex-1"
         >
-          {loading ? "验证中..." : "完成注册"}
+          {loading ? "Verifying..." : "Complete registration"}
         </Button>
       </div>
     </form>

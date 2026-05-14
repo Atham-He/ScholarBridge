@@ -2,172 +2,267 @@
   "nodes": [
     {
       "slug": "sft",
-      "title": "监督微调（SFT）",
-      "summary": "用高质量示例数据把基础模型拉到可控、稳定、可用的初始能力区间",
-      "description": "SFT 是当前大模型训练链路里最基础也最关键的一步。它决定了模型是否具备稳定的指令遵循、格式输出、基础推理和任务迁移能力，也是后续偏好对齐、强化学习和工具调用能力的起点。",
-      "tags": ["SFT", "后训练", "指令微调", "数据配方"],
+      "title": "Supervised Fine-Tuning (SFT)",
+      "summary": "Uses high-quality examples to move a base model into a controllable, stable, and useful capability regime.",
+      "description": "SFT is one of the most fundamental and critical steps in modern LLM training pipelines. It determines whether a model can reliably follow instructions, format outputs, perform basic reasoning, and transfer across tasks, while also serving as the starting point for preference alignment, reinforcement learning, and tool use.",
+      "tags": [
+        "SFT",
+        "Post-Training",
+        "Instruction Tuning",
+        "Data Recipe"
+      ],
       "layerKey": "theory",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "rl-post-training",
-      "title": "强化学习与后训练优化",
-      "summary": "通过奖励、反馈和在线优化提升复杂推理、决策与长程任务表现",
-      "description": "强化学习在逻辑数理智能里不只是经典控制问题，更是后训练阶段提升推理、规划和策略表现的关键方法。核心关注点包括奖励设计、样本效率、探索策略，以及如何把离线偏好数据和在线交互结合起来。",
-      "tags": ["强化学习", "后训练", "奖励建模", "策略优化"],
+      "title": "Reinforcement Learning and Post-Training Optimization",
+      "summary": "Improves complex reasoning, decision making, and long-horizon performance through rewards, feedback, and online optimization.",
+      "description": "In logical-mathematical intelligence, reinforcement learning is not only about classical control. It is also a key method for improving reasoning, planning, and policy quality during post-training. Core concerns include reward design, sample efficiency, exploration strategy, and how to combine offline preference data with online interaction.",
+      "tags": [
+        "Reinforcement Learning",
+        "Post-Training",
+        "Reward Modeling",
+        "Policy Optimization"
+      ],
       "layerKey": "theory",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "preference-alignment",
-      "title": "偏好对齐与奖励建模",
-      "summary": "把“更好答案”的偏好信号显式建模，连接 SFT 与 RL",
-      "description": "偏好对齐研究如何把人类或系统偏好转换成可训练的优化目标。它既包括 RLHF 这类基于奖励模型的路线，也包括 DPO 一类直接优化偏好的方法，是提升模型可控性、推理质量和输出风格的核心理论模块。",
-      "tags": ["RLHF", "DPO", "奖励模型", "偏好学习"],
+      "title": "Preference Alignment and Reward Modeling",
+      "summary": "Explicitly models preference signals for better answers and connects SFT with RL.",
+      "description": "Preference alignment studies how human or system preferences can be turned into trainable optimization objectives. It includes reward-model-based approaches such as RLHF as well as direct preference optimization methods such as DPO, making it a core theoretical module for controllability, reasoning quality, and output style.",
+      "tags": [
+        "RLHF",
+        "DPO",
+        "Reward Model",
+        "Preference Learning"
+      ],
       "layerKey": "theory",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "reasoning-search",
-      "title": "推理时扩展与搜索",
-      "summary": "把搜索、采样、树结构和测试时计算预算引入推理过程",
-      "description": "逻辑数理任务常常无法靠一次前向生成解决，因此需要在推理时做候选展开、搜索、回溯、验证和选择。这个方向关注 test-time scaling、树搜索、程序搜索和 proof search，强调用额外计算换取更可靠的复杂推理结果。",
-      "tags": ["推理", "搜索", "test-time scaling", "proof search"],
+      "title": "Inference-Time Expansion and Search",
+      "summary": "Brings search, sampling, tree structures, and test-time compute budgets into the reasoning process.",
+      "description": "Logical and mathematical tasks often cannot be solved with a single forward pass. They require candidate expansion, search, backtracking, verification, and selection during inference. This direction studies test-time scaling, tree search, program search, and proof search, emphasizing the use of extra compute to obtain more reliable complex reasoning.",
+      "tags": [
+        "Reasoning",
+        "Search",
+        "Test-Time Scaling",
+        "Proof Search"
+      ],
       "layerKey": "theory",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "ai-infra",
-      "title": "AI Infra",
-      "summary": "训练、存储、调度、并行与成本控制构成大模型系统的硬底座",
-      "description": "AI Infra 关注的是大模型从训练到部署的整条工程链路，包括集群调度、并行策略、显存与带宽管理、容错、观测和成本优化。没有这层能力，很多理论方法和应用形态都无法稳定放大到真实规模。",
-      "tags": ["AI Infra", "分布式训练", "系统工程", "集群调度"],
+      "title": "AI Infrastructure",
+      "summary": "Training, storage, scheduling, parallelism, and cost control form the hard foundation of large-model systems.",
+      "description": "AI infrastructure covers the full engineering stack from training to deployment, including cluster scheduling, parallel strategies, memory and bandwidth management, fault tolerance, observability, and cost optimization. Without this layer, many theoretical methods and applications cannot scale reliably to real-world size.",
+      "tags": [
+        "AI Infrastructure",
+        "Distributed Training",
+        "Systems Engineering",
+        "Cluster Scheduling"
+      ],
       "layerKey": "infrastructure",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "ai4math",
       "title": "AI for Math",
-      "summary": "面向数学竞赛、证明、猜想与形式化问题求解的应用方向",
-      "description": "AI4Math 关注模型如何处理高结构化、高验证要求的数学任务，包括几何题求解、代数推导、定理证明、形式化数学和研究辅助。它是检验逻辑推理能力是否真正可用的重要应用场景。",
-      "tags": ["AI4Math", "数学推理", "证明", "竞赛数学"],
+      "summary": "Application direction for mathematical competitions, proving, conjectures, and formal problem solving.",
+      "description": "AI4Math studies how models handle highly structured and highly verifiable mathematical tasks, including geometry problem solving, algebraic derivation, theorem proving, formal mathematics, and research assistance. It is an important application area for testing whether logical reasoning is truly usable.",
+      "tags": [
+        "AI4Math",
+        "Mathematical Reasoning",
+        "Proofs",
+        "Competition Math"
+      ],
       "layerKey": "application",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "ai4science",
       "title": "AI for Science",
-      "summary": "把模型能力落到蛋白质、材料、气候、生物等科学问题上",
-      "description": "AI4Science 的核心不是通用聊天，而是让模型在真实科学任务中参与预测、发现、模拟和设计。对于逻辑数理智能来说，它代表了数理推理能力从抽象 benchmark 走向科学问题求解的关键出口。",
-      "tags": ["AI4Science", "科学发现", "计算科学", "科学模型"],
+      "summary": "Applies model capabilities to scientific problems in proteins, materials, climate, biology, and beyond.",
+      "description": "AI4Science is not about generic chat. It is about making models participate in prediction, discovery, simulation, and design for real scientific tasks. For logical-mathematical intelligence, it represents a key path from abstract benchmarks to real scientific problem solving.",
+      "tags": [
+        "AI4Science",
+        "Scientific Discovery",
+        "Computational Science",
+        "Scientific Models"
+      ],
       "layerKey": "application",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "automated-theorem-systems",
-      "title": "自动定理证明系统",
-      "summary": "把证明搜索、形式系统和语言模型结合成可执行系统",
-      "description": "自动定理证明系统强调端到端能力：命题表示、搜索策略、战术生成、验证器调用和结果回收。它比单篇论文更接近真实系统工程，是逻辑数理智能最直接、最具代表性的应用场景之一。",
-      "tags": ["自动定理证明", "形式系统", "证明搜索", "系统应用"],
+      "title": "Automated Theorem Proving Systems",
+      "summary": "Combines proof search, formal systems, and language models into executable systems.",
+      "description": "Automated theorem proving systems emphasize end-to-end capability: statement representation, search strategies, tactic generation, verifier calls, and result recovery. They are closer to real systems engineering than isolated papers and are among the most direct and representative application scenarios for logical-mathematical intelligence.",
+      "tags": [
+        "Automated Theorem Proving",
+        "Formal Systems",
+        "Proof Search",
+        "Systems Applications"
+      ],
       "layerKey": "application",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "algorithm-discovery",
-      "title": "算法发现与程序优化",
-      "summary": "让模型参与算法搜索、程序改写与计算性能优化",
-      "description": "这类应用把逻辑数理智能落在算法空间搜索和程序层面的优化问题上，例如矩阵乘法策略发现、排序与编译优化、启发式搜索改进等，体现模型在离散结构和优化目标上的实用价值。",
-      "tags": ["算法发现", "程序优化", "离散搜索", "系统优化"],
+      "title": "Algorithm Discovery and Program Optimization",
+      "summary": "Lets models participate in algorithm search, program rewriting, and computational performance optimization.",
+      "description": "These applications apply logical-mathematical intelligence to search and optimization in algorithm space and program space, including matrix multiplication strategy discovery, sorting and compilation optimization, and heuristic search improvement. They show the practical value of models on discrete structures and optimization objectives.",
+      "tags": [
+        "Algorithm Discovery",
+        "Program Optimization",
+        "Discrete Search",
+        "Systems Optimization"
+      ],
       "layerKey": "application",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "vllm-serving",
-      "title": "vLLM 与推理服务",
-      "summary": "围绕高吞吐、低延迟和显存效率构建大模型推理引擎",
-      "description": "vLLM 代表了当前推理基础设施的关键方向：通过高效 KV cache 管理、continuous batching 和 serving 抽象，把大模型从研究原型变成可部署的在线服务能力。",
-      "tags": ["vLLM", "serving", "推理引擎", "系统优化"],
+      "title": "vLLM and Inference Serving",
+      "summary": "Builds LLM inference engines around throughput, latency, and memory efficiency.",
+      "description": "vLLM represents a key direction in modern inference infrastructure. Through efficient KV cache management, continuous batching, and serving abstractions, it turns large models from research prototypes into deployable online services.",
+      "tags": [
+        "vLLM",
+        "Serving",
+        "Inference Engine",
+        "Systems Optimization"
+      ],
       "layerKey": "infrastructure",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "posttraining-pipeline",
-      "title": "数据与后训练 Pipeline",
-      "summary": "从数据构造、清洗、偏好采样到多轮后训练形成可重复流程",
-      "description": "真正的后训练能力来自稳定的数据与流程，而不是单次实验。这个方向关注数据生成、数据清洗、合成偏好、样本配方、训练编排以及多阶段 SFT/RL 对齐流程的工程化实现。",
-      "tags": ["数据工程", "后训练", "pipeline", "合成数据"],
+      "title": "Data and Post-Training Pipelines",
+      "summary": "Creates repeatable workflows from data construction and cleaning to preference sampling and multi-stage post-training.",
+      "description": "Real post-training capability comes from stable data and workflows, not from one-off experiments. This direction focuses on data generation, data cleaning, synthetic preferences, sample recipes, training orchestration, and engineering implementations of multi-stage SFT and RL alignment pipelines.",
+      "tags": [
+        "Data Engineering",
+        "Post-Training",
+        "Pipeline",
+        "Synthetic Data"
+      ],
       "layerKey": "infrastructure",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "eval-benchmarking",
-      "title": "评测与 Benchmark 基础设施",
-      "summary": "用统一评测集、打分协议和实验平台衡量复杂推理能力",
-      "description": "数理与逻辑任务的进步高度依赖可信评测。这个方向关注 benchmark 设计、自动评测、可复现实验、能力剖面分析，以及如何把开放式推理问题转成可比较的系统评估。",
-      "tags": ["评测", "benchmark", "实验平台", "能力分析"],
+      "title": "Evaluation and Benchmark Infrastructure",
+      "summary": "Uses unified benchmarks, scoring protocols, and experiment platforms to measure complex reasoning.",
+      "description": "Progress on logical and mathematical tasks depends heavily on trustworthy evaluation. This direction studies benchmark design, automatic evaluation, reproducible experiments, capability profiling, and how to turn open-ended reasoning problems into comparable systems evaluation.",
+      "tags": [
+        "Evaluation",
+        "Benchmark",
+        "Experiment Platform",
+        "Capability Analysis"
+      ],
       "layerKey": "infrastructure",
       "domainSlug": "logical-mathematical"
     },
     {
       "slug": "transformer",
-      "title": "Transformer架构",
-      "summary": "现代大语言模型的基础架构",
-      "description": "Transformer架构通过自注意力机制实现了序列建模的革命性突破，成为NLP和计算机视觉等领域的主流架构。研究重点包括效率优化、长序列处理和变体设计。",
-      "tags": ["Transformer", "注意力机制", "模型架构", "效率优化"],
+      "title": "Transformer Architecture",
+      "summary": "The foundational architecture behind modern large language models.",
+      "description": "The Transformer architecture revolutionized sequence modeling with self-attention and became the dominant architecture in NLP, computer vision, and related fields. Research topics include efficiency optimization, long-context handling, and architectural variants.",
+      "tags": [
+        "Transformer",
+        "Self-Attention",
+        "Model Architecture",
+        "Efficiency"
+      ],
       "layerKey": "theory",
       "domainSlug": "linguistic-verbal"
     },
     {
       "slug": "vision-transformer",
       "title": "Vision Transformer",
-      "summary": "将Transformer应用于计算机视觉",
-      "description": "Vision Transformer (ViT)成功将Transformer架构引入计算机视觉领域，通过将图像分割成patches并处理为序列，实现了与CNN相媲美甚至超越的性能。",
-      "tags": ["ViT", "计算机视觉", "Transformer", "图像分类"],
+      "summary": "Applies Transformer architectures to computer vision.",
+      "description": "Vision Transformer (ViT) successfully brought Transformers into computer vision by splitting images into patches and processing them as sequences, reaching or surpassing CNN-level performance.",
+      "tags": [
+        "ViT",
+        "Computer Vision",
+        "Transformer",
+        "Image Classification"
+      ],
       "layerKey": "theory",
       "domainSlug": "visual-spatial"
     },
     {
       "slug": "diffusion-model",
-      "title": "扩散模型",
-      "summary": "生成式图像建模的主流方法",
-      "description": "扩散模型通过逐步去噪的过程生成高质量图像，成为当前图像生成的主流技术。研究包括采样加速、条件生成和视频扩展等方向。",
-      "tags": ["扩散模型", "图像生成", "生成式AI", "DDPM"],
+      "title": "Diffusion Models",
+      "summary": "The dominant approach for generative image modeling.",
+      "description": "Diffusion models generate high-quality images through iterative denoising and have become the mainstream technology for image generation. Research includes faster sampling, conditional generation, and video extensions.",
+      "tags": [
+        "Diffusion Models",
+        "Image Generation",
+        "Generative AI",
+        "DDPM"
+      ],
       "layerKey": "infrastructure",
       "domainSlug": "visual-spatial"
     },
     {
       "slug": "reinforcement-learning",
-      "title": "强化学习基础",
-      "summary": "智能体与环境的交互学习",
-      "description": "强化学习研究智能体如何通过与环境交互获得奖励反馈来优化行为策略。核心挑战包括样本效率、探索利用平衡和泛化能力。",
-      "tags": ["强化学习", "RL", "智能体", "策略优化"],
+      "title": "Reinforcement Learning Fundamentals",
+      "summary": "Learning through interaction between an agent and its environment.",
+      "description": "Reinforcement learning studies how agents optimize behavior through reward feedback from interaction with an environment. Core challenges include sample efficiency, exploration-exploitation balance, and generalization.",
+      "tags": [
+        "Reinforcement Learning",
+        "RL",
+        "Agents",
+        "Policy Optimization"
+      ],
       "layerKey": "theory",
       "domainSlug": "bodily-kinesthetic"
     },
     {
       "slug": "speech-synthesis",
-      "title": "语音合成",
-      "summary": "高质量语音生成技术",
-      "description": "语音合成技术已经从传统的拼接方法发展到神经网络端到端生成，实现了高度自然和表现力丰富的语音输出。研究重点包括音色克隆、情感表达和实时生成。",
-      "tags": ["语音合成", "TTS", "端到端", "语音生成"],
+      "title": "Speech Synthesis",
+      "summary": "High-quality speech generation technologies.",
+      "description": "Speech synthesis has evolved from traditional concatenative systems to end-to-end neural generation, enabling highly natural and expressive speech output. Research focuses on voice cloning, emotional expression, and real-time generation.",
+      "tags": [
+        "Speech Synthesis",
+        "TTS",
+        "End-to-End",
+        "Speech Generation"
+      ],
       "layerKey": "application",
       "domainSlug": "musical-rhythmic"
     },
     {
       "slug": "multi-agent",
-      "title": "多智能体系统",
-      "summary": "多个AI智能体的协作与竞争",
-      "description": "多智能体系统研究多个自主智能体如何在共享环境中交互、协作或竞争。应用包括游戏AI、分布式问题求解和社会模拟等。",
-      "tags": ["多智能体", "协作", "博弈论", "社会AI"],
+      "title": "Multi-Agent Systems",
+      "summary": "Collaboration and competition among multiple AI agents.",
+      "description": "Multi-agent systems study how multiple autonomous agents interact, cooperate, or compete in shared environments. Applications include game AI, distributed problem solving, and social simulation.",
+      "tags": [
+        "Multi-Agent",
+        "Collaboration",
+        "Game Theory",
+        "Social AI"
+      ],
       "layerKey": "application",
       "domainSlug": "interpersonal"
     },
     {
       "slug": "meta-learning",
-      "title": "元学习",
-      "summary": "学会如何学习",
-      "description": "元学习旨在让AI系统具备学习如何学习的能力，能够快速适应新任务和少样本学习场景。研究包括MAML、元强化学习和自动优化等方向。",
-      "tags": ["元学习", "Few-shot", "学习算法", "自适应"],
+      "title": "Meta-Learning",
+      "summary": "Learning how to learn.",
+      "description": "Meta-learning aims to equip AI systems with the ability to learn how to learn, enabling rapid adaptation to new tasks and few-shot settings. Research includes MAML, meta-RL, and automated optimization.",
+      "tags": [
+        "Meta-Learning",
+        "Few-Shot",
+        "Learning Algorithms",
+        "Adaptation"
+      ],
       "layerKey": "theory",
       "domainSlug": "intrapersonal"
     }
@@ -175,22 +270,22 @@
   "layers": [
     {
       "key": "theory",
-      "name": "理论层",
-      "description": "训练范式、优化机制与推理方法",
+      "name": "Theory Layer",
+      "description": "Training paradigms, optimization mechanisms, and reasoning methods",
       "icon": "📐",
       "order": 1
     },
     {
       "key": "application",
-      "name": "应用层",
-      "description": "AI4Math、AI4Science 与算法发现等落地场景",
+      "name": "Application Layer",
+      "description": "Practical scenarios such as AI4Math, AI4Science, and algorithm discovery",
       "icon": "🚀",
       "order": 2
     },
     {
       "key": "infrastructure",
-      "name": "基础设施层",
-      "description": "serving、训练系统、数据工程与评测平台",
+      "name": "Infrastructure Layer",
+      "description": "Serving, training systems, data engineering, and evaluation platforms",
       "icon": "⚙️",
       "order": 3
     }

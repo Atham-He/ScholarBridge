@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <p className="px-4 py-16 text-center text-[#1A1A1A]">加载中…</p>
+        <p className="px-4 py-16 text-center text-[#1A1A1A]">Loading...</p>
       }
     >
       <LoginForm />

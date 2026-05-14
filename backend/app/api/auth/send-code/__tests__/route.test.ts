@@ -14,7 +14,7 @@ describe('POST /api/auth/send-code', () => {
 
     expect(response.status).toBe(200);
     expect(data.ok).toBe(true);
-    expect(data.message).toContain('验证码已发送');
+    expect(data.message).toContain('A verification code has been sent');
   });
 
   it('should reject invalid email format', async () => {

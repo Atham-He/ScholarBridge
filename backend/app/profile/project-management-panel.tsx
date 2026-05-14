@@ -141,7 +141,7 @@ export function ProfileProjectPanel() {
 
   const submitProject = async () => {
     if (!form.title.trim() || !form.description.trim() || !form.researchArea.trim() || !form.startTime.trim()) {
-      alert("请填写项目标题、描述、研究方向和开始时间");
+      alert("Please fill in the project title, description, research area, and start time.");
       return;
     }
 
@@ -164,7 +164,7 @@ export function ProfileProjectPanel() {
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        alert(data.error || "保存项目失败");
+        alert(data.error || "Failed to save the project.");
         return;
       }
 
@@ -177,7 +177,7 @@ export function ProfileProjectPanel() {
   };
 
   const deleteProject = async (projectId: string) => {
-    if (!confirm("确定要删除这个项目吗？")) {
+    if (!confirm("Are you sure you want to delete this project?")) {
       return;
     }
 
@@ -187,7 +187,7 @@ export function ProfileProjectPanel() {
       return;
     }
 
-    alert("删除失败");
+    alert("Failed to delete the project.");
   };
 
   const toggleStatus = async (project: OwnedProject) => {
@@ -220,7 +220,7 @@ export function ProfileProjectPanel() {
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        alert(data.error || "保存 AI 配置失败");
+        alert(data.error || "Failed to save AI settings.");
         return;
       }
 
@@ -253,7 +253,7 @@ export function ProfileProjectPanel() {
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        alert(data.error || "更新申请失败");
+        alert(data.error || "Failed to update the application.");
         return;
       }
 
@@ -270,11 +270,11 @@ export function ProfileProjectPanel() {
 
   const editFeedback = async (application: ProjectApplication) => {
     if (application.status !== "accepted" && application.status !== "rejected") {
-      alert("请先同意或拒绝该申请，再填写反馈。");
+      alert("Accept or reject this application before adding feedback.");
       return;
     }
 
-    const feedback = window.prompt("填写给申请者的反馈（可留空）：", application.ownerFeedback || "");
+    const feedback = window.prompt("Write feedback for the applicant (optional):", application.ownerFeedback || "");
     if (feedback === null) {
       return;
     }
@@ -288,7 +288,7 @@ export function ProfileProjectPanel() {
       const response = await fetch(`/api/applications/${application.id}/score`, { method: "POST" });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        alert(data.error || "AI 评分失败");
+        alert(data.error || "AI scoring failed.");
         return;
       }
 
@@ -304,10 +304,10 @@ export function ProfileProjectPanel() {
 
   const statusText = (status: string) => {
     switch (status) {
-      case "pending": return "待审核";
-      case "accepted": return "已接受";
-      case "rejected": return "已拒绝";
-      case "WITHDRAWN": return "已撤回";
+      case "pending": return "Pending";
+      case "accepted": return "Accepted";
+      case "rejected": return "Rejected";
+      case "WITHDRAWN": return "Withdrawn";
       default: return status;
     }
   };
@@ -324,7 +324,7 @@ export function ProfileProjectPanel() {
 
   const formatDate = (dateValue?: string | null) => {
     if (!dateValue) return "";
-    return new Date(dateValue).toLocaleDateString("zh-CN", {
+    return new Date(dateValue).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -337,19 +337,19 @@ export function ProfileProjectPanel() {
   };
 
   if (loading) {
-    return <p className="py-6 text-sm text-[#1A1A1A]">项目加载中...</p>;
+    return <p className="py-6 text-sm text-[#1A1A1A]">Loading projects...</p>;
   }
 
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-sm text-[#1A1A1A]">发布、编辑项目，并处理收到的申请。</p>
+          <p className="text-sm text-[#1A1A1A]">Publish and edit projects, then review and manage incoming applications.</p>
           <p className="mt-1 text-xs text-[#4A4A4A]">
-            AI 权重：硬实力 {aiConfig.aiHardWeight}% · 项目匹配度 {aiConfig.aiFitWeight}%
+            AI weights: academic strength {aiConfig.aiHardWeight}% · project fit {aiConfig.aiFitWeight}%
           </p>
         </div>
-        <Button variant="gold" size="sm" onClick={startCreate}>新建项目</Button>
+        <Button variant="gold" size="sm" onClick={startCreate}>New project</Button>
       </div>
 
       <div className="rounded border border-[#A8D0E8] bg-[#EBF3F8] p-4">
@@ -362,15 +362,15 @@ export function ProfileProjectPanel() {
                   checked={aiConfig.aiAgentEnabled}
                   onChange={(event) => setAiConfig((current) => ({ ...current, aiAgentEnabled: event.target.checked }))}
                 />
-                AI 简历评分
+                AI resume scoring
               </label>
               <span className="text-xs text-[#4A4A4A]">
-                硬实力 {aiConfig.aiHardWeight}% · 项目匹配度 {aiConfig.aiFitWeight}%
+                Academic strength {aiConfig.aiHardWeight}% · project fit {aiConfig.aiFitWeight}%
               </span>
             </div>
 
             <label className="mt-4 grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-              权重滑块
+              Weight slider
               <input
                 type="range"
                 min={0}
@@ -388,11 +388,11 @@ export function ProfileProjectPanel() {
             </label>
 
             <label className="mt-4 grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-              自定义筛选偏好
+              Custom screening preference
               <textarea
                 value={aiConfig.aiAgentPrompt}
                 rows={3}
-                placeholder="例如：优先考虑有论文发表、独立研究经历、或与项目方向高度相关的申请者。"
+                placeholder="Example: prioritize applicants with publications, independent research experience, or especially strong alignment with this project."
                 onChange={(event) => setAiConfig((current) => ({ ...current, aiAgentPrompt: event.target.value }))}
                 className="rounded border border-[#A8D0E8] bg-white px-3 py-2 font-normal text-[#1A1A1A] outline-none focus:border-[#2C5F7C]"
               />
@@ -400,7 +400,7 @@ export function ProfileProjectPanel() {
           </div>
 
           <Button variant="outline" size="sm" disabled={savingAiConfig} onClick={saveAiConfig}>
-            {savingAiConfig ? "保存中..." : "保存 AI 配置"}
+            {savingAiConfig ? "Saving..." : "Save AI settings"}
           </Button>
         </div>
       </div>
@@ -409,42 +409,42 @@ export function ProfileProjectPanel() {
         <div className="rounded border border-[#E0D8CC] bg-[#FAF8F5] p-4">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-              项目标题
+              Project title
               <input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
             </label>
             <label className="grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-              研究方向
+              Research area
               <input value={form.researchArea} onChange={(event) => setForm({ ...form, researchArea: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
             </label>
             <label className="grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-              开始时间
+              Start time
               <input value={form.startTime} onChange={(event) => setForm({ ...form, startTime: event.target.value })} placeholder="2026-09" className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
             </label>
             <label className="grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-              结束时间
-              <input value={form.endTime} onChange={(event) => setForm({ ...form, endTime: event.target.value })} placeholder="可留空" className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
+              End time
+              <input value={form.endTime} onChange={(event) => setForm({ ...form, endTime: event.target.value })} placeholder="Optional" className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
             </label>
             <label className="grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-              地点
+              Location
               <input value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
             </label>
             <label className="grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-              名额
+              Capacity
               <input type="number" min={1} value={form.capacity} onChange={(event) => setForm({ ...form, capacity: Number(event.target.value) })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
             </label>
           </div>
           <label className="mt-4 grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-            项目描述
+            Project description
             <textarea value={form.description} rows={4} onChange={(event) => setForm({ ...form, description: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
           </label>
           <label className="mt-4 grid gap-2 text-sm font-semibold text-[#1A1A1A]">
-            申请要求
+            Application requirements
             <textarea value={form.requirements} rows={3} onChange={(event) => setForm({ ...form, requirements: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
           </label>
           <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => { setShowForm(false); setForm(emptyForm); }}>取消</Button>
+            <Button variant="outline" size="sm" onClick={() => { setShowForm(false); setForm(emptyForm); }}>Cancel</Button>
             <Button variant="gold" size="sm" disabled={savingProject} onClick={submitProject}>
-              {savingProject ? "保存中..." : form.id ? "保存项目" : "发布项目"}
+              {savingProject ? "Saving..." : form.id ? "Save project" : "Publish project"}
             </Button>
           </div>
         </div>
@@ -452,8 +452,8 @@ export function ProfileProjectPanel() {
 
       {projects.length === 0 ? (
         <div className="rounded border border-[#E0D8CC] bg-[#FAF8F5] p-8 text-center">
-          <p className="text-sm font-semibold text-[#1A1A1A]">还没有发布项目</p>
-          <p className="mt-2 text-sm text-[#1A1A1A]">创建第一个研究项目后，收到的申请也会在这里管理。</p>
+          <p className="text-sm font-semibold text-[#1A1A1A]">No projects published yet</p>
+          <p className="mt-2 text-sm text-[#1A1A1A]">Once you create your first research project, incoming applications will be managed here.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -464,23 +464,23 @@ export function ProfileProjectPanel() {
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <h4 className="text-[16px] font-semibold text-[#1A1A1A]">{project.title}</h4>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${project.status === "OPEN" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                      {project.status === "OPEN" ? "招募中" : project.status === "CLOSED" ? "已关闭" : "已完成"}
+                      {project.status === "OPEN" ? "Open" : project.status === "CLOSED" ? "Closed" : "Completed"}
                     </span>
                   </div>
                   <p className="line-clamp-2 text-sm leading-6 text-[#1A1A1A]">{project.description}</p>
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-[#1A1A1A]">
                     <span>{project.researchArea}</span>
-                    <span>{project.startTime} - {project.endTime || "进行中"}</span>
-                    <span>{project.enrolled}/{project.capacity} 人</span>
-                    <span>{project.applicationCount} 个申请</span>
+                    <span>{project.startTime} - {project.endTime || "Ongoing"}</span>
+                    <span>{project.enrolled}/{project.capacity} enrolled</span>
+                    <span>{project.applicationCount} applications</span>
                     {project.location && <span>{project.location}</span>}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setSelectedProjectId(project.id)}>查看申请</Button>
-                  <Button variant="outline" size="sm" onClick={() => startEdit(project)}>编辑</Button>
-                  <Button variant="outline" size="sm" onClick={() => toggleStatus(project)}>{project.status === "OPEN" ? "关闭" : "开启"}</Button>
-                  <button onClick={() => deleteProject(project.id)} className="rounded border border-red-200 bg-white px-4 py-2 text-sm text-red-700 transition-all hover:border-red-400 hover:bg-red-50">删除</button>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedProjectId(project.id)}>View applications</Button>
+                  <Button variant="outline" size="sm" onClick={() => startEdit(project)}>Edit</Button>
+                  <Button variant="outline" size="sm" onClick={() => toggleStatus(project)}>{project.status === "OPEN" ? "Close" : "Reopen"}</Button>
+                  <button onClick={() => deleteProject(project.id)} className="rounded border border-red-200 bg-white px-4 py-2 text-sm text-red-700 transition-all hover:border-red-400 hover:bg-red-50">Delete</button>
                 </div>
               </div>
             </article>
@@ -496,7 +496,7 @@ export function ProfileProjectPanel() {
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#2C5F7C]">Applications</p>
                   <h3 className="font-display text-[28px] font-semibold text-[#1A1A1A]">{selectedProject.title}</h3>
-                  <p className="mt-2 text-sm text-[#1A1A1A]">{selectedProject.applications.length} 条申请记录</p>
+                  <p className="mt-2 text-sm text-[#1A1A1A]">{selectedProject.applications.length} applications</p>
                 </div>
                 <button
                   className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-semibold text-[#1A1A1A] hover:border-[#2C5F7C] hover:text-[#2C5F7C]"
@@ -512,7 +512,7 @@ export function ProfileProjectPanel() {
 
             <div className="grid gap-4 px-6 py-5">
               {selectedProject.applications.length === 0 ? (
-                <div className="rounded border border-[#E0D8CC] bg-[#FAF8F5] p-8 text-center text-sm text-[#1A1A1A]">暂无申请</div>
+                <div className="rounded border border-[#E0D8CC] bg-[#FAF8F5] p-8 text-center text-sm text-[#1A1A1A]">No applications yet</div>
               ) : selectedProject.applications.map((application) => (
                 <article key={application.id} className="rounded border border-[#E0D8CC] bg-white p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -531,17 +531,17 @@ export function ProfileProjectPanel() {
                   </div>
 
                   {application.coverLetter && <p className="mt-4 rounded border border-[#E0D8CC] bg-[#FAF8F5] p-3 text-sm leading-6 text-[#1A1A1A]">{application.coverLetter}</p>}
-                  {application.ownerFeedback && <p className="mt-4 rounded border border-[#E0D8CC] bg-[#EBF3F8] p-3 text-sm leading-6 text-[#1A1A1A]"><span className="font-semibold">反馈：</span>{application.ownerFeedback}</p>}
+                  {application.ownerFeedback && <p className="mt-4 rounded border border-[#E0D8CC] bg-[#EBF3F8] p-3 text-sm leading-6 text-[#1A1A1A]"><span className="font-semibold">Feedback:</span> {application.ownerFeedback}</p>}
                   <div className="mt-4 rounded border border-[#A8D0E8] bg-[#EBF3F8] p-3 text-sm leading-6 text-[#1A1A1A]">
-                    <p className="font-semibold">AI 简历评分</p>
+                    <p className="font-semibold">AI resume score</p>
                     {typeof application.aiWeightedScore === "number" ? (
                       <div className="mt-1 grid gap-1">
-                        <p>总分 {application.aiWeightedScore} · 硬实力 {application.aiHardScore ?? "-"} · 匹配度 {application.aiFitScore ?? "-"}</p>
+                        <p>Total {application.aiWeightedScore} · Academic strength {application.aiHardScore ?? "-"} · Project fit {application.aiFitScore ?? "-"}</p>
                         {application.aiScoreSummary && <p>{application.aiScoreSummary}</p>}
-                        {application.aiScoredAt && <p className="text-xs text-[#4A4A4A]">评分时间：{formatDate(application.aiScoredAt)}</p>}
+                        {application.aiScoredAt && <p className="text-xs text-[#4A4A4A]">Scored on: {formatDate(application.aiScoredAt)}</p>}
                       </div>
                     ) : (
-                      <p className="mt-1">{application.aiScoreError || "尚未评分。申请者上传 PDF 简历后可评分。"}</p>
+                      <p className="mt-1">{application.aiScoreError || "Not scored yet. Scoring is available after the applicant uploads a PDF resume."}</p>
                     )}
                   </div>
 
@@ -558,26 +558,26 @@ export function ProfileProjectPanel() {
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={() => setSelectedApplicationId(application.id)}>
-                      查看申请者详情
+                      View applicant details
                     </Button>
                     <Button variant="outline" size="sm" disabled={!application.applicant.resumeFileName} onClick={() => openResume(application.id)}>
-                      {application.applicant.resumeFileName ? `查看简历 ${formatFileSize(application.applicant.resumeSize)}` : "未上传简历"}
+                      {application.applicant.resumeFileName ? `View resume ${formatFileSize(application.applicant.resumeSize)}` : "No resume uploaded"}
                     </Button>
                     <Button variant="outline" size="sm" disabled={scoringApplicationId === application.id || !application.applicant.resumeFileName} onClick={() => scoreApplication(application)}>
-                      {scoringApplicationId === application.id ? "评分中..." : "AI 评分"}
+                      {scoringApplicationId === application.id ? "Scoring..." : "Run AI score"}
                     </Button>
                     {(application.status === "accepted" || application.status === "rejected") && (
                       <Button variant="outline" size="sm" disabled={updatingApplicationId === application.id} onClick={() => editFeedback(application)}>
-                        {application.ownerFeedback ? "编辑反馈" : "填写反馈"}
+                        {application.ownerFeedback ? "Edit feedback" : "Add feedback"}
                       </Button>
                     )}
                     {application.status !== "WITHDRAWN" && (
                       <>
                         <button disabled={updatingApplicationId === application.id} onClick={() => decideApplication(application, "accepted")} className="rounded border border-green-200 bg-white px-4 py-2 text-sm text-green-800 hover:border-green-400 hover:bg-green-50 disabled:cursor-not-allowed disabled:bg-[#F5F2ED]">
-                          {application.status === "accepted" ? "撤销同意" : "同意"}
+                          {application.status === "accepted" ? "Undo accept" : "Accept"}
                         </button>
                         <button disabled={updatingApplicationId === application.id} onClick={() => decideApplication(application, "rejected")} className="rounded border border-red-200 bg-white px-4 py-2 text-sm text-red-700 hover:border-red-400 hover:bg-red-50 disabled:cursor-not-allowed disabled:bg-[#F5F2ED]">
-                          {application.status === "rejected" ? "撤销拒绝" : "拒绝"}
+                          {application.status === "rejected" ? "Undo reject" : "Reject"}
                         </button>
                       </>
                     )}
@@ -611,18 +611,18 @@ export function ProfileProjectPanel() {
 
             <div className="grid gap-5 px-6 py-5 text-sm leading-6 text-[#1A1A1A]">
               <div className="grid gap-2 rounded border border-[#E0D8CC] bg-[#FAF8F5] p-4">
-                <p><span className="font-semibold">申请状态：</span>{statusText(selectedApplication.status)}</p>
-                <p><span className="font-semibold">申请时间：</span>{formatDate(selectedApplication.createdAt)}</p>
+                <p><span className="font-semibold">Application status:</span> {statusText(selectedApplication.status)}</p>
+                <p><span className="font-semibold">Applied on:</span> {formatDate(selectedApplication.createdAt)}</p>
                 {selectedApplication.applicant.education && (
-                  <p><span className="font-semibold">教育背景：</span>{selectedApplication.applicant.education}</p>
+                  <p><span className="font-semibold">Education:</span> {selectedApplication.applicant.education}</p>
                 )}
               </div>
 
               <div className="rounded border border-[#A8D0E8] bg-[#EBF3F8] p-4">
                 <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                   <div>
-                    <p className="font-semibold">AI 简历评分</p>
-                    <p className="mt-1 text-xs text-[#4A4A4A]">当前权重：硬实力 {aiConfig.aiHardWeight}% · 项目匹配度 {aiConfig.aiFitWeight}%</p>
+                    <p className="font-semibold">AI resume score</p>
+                    <p className="mt-1 text-xs text-[#4A4A4A]">Current weights: academic strength {aiConfig.aiHardWeight}% · project fit {aiConfig.aiFitWeight}%</p>
                   </div>
                   <Button
                     variant="outline"
@@ -630,82 +630,82 @@ export function ProfileProjectPanel() {
                     disabled={scoringApplicationId === selectedApplication.id || !selectedApplication.applicant.resumeFileName}
                     onClick={() => scoreApplication(selectedApplication)}
                   >
-                    {scoringApplicationId === selectedApplication.id ? "评分中..." : "重新评分"}
+                    {scoringApplicationId === selectedApplication.id ? "Scoring..." : "Re-score"}
                   </Button>
                 </div>
                 {typeof selectedApplication.aiWeightedScore === "number" ? (
                   <div className="grid gap-2">
-                    <p className="text-[20px] font-semibold text-[#1A1A1A]">总分 {selectedApplication.aiWeightedScore}</p>
-                    <p>硬实力背景：{selectedApplication.aiHardScore ?? "-"} · 项目匹配度：{selectedApplication.aiFitScore ?? "-"}</p>
+                    <p className="text-[20px] font-semibold text-[#1A1A1A]">Total score {selectedApplication.aiWeightedScore}</p>
+                    <p>Academic strength: {selectedApplication.aiHardScore ?? "-"} · Project fit: {selectedApplication.aiFitScore ?? "-"}</p>
                     {selectedApplication.aiScoreSummary && <p>{selectedApplication.aiScoreSummary}</p>}
-                    {selectedApplication.aiScoredAt && <p className="text-xs text-[#4A4A4A]">评分时间：{formatDate(selectedApplication.aiScoredAt)}</p>}
+                    {selectedApplication.aiScoredAt && <p className="text-xs text-[#4A4A4A]">Scored on: {formatDate(selectedApplication.aiScoredAt)}</p>}
                   </div>
                 ) : (
-                  <p>{selectedApplication.aiScoreError || "尚未评分。申请者上传 PDF 简历后可评分。"}</p>
+                  <p>{selectedApplication.aiScoreError || "Not scored yet. Scoring is available after the applicant uploads a PDF resume."}</p>
                 )}
               </div>
 
               <div className="rounded border border-[#E0D8CC] bg-[#FAF8F5] p-4">
-                <p className="mb-2 font-semibold">PDF 简历</p>
+                <p className="mb-2 font-semibold">PDF resume</p>
                 {selectedApplication.applicant.resumeFileName ? (
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                       <p>{selectedApplication.applicant.resumeFileName}</p>
                       <p className="mt-1 text-xs text-[#4A4A4A]">
-                        {selectedApplication.applicant.resumeSize ? formatFileSize(selectedApplication.applicant.resumeSize) : "文件大小未知"}
-                        {selectedApplication.applicant.resumeUploadedAt ? ` · 上传于 ${formatDate(selectedApplication.applicant.resumeUploadedAt)}` : ""}
+                        {selectedApplication.applicant.resumeSize ? formatFileSize(selectedApplication.applicant.resumeSize) : "Unknown file size"}
+                        {selectedApplication.applicant.resumeUploadedAt ? ` · Uploaded on ${formatDate(selectedApplication.applicant.resumeUploadedAt)}` : ""}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => openResume(selectedApplication.id)}>查看简历内容</Button>
+                    <Button variant="outline" size="sm" onClick={() => openResume(selectedApplication.id)}>View resume contents</Button>
                   </div>
                 ) : (
-                  <p>申请者暂未上传简历</p>
+                  <p>The applicant has not uploaded a resume yet.</p>
                 )}
               </div>
 
               {selectedApplication.applicant.bioShort && (
                 <div>
-                  <p className="mb-2 font-semibold">申请者简介</p>
+                  <p className="mb-2 font-semibold">Applicant bio</p>
                   <p>{selectedApplication.applicant.bioShort}</p>
                 </div>
               )}
 
               {selectedApplication.coverLetter && (
                 <div>
-                  <p className="mb-2 font-semibold">申请说明</p>
+                  <p className="mb-2 font-semibold">Application note</p>
                   <div className="rounded border border-[#E0D8CC] bg-[#FAF8F5] p-4">{selectedApplication.coverLetter}</div>
                 </div>
               )}
 
               {selectedApplication.ownerFeedback && (
                 <div>
-                  <p className="mb-2 font-semibold">发布者反馈</p>
+                  <p className="mb-2 font-semibold">Owner feedback</p>
                   <div className="rounded border border-[#E0D8CC] bg-[#EBF3F8] p-4">{selectedApplication.ownerFeedback}</div>
                 </div>
               )}
 
               <div className="grid gap-3 md:grid-cols-2">
                 <div>
-                  <p className="mb-2 font-semibold">研究兴趣</p>
+                  <p className="mb-2 font-semibold">Research interests</p>
                   <div className="flex flex-wrap gap-2">
                     {(selectedApplication.applicant.interests || []).length > 0 ? (
                       (selectedApplication.applicant.interests || []).map((interest) => (
                         <span key={interest} className="rounded bg-[#F5F2ED] px-2 py-1 text-xs text-[#1A1A1A]">{interest}</span>
                       ))
                     ) : (
-                      <span className="text-sm text-[#1A1A1A]">未填写</span>
+                      <span className="text-sm text-[#1A1A1A]">Not provided</span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <p className="mb-2 font-semibold">技能</p>
+                  <p className="mb-2 font-semibold">Skills</p>
                   <div className="flex flex-wrap gap-2">
                     {(selectedApplication.applicant.skills || []).length > 0 ? (
                       (selectedApplication.applicant.skills || []).map((skill) => (
                         <span key={skill} className="rounded bg-[#EBF3F8] px-2 py-1 text-xs text-[#1A1A1A]">{skill}</span>
                       ))
                     ) : (
-                      <span className="text-sm text-[#1A1A1A]">未填写</span>
+                      <span className="text-sm text-[#1A1A1A]">Not provided</span>
                     )}
                   </div>
                 </div>
@@ -715,14 +715,14 @@ export function ProfileProjectPanel() {
                 <div className="flex flex-wrap gap-2 border-t border-[#E0D8CC] pt-5">
                   {(selectedApplication.status === "accepted" || selectedApplication.status === "rejected") && (
                     <Button variant="outline" size="sm" disabled={updatingApplicationId === selectedApplication.id} onClick={() => editFeedback(selectedApplication)}>
-                      {selectedApplication.ownerFeedback ? "编辑反馈" : "填写反馈"}
+                        {selectedApplication.ownerFeedback ? "Edit feedback" : "Add feedback"}
                     </Button>
                   )}
                   <button disabled={updatingApplicationId === selectedApplication.id} onClick={() => decideApplication(selectedApplication, "accepted")} className="rounded border border-green-200 bg-white px-4 py-2 text-sm text-green-800 hover:border-green-400 hover:bg-green-50 disabled:cursor-not-allowed disabled:bg-[#F5F2ED]">
-                    {selectedApplication.status === "accepted" ? "撤销同意" : "同意申请"}
+                    {selectedApplication.status === "accepted" ? "Undo accept" : "Accept application"}
                   </button>
                   <button disabled={updatingApplicationId === selectedApplication.id} onClick={() => decideApplication(selectedApplication, "rejected")} className="rounded border border-red-200 bg-white px-4 py-2 text-sm text-red-700 hover:border-red-400 hover:bg-red-50 disabled:cursor-not-allowed disabled:bg-[#F5F2ED]">
-                    {selectedApplication.status === "rejected" ? "撤销拒绝" : "拒绝申请"}
+                    {selectedApplication.status === "rejected" ? "Undo reject" : "Reject application"}
                   </button>
                 </div>
               )}

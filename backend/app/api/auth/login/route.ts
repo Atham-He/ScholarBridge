@@ -13,12 +13,12 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "请求体必须是 JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Request body must be JSON" }, { status: 400 });
   }
 
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "邮箱或密码无效" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid email or password format" }, { status: 400 });
   }
 
   const data = parsed.data;
@@ -36,18 +36,18 @@ export async function POST(request: NextRequest) {
   `;
 
   if (users.length === 0) {
-    return NextResponse.json({ error: "邮箱或密码错误" }, { status: 401 });
+    return NextResponse.json({ error: "Incorrect email or password" }, { status: 401 });
   }
 
   const user = users[0];
 
   if (!user.passwordHash) {
-    return NextResponse.json({ error: "邮箱或密码错误" }, { status: 401 });
+    return NextResponse.json({ error: "Incorrect email or password" }, { status: 401 });
   }
 
   const ok = await verifyPassword(data.password, user.passwordHash);
   if (!ok) {
-    return NextResponse.json({ error: "邮箱或密码错误" }, { status: 401 });
+    return NextResponse.json({ error: "Incorrect email or password" }, { status: 401 });
   }
 
   const session = await getSession();

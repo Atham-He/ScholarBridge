@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.json({ error: "请先登录" }, { status: 401 });
+    return NextResponse.json({ error: "Please sign in first" }, { status: 401 });
   }
 
   const items = await db.notification.findMany({

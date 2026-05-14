@@ -24,23 +24,23 @@ class DevelopmentEmailService implements EmailService {
 
   async sendVerification(email: string, code: string): Promise<void> {
     const mailOptions = {
-      from: `"ScholarBridge 验证" <2212360065@qq.com>`,
+      from: `"ScholarBridge Verification" <2212360065@qq.com>`,
       to: email,
-      subject: "ScholarBridge 注册验证码",
+      subject: "Your ScholarBridge Verification Code",
       text: `
-您的验证码是：${code}
+Your verification code is: ${code}
 
-此验证码15分钟内有效，用于账号注册。
-如果不是你本人操作，请忽略。
+This code is valid for 15 minutes and can be used to complete your registration.
+If you did not request this code, you can safely ignore this email.
 
-ScholarBridge 团队
+The ScholarBridge Team
       `,
     };
 
     // 真实发送！
     await this.transporter.sendMail(mailOptions);
 
-    console.log(`邮件已发送至 ${email}，验证码：${code}`);
+    console.log(`Verification email sent to ${email}. Code: ${code}`);
   }
 }
 
@@ -53,7 +53,7 @@ class TencentEmailService implements EmailService {
     code: string
   ): Promise<void> {
     // Todo:自己实现腾讯云 SES
-    console.log(`腾讯云邮件发送：${email}，验证码：${code}`);
+    console.log(`Tencent Cloud email delivery: ${email}. Code: ${code}`);
   }
 }
 

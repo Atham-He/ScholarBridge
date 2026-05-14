@@ -20,8 +20,8 @@ export async function gotoAndWaitForHydration(page: Page, path: string) {
 export async function login(page: Page, email: string, password: string, next: string = "/browse") {
   await gotoAndWaitForHydration(page, `/login?next=${encodeURIComponent(next)}`);
   await page.getByPlaceholder("your@email.com").fill(email);
-  await page.getByPlaceholder("请输入密码").fill(password);
-  await page.getByRole("button", { name: "登录" }).click();
+  await page.getByPlaceholder("Enter your password").fill(password);
+  await page.getByRole("button", { name: "Sign In" }).click();
   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(next)}$`));
 }
 

@@ -10,13 +10,13 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "请求体必须是 JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Request body must be JSON" }, { status: 400 });
   }
 
   const parsed = registerSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "参数校验失败", details: parsed.error.issues.map((i: { message: string }) => i.message) },
+      { error: "Validation failed", details: parsed.error.issues.map((i: { message: string }) => i.message) },
       { status: 400 },
     );
   }
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     where: { email: data.email },
   });
   if (existing) {
-    return NextResponse.json({ error: "该邮箱已注册" }, { status: 409 });
+    return NextResponse.json({ error: "This email is already registered" }, { status: 409 });
   }
 
   const passwordHash = await hashPassword(data.password);
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
   
   return NextResponse.json({
     ok: true,
-    message: "注册成功，验证码已发送至邮箱",
+    message: "Registration successful. A verification code has been sent to your email.",
     user: {
       id: user.id,
       email: user.email,

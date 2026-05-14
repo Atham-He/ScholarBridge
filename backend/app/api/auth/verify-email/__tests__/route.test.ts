@@ -70,7 +70,7 @@ describe('POST /api/auth/verify-email', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    // When no verification code exists, it returns "验证码不存在或已使用，请重新获取"
+    // When no verification code exists, it returns an English error message.
     expect(data.error).toBeTruthy();
   });
 
@@ -99,7 +99,7 @@ describe('POST /api/auth/verify-email', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toContain('验证码错误');
+    expect(data.error).toContain("Incorrect verification code");
   });
 
   it('should reject expired verification code', async () => {
@@ -126,6 +126,6 @@ describe('POST /api/auth/verify-email', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toContain('验证码已过期');
+    expect(data.error).toContain("The verification code has expired");
   });
 });

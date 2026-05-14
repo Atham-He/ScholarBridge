@@ -474,7 +474,7 @@ export default function BrowsePage() {
                     variant="ghost"
                     onClick={() => handleToggleSave(project.id)}
                   >
-                    {isSaved ? '已收藏' : '收藏'}
+                    {isSaved ? 'Saved' : 'Save'}
                   </Button>
                 </div>
               </article>
@@ -577,7 +577,7 @@ export default function BrowsePage() {
 
               {appliedApplications[selectedProject.id]?.ownerFeedback && (
                 <div className="rounded border border-[#A8D0E8] bg-[#EBF3F8] p-4">
-                  <p className="mb-2 font-semibold">发布者反馈</p>
+                  <p className="mb-2 font-semibold">Owner feedback</p>
                   <p>{appliedApplications[selectedProject.id].ownerFeedback}</p>
                 </div>
               )}
@@ -608,7 +608,7 @@ export default function BrowsePage() {
                 variant="ghost"
                 onClick={() => handleToggleSave(selectedProject.id)}
               >
-                {savedProjectIds.has(selectedProject.id) ? '已收藏' : '收藏'}
+                {savedProjectIds.has(selectedProject.id) ? 'Saved' : 'Save'}
               </Button>
             </div>
           </section>

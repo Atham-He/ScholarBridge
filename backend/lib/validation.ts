@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const registerSchema = z.object({
-    email: z.string().email("邮箱格式不正确"),
-    password: z.string().min(6, "密码至少 6 位"),
-    displayName: z.string().min(1, "请填写姓名或昵称"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    displayName: z.string().min(1, "Please enter your name or nickname"),
     institution: z.string().optional(),
     department: z.string().optional(),
     title: z.string().optional(),
@@ -18,14 +18,14 @@ export const loginSchema = z.object({
 });
 
 export const sendVerificationSchema = z.object({
-  email: z.string().email("邮箱格式不正确"),
+  email: z.string().email("Please enter a valid email address"),
 });
 
 export const verifyEmailSchema = z.object({
-  email: z.string().email("邮箱格式不正确"),
-  code: z.string().regex(/^\d{6}$/, "验证码必须是6位数字"),
-  password: z.string().min(6, "密码至少 6 位"),
-  displayName: z.string().min(1, "请填写姓名或昵称"),
+  email: z.string().email("Please enter a valid email address"),
+  code: z.string().regex(/^\d{6}$/, "Verification code must be 6 digits"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  displayName: z.string().min(1, "Please enter your name or nickname"),
   institution: z.string().optional(),
   department: z.string().optional(),
   title: z.string().optional(),
@@ -36,14 +36,14 @@ export const verifyEmailSchema = z.object({
 
 // Project validation schemas
 export const projectCreateSchema = z.object({
-  title: z.string().min(1, "项目名称不能为空"),
-  description: z.string().min(10, "项目简介至少10个字符"),
-  researchArea: z.string().min(1, "研究方向不能为空"),
-  startTime: z.string().min(1, "开始时间不能为空"),
+  title: z.string().min(1, "Project title is required"),
+  description: z.string().min(10, "Project description must be at least 10 characters"),
+  researchArea: z.string().min(1, "Research area is required"),
+  startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().optional(),
   location: z.string().optional(),
   requirements: z.string().optional(),
-  capacity: z.number().int().min(1, "招募人数至少为1"),
+  capacity: z.number().int().min(1, "Capacity must be at least 1"),
 });
 
 export const projectUpdateSchema = projectCreateSchema.partial();

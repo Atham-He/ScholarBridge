@@ -17,7 +17,7 @@ export function LogoutButton() {
       onClick={() => void logout()}
       className="rounded-lg border border-[#E0D8CC] bg-white px-3 py-1.5 text-sm font-medium text-[#1A1A1A] hover:border-[#2C5F7C] hover:text-[#2C5F7C]"
     >
-      退出
+      Sign Out
     </button>
   );
 }

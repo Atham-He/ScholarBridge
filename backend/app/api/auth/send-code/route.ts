@@ -14,13 +14,13 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "请求体必须是 JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Request body must be JSON" }, { status: 400 });
   }
 
   const parsed = sendVerificationSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "参数校验失败", details: parsed.error.issues.map((i: { message: string }) => i.message) },
+      { error: "Validation failed", details: parsed.error.issues.map((i: { message: string }) => i.message) },
       { status: 400 },
     );
   }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
   if (recentCodes >= 3) {
     return NextResponse.json(
-      { error: "发送过于频繁，请1小时后再试" },
+      { error: "Too many verification requests. Please try again in 1 hour." },
       { status: 429 }
     );
   }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
   if (existingUser) {
     return NextResponse.json(
-      { error: "该邮箱已注册" },
+      { error: "This email is already registered" },
       { status: 409 }
     );
   }
@@ -81,13 +81,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Failed to send email:', error);
     return NextResponse.json(
-      { error: "发送验证码失败，请稍后重试" },
+      { error: "Failed to send the verification code. Please try again later." },
       { status: 500 }
     );
   }
 
   return NextResponse.json({
     ok: true,
-    message: `验证码已发送到 ${email}，15分钟内有效`,
+    message: `A verification code has been sent to ${email}. It will expire in 15 minutes.`,
   });
 }

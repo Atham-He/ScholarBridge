@@ -9,13 +9,13 @@ test("student profile buttons: save basic info, upload resume, saved/application
   await login(page, demoAccounts.alex.email, demoAccounts.alex.password, "/profile");
   await expect(page).toHaveURL(/\/profile$/);
 
-  await page.getByRole("button", { name: /基本信息/ }).click();
-  const nameInput = page.locator('label:has-text("姓名") + input');
+  await page.getByRole("button", { name: /Basic information/ }).click();
+  const nameInput = page.locator('label:has-text("Name") + input');
   await nameInput.fill("Alex Wang (E2E)");
 
   const [saveDialog] = await Promise.all([
     page.waitForEvent("dialog"),
-    page.getByRole("button", { name: "保存更改" }).click(),
+    page.getByRole("button", { name: "Save changes" }).click(),
   ]);
   await saveDialog.accept();
   await expect(nameInput).toHaveValue("Alex Wang (E2E)");
@@ -29,21 +29,21 @@ test("student profile buttons: save basic info, upload resume, saved/application
 
   const [uploadDialog] = await Promise.all([
     page.waitForEvent("dialog"),
-    page.getByRole("button", { name: "上传简历" }).click(),
+    page.getByRole("button", { name: "Upload resume" }).click(),
   ]);
   await uploadDialog.accept();
 
-  await page.getByRole("button", { name: /我的收藏/ }).click();
+  await page.getByRole("button", { name: /Saved projects/ }).click();
   const savedItem = page.locator('button:has(h4)').first();
   await savedItem.click();
   const savedDialog = page.getByRole("dialog");
   await expect(savedDialog).toBeVisible();
   await savedDialog.getByRole("button", { name: "Close project details" }).click();
 
-  await page.getByRole("button", { name: /我的申请/ }).click();
-  const withdrawButton = page.locator("button", { hasText: "撤回申请" }).first();
+  await page.getByRole("button", { name: /My applications/ }).click();
+  const withdrawButton = page.locator("button", { hasText: "Withdraw application" }).first();
   if (await withdrawButton.isVisible().catch(() => false)) {
     await withdrawButton.click();
-    await expect(page.locator("button", { hasText: "撤回申请" })).toHaveCount(0);
+    await expect(page.locator("button", { hasText: "Withdraw application" })).toHaveCount(0);
   }
 });

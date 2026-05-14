@@ -8,9 +8,14 @@
       "year": 2022,
       "authors": "Hyung Won Chung et al.",
       "venueOrOrg": "ICLR 2022",
-      "summary": "通过多任务指令微调显著提升语言模型的零样本泛化能力，奠定了现代 SFT 路线的代表性范式。",
-      "whyMilestone": "它清楚展示了高质量指令数据和任务混合配方如何把基础模型拉向通用任务执行器，是 SFT 成为主流后训练步骤的重要节点。",
-      "tags": ["SFT", "指令微调", "FLAN", "零样本泛化"],
+      "summary": "Shows that multitask instruction tuning can significantly improve zero-shot generalization in language models, establishing a representative modern SFT paradigm.",
+      "whyMilestone": "It clearly demonstrates how high-quality instruction data and mixed-task recipes can turn a base model into a general-purpose task executor, making it a key milestone in SFT becoming a mainstream post-training step.",
+      "tags": [
+        "SFT",
+        "Instruction Tuning",
+        "FLAN",
+        "Zero-Shot Generalization"
+      ],
       "url": "https://openreview.net/forum?id=gEZrGCozdqR"
     },
     {
@@ -21,9 +26,14 @@
       "year": 2023,
       "authors": "Yizhong Wang et al.",
       "venueOrOrg": "ACL 2023",
-      "summary": "提出用模型自生成指令数据来扩展 SFT 数据集，降低高质量人工标注的门槛。",
-      "whyMilestone": "它把 SFT 从纯人工数据依赖推进到可规模化扩展的流水线，为后续合成数据和指令配方工程打开了路径。",
-      "tags": ["SFT", "合成数据", "指令数据", "Self-Instruct"],
+      "summary": "Proposes expanding SFT datasets with model-generated instruction data, lowering the dependence on large amounts of manual annotation.",
+      "whyMilestone": "It moved SFT from fully human-curated data toward scalable pipelines, opening the path to synthetic data generation and instruction-recipe engineering.",
+      "tags": [
+        "SFT",
+        "Synthetic Data",
+        "Instruction Data",
+        "Self-Instruct"
+      ],
       "url": "https://aclanthology.org/2023.acl-long.754/"
     },
     {
@@ -34,9 +44,14 @@
       "year": 2015,
       "authors": "Volodymyr Mnih et al.",
       "venueOrOrg": "Nature 2015",
-      "summary": "提出 DQN，把深度学习与强化学习有效结合，展示了从像素输入直接学习复杂策略的能力。",
-      "whyMilestone": "这是深度强化学习的开端，也为后来把 RL 用到更复杂序列决策和模型后训练提供了核心方法论基础。",
-      "tags": ["强化学习", "DQN", "深度学习", "策略学习"],
+      "summary": "Introduces DQN and effectively combines deep learning with reinforcement learning, showing that complex policies can be learned directly from pixels.",
+      "whyMilestone": "This marks the beginning of deep reinforcement learning and provides core methodology for later uses of RL in more complex sequential decision making and model post-training.",
+      "tags": [
+        "Reinforcement Learning",
+        "DQN",
+        "Deep Learning",
+        "Policy Learning"
+      ],
       "url": "https://www.nature.com/articles/nature14236"
     },
     {
@@ -47,9 +62,14 @@
       "year": 2017,
       "authors": "John Schulman et al.",
       "venueOrOrg": "arXiv 2017",
-      "summary": "提出 PPO 这一稳定、易实现的策略优化方法，成为强化学习和 RLHF 实践中最常见的优化算法之一。",
-      "whyMilestone": "无论是经典 RL 还是早期 RLHF，PPO 都是极具影响力的工程方法，连接了理论可用性与大规模训练实践。",
-      "tags": ["PPO", "强化学习", "策略优化", "RLHF"],
+      "summary": "Introduces PPO, a stable and easy-to-implement policy optimization method that became one of the most common algorithms in RL and RLHF practice.",
+      "whyMilestone": "Whether in classical RL or early RLHF, PPO is a highly influential engineering method that connects theoretical usability with large-scale training practice.",
+      "tags": [
+        "PPO",
+        "Reinforcement Learning",
+        "Policy Optimization",
+        "RLHF"
+      ],
       "url": "https://arxiv.org/abs/1707.06347"
     },
     {
@@ -60,9 +80,14 @@
       "year": 2022,
       "authors": "Long Ouyang et al.",
       "venueOrOrg": "NeurIPS 2022",
-      "summary": "系统展示了通过人类偏好数据、奖励模型和 RL 优化来提升模型对齐效果的整体路线。",
-      "whyMilestone": "这篇工作把偏好对齐从零散技巧变成了一条完整可复现的方法链，是后续 RLHF、奖励建模和后训练对齐研究的起点之一。",
-      "tags": ["RLHF", "偏好对齐", "奖励模型", "InstructGPT"],
+      "summary": "Systematically presents the full alignment pipeline of using human preference data, reward models, and RL optimization to improve model alignment.",
+      "whyMilestone": "This work turned preference alignment from a collection of isolated tricks into a complete and reproducible pipeline, becoming one of the starting points for later RLHF, reward modeling, and post-training alignment research.",
+      "tags": [
+        "RLHF",
+        "Preference Alignment",
+        "Reward Model",
+        "InstructGPT"
+      ],
       "url": "https://arxiv.org/abs/2203.02155"
     },
     {
@@ -73,9 +98,14 @@
       "year": 2023,
       "authors": "Rafael Rafailov et al.",
       "venueOrOrg": "NeurIPS 2023",
-      "summary": "提出 DPO，通过直接优化偏好对而不显式训练奖励模型，简化了对齐训练流程。",
-      "whyMilestone": "DPO 代表了偏好对齐方法从复杂 RL 管线向更直接、更易复现优化目标的演进，是对齐理论与工程的重要进展。",
-      "tags": ["DPO", "偏好优化", "对齐", "后训练"],
+      "summary": "Introduces DPO, which optimizes preference pairs directly without explicitly training a reward model, simplifying the alignment pipeline.",
+      "whyMilestone": "DPO represents the shift from complex RL pipelines toward more direct and reproducible preference optimization objectives, marking an important advance in both alignment theory and engineering.",
+      "tags": [
+        "DPO",
+        "Preference Optimization",
+        "Alignment",
+        "Post-Training"
+      ],
       "url": "https://openreview.net/forum?id=HPuSIXJaa9"
     },
     {
@@ -86,9 +116,14 @@
       "year": 2023,
       "authors": "Shunyu Yao et al.",
       "venueOrOrg": "NeurIPS 2023",
-      "summary": "把树状搜索引入大模型推理过程，让模型在多个中间思路间展开、评估和回溯。",
-      "whyMilestone": "它明确展示了复杂推理不只是更长的 Chain-of-Thought，而是搜索空间管理与计算预算分配问题。",
-      "tags": ["推理", "搜索", "Tree of Thoughts", "test-time"],
+      "summary": "Brings tree search into LLM reasoning, allowing models to branch, evaluate, and backtrack across multiple intermediate thoughts.",
+      "whyMilestone": "It makes clear that complex reasoning is not just longer chain-of-thought, but also a problem of search-space management and compute allocation.",
+      "tags": [
+        "Reasoning",
+        "Search",
+        "Tree of Thoughts",
+        "Test-Time"
+      ],
       "url": "https://openreview.net/forum?id=5Xc1ecxO1h"
     },
     {
@@ -99,9 +134,14 @@
       "year": 2018,
       "authors": "David Silver et al.",
       "venueOrOrg": "Science 2018",
-      "summary": "通过自博弈和搜索结合，展示了策略网络、价值网络和树搜索协同带来的强大决策能力。",
-      "whyMilestone": "AlphaZero 证明了搜索与学习的结合可以在复杂离散空间中形成强推理能力，对后来 reasoning+search 路线影响极大。",
-      "tags": ["搜索", "AlphaZero", "MCTS", "强化学习"],
+      "summary": "Combines self-play and search to show how policy networks, value networks, and tree search can work together for powerful decision making.",
+      "whyMilestone": "AlphaZero proves that combining search with learning can create strong reasoning in complex discrete spaces, heavily influencing later reasoning-plus-search directions.",
+      "tags": [
+        "Search",
+        "AlphaZero",
+        "MCTS",
+        "Reinforcement Learning"
+      ],
       "url": "https://www.science.org/doi/10.1126/science.aar6404"
     },
     {
@@ -112,9 +152,14 @@
       "year": 2024,
       "authors": "Trieu H. Trinh et al.",
       "venueOrOrg": "Nature 2024",
-      "summary": "结合神经模型与符号引擎，在奥赛级几何问题上实现高水平求解。",
-      "whyMilestone": "它是 AI4Math 最具代表性的系统之一，证明了神经与符号结合可以在高难数学任务上产生实战能力。",
-      "tags": ["AI4Math", "几何证明", "AlphaGeometry", "神经符号"],
+      "summary": "Combines neural models with symbolic engines to achieve high-level performance on Olympiad-style geometry problems.",
+      "whyMilestone": "It is one of the most representative AI4Math systems and shows that neuro-symbolic combinations can deliver practical capability on difficult math tasks.",
+      "tags": [
+        "AI4Math",
+        "Geometry Proofs",
+        "AlphaGeometry",
+        "Neuro-Symbolic"
+      ],
       "url": "https://www.nature.com/articles/s41586-023-06747-5"
     },
     {
@@ -125,9 +170,14 @@
       "year": 2024,
       "authors": "AlphaProof and AlphaGeometry teams",
       "venueOrOrg": "Google DeepMind",
-      "summary": "AlphaProof 与 AlphaGeometry 2 联合求解 IMO 题目，达到银牌水平，推动了复杂数学问题求解系统的发展。",
-      "whyMilestone": "它说明 AI4Math 已经从局部子任务走向完整竞赛题级别问题求解，是逻辑数理智能的重要外显成果。",
-      "tags": ["AI4Math", "IMO", "AlphaProof", "复杂推理"],
+      "summary": "AlphaProof and AlphaGeometry 2 jointly solve IMO problems at silver-medal level, advancing systems for difficult mathematical problem solving.",
+      "whyMilestone": "It shows that AI4Math has moved from isolated subtasks to full competition-problem solving, making it an important outward-facing result of logical-mathematical intelligence.",
+      "tags": [
+        "AI4Math",
+        "IMO",
+        "AlphaProof",
+        "Complex Reasoning"
+      ],
       "url": "https://deepmind.google/discover/blog/ai-solves-imo-problems-at-silver-medal-level/"
     },
     {
@@ -138,9 +188,14 @@
       "year": 2021,
       "authors": "John Jumper et al.",
       "venueOrOrg": "Nature 2021",
-      "summary": "在蛋白质结构预测上达到接近实验精度，展示了 AI 对核心科学问题的突破能力。",
-      "whyMilestone": "AlphaFold 是 AI4Science 最具代表性的里程碑之一，证明 AI 可以在长期未解的科学难题上产生决定性影响。",
-      "tags": ["AI4Science", "AlphaFold", "蛋白质", "生物学"],
+      "summary": "Achieves near-experimental accuracy in protein structure prediction and demonstrates AI breakthroughs on core scientific problems.",
+      "whyMilestone": "AlphaFold is one of the landmark milestones in AI4Science, proving that AI can have decisive impact on long-standing scientific challenges.",
+      "tags": [
+        "AI4Science",
+        "AlphaFold",
+        "Proteins",
+        "Biology"
+      ],
       "url": "https://www.nature.com/articles/s41586-021-03819-2"
     },
     {
@@ -151,9 +206,14 @@
       "year": 2023,
       "authors": "Remi Lam et al.",
       "venueOrOrg": "Science 2023",
-      "summary": "GraphCast 用图神经网络进行全球中期天气预测，在多项指标上超越传统数值天气预报基线。",
-      "whyMilestone": "它体现了 AI4Science 不只是分析已有数据，还可以在高价值科学预测任务上提供更高效、更准确的新范式。",
-      "tags": ["AI4Science", "GraphCast", "天气预测", "科学建模"],
+      "summary": "Uses graph neural networks for medium-range global weather forecasting and surpasses traditional numerical baselines on multiple metrics.",
+      "whyMilestone": "It shows that AI4Science is not only about analyzing existing data, but also about providing more efficient and more accurate paradigms for high-value scientific forecasting tasks.",
+      "tags": [
+        "AI4Science",
+        "GraphCast",
+        "Weather Forecasting",
+        "Scientific Modeling"
+      ],
       "url": "https://www.science.org/doi/10.1126/science.adi2336"
     },
     {
@@ -164,9 +224,14 @@
       "year": 2020,
       "authors": "Stanislas Polu, Ilya Sutskever",
       "venueOrOrg": "OpenAI",
-      "summary": "使用生成式语言模型在 Metamath 形式系统中进行证明搜索，展示语言模型进入自动定理证明的可能性。",
-      "whyMilestone": "这是把大模型能力接到形式系统求证链路上的重要早期代表工作，为后续自动定理证明系统提供了方向。",
-      "tags": ["自动定理证明", "GPT-f", "Metamath", "证明系统"],
+      "summary": "Uses generative language models to search for proofs in the Metamath formal system, showing the potential of language models in theorem proving.",
+      "whyMilestone": "This is an important early work connecting large-model capability to formal proof workflows and pointing the way toward later automated theorem proving systems.",
+      "tags": [
+        "Automated Theorem Proving",
+        "GPT-f",
+        "Metamath",
+        "Proof Systems"
+      ],
       "url": "https://openai.com/index/generative-language-modeling-for-automated-theorem-proving/"
     },
     {
@@ -177,9 +242,14 @@
       "year": 2023,
       "authors": "Kaiyu Yang et al.",
       "venueOrOrg": "NeurIPS 2023",
-      "summary": "提供 Lean 环境、检索增强证明方法和可复现实验基线，推动自动定理证明系统化研究。",
-      "whyMilestone": "LeanDojo 把环境、数据和模型串成统一框架，是自动定理证明从单点 demo 走向系统应用的重要基础。",
-      "tags": ["LeanDojo", "自动定理证明", "检索增强", "Lean"],
+      "summary": "Provides a Lean environment, retrieval-augmented proving methods, and reproducible baselines that advance systematic research on automated theorem proving.",
+      "whyMilestone": "LeanDojo connects environment, data, and models into a unified framework, forming an important foundation for moving automated theorem proving from isolated demos to system applications.",
+      "tags": [
+        "LeanDojo",
+        "Automated Theorem Proving",
+        "Retrieval-Augmented",
+        "Lean"
+      ],
       "url": "https://proceedings.neurips.cc/paper_files/paper/2023/hash/4441469427094f8873d0fecb0c4e1cee-Abstract-Datasets_and_Benchmarks.html"
     },
     {
@@ -190,9 +260,14 @@
       "year": 2022,
       "authors": "Alhussein Fawzi et al.",
       "venueOrOrg": "Nature 2022",
-      "summary": "AlphaTensor 通过强化学习发现更优矩阵乘法算法，刷新了多个张量乘法问题上的已知结果。",
-      "whyMilestone": "它清楚说明模型可以进入离散算法空间进行真实发现，而不是只做自然语言层面的辅助。",
-      "tags": ["算法发现", "AlphaTensor", "强化学习", "矩阵乘法"],
+      "summary": "Uses reinforcement learning to discover better matrix multiplication algorithms and improves known results on multiple tensor multiplication problems.",
+      "whyMilestone": "It clearly shows that models can enter discrete algorithm spaces for real discovery instead of staying at the level of natural-language assistance.",
+      "tags": [
+        "Algorithm Discovery",
+        "AlphaTensor",
+        "Reinforcement Learning",
+        "Matrix Multiplication"
+      ],
       "url": "https://www.nature.com/articles/s41586-022-05172-4"
     },
     {
@@ -203,9 +278,14 @@
       "year": 2023,
       "authors": "Daniel Mankowitz et al.",
       "venueOrOrg": "Nature 2023",
-      "summary": "AlphaDev 在底层排序和哈希算法上找到更优实现，直接影响真实软件库性能。",
-      "whyMilestone": "它把算法发现从数学构造推进到系统软件优化，展示了逻辑数理智能在程序与基础库层面的实际价值。",
-      "tags": ["算法发现", "AlphaDev", "程序优化", "强化学习"],
+      "summary": "Finds improved implementations for low-level sorting and hashing algorithms, directly affecting real software-library performance.",
+      "whyMilestone": "It pushes algorithm discovery from mathematical construction into systems software optimization, demonstrating the practical value of logical-mathematical intelligence at the program and infrastructure level.",
+      "tags": [
+        "Algorithm Discovery",
+        "AlphaDev",
+        "Program Optimization",
+        "Reinforcement Learning"
+      ],
       "url": "https://www.nature.com/articles/s41586-023-06004-9"
     },
     {
@@ -216,9 +296,14 @@
       "year": 2023,
       "authors": "Woosuk Kwon et al.",
       "venueOrOrg": "SOSP 2023",
-      "summary": "提出 PagedAttention，为大模型在线推理提供更高显存利用率和吞吐表现。",
-      "whyMilestone": "这篇工作奠定了 vLLM 路线的核心技术基础，是现代大模型 serving 基础设施的代表性成果。",
-      "tags": ["vLLM", "PagedAttention", "serving", "推理系统"],
+      "summary": "Introduces PagedAttention to improve memory efficiency and throughput for online large-model inference.",
+      "whyMilestone": "This paper establishes the core technical foundation of the vLLM direction and stands as a representative result in modern large-model serving infrastructure.",
+      "tags": [
+        "vLLM",
+        "PagedAttention",
+        "Serving",
+        "Inference Systems"
+      ],
       "url": "https://arxiv.org/abs/2309.06180"
     },
     {
@@ -229,9 +314,14 @@
       "year": 2023,
       "authors": "vLLM project contributors",
       "venueOrOrg": "Open Source Project",
-      "summary": "面向大模型高吞吐推理和 API serving 的开源引擎，已成为开源模型部署的重要基础设施之一。",
-      "whyMilestone": "vLLM 把研究中的系统优化真正落成了广泛使用的工程产品，是 AI infra 开源生态中的关键节点。",
-      "tags": ["vLLM", "开源", "serving", "LLM Infra"],
+      "summary": "An open-source engine for high-throughput LLM inference and API serving that has become key infrastructure for open-model deployment.",
+      "whyMilestone": "vLLM turns systems optimizations from research into a widely used engineering product and marks a key milestone in the open AI infrastructure ecosystem.",
+      "tags": [
+        "vLLM",
+        "Open Source",
+        "Serving",
+        "LLM Infrastructure"
+      ],
       "url": "https://github.com/vllm-project/vllm"
     },
     {
@@ -242,9 +332,14 @@
       "year": 2019,
       "authors": "Mohammad Shoeybi et al.",
       "venueOrOrg": "arXiv 2019",
-      "summary": "提出适用于超大模型训练的模型并行方案，推动大规模训练基础设施标准化。",
-      "whyMilestone": "Megatron-LM 是现代 AI Infra 的代表性工作之一，奠定了大模型分布式训练在并行划分上的基础实践。",
-      "tags": ["AI Infra", "Megatron-LM", "模型并行", "分布式训练"],
+      "summary": "Proposes model-parallel training schemes for ultra-large models and pushes standardization in large-scale training infrastructure.",
+      "whyMilestone": "Megatron-LM is a representative work in modern AI infrastructure and lays foundational practice for partitioning and scaling distributed LLM training.",
+      "tags": [
+        "AI Infrastructure",
+        "Megatron-LM",
+        "Model Parallelism",
+        "Distributed Training"
+      ],
       "url": "https://arxiv.org/abs/1909.08053"
     },
     {
@@ -255,9 +350,14 @@
       "year": 2021,
       "authors": "Jeff Rasley et al.",
       "venueOrOrg": "KDD 2021",
-      "summary": "通过 ZeRO 等系统优化大幅降低大模型训练的显存和通信成本，成为训练基础设施的核心工具链之一。",
-      "whyMilestone": "DeepSpeed 代表了 AI Infra 从算法到系统协同优化的主流路线，对训练成本与可扩展性影响深远。",
-      "tags": ["AI Infra", "DeepSpeed", "ZeRO", "训练系统"],
+      "summary": "Greatly reduces memory and communication cost in large-model training through system optimizations such as ZeRO, becoming a core infrastructure toolchain.",
+      "whyMilestone": "DeepSpeed represents the mainstream path of joint optimization across algorithms and systems in AI infrastructure, with deep impact on training cost and scalability.",
+      "tags": [
+        "AI Infrastructure",
+        "DeepSpeed",
+        "ZeRO",
+        "Training Systems"
+      ],
       "url": "https://dl.acm.org/doi/10.1145/3447548.3467276"
     },
     {
@@ -268,9 +368,14 @@
       "year": 2023,
       "authors": "Tianhao Shen et al.",
       "venueOrOrg": "OpenBMB / Dataset Release",
-      "summary": "构建用于后训练与偏好优化的大规模高质量反馈数据集，服务多阶段对齐流程。",
-      "whyMilestone": "后训练 pipeline 的瓶颈常常在数据而非算力，UltraFeedback 代表了偏好数据工程化与标准化的重要方向。",
-      "tags": ["后训练", "数据集", "UltraFeedback", "偏好数据"],
+      "summary": "Builds a large-scale, high-quality feedback dataset for post-training and preference optimization across multi-stage alignment workflows.",
+      "whyMilestone": "Because post-training pipelines are often bottlenecked by data rather than compute, UltraFeedback represents an important direction in engineering and standardizing preference data.",
+      "tags": [
+        "Post-Training",
+        "Datasets",
+        "UltraFeedback",
+        "Preference Data"
+      ],
       "url": "https://huggingface.co/datasets/openbmb/UltraFeedback"
     },
     {
@@ -281,9 +386,14 @@
       "year": 2024,
       "authors": "Allen Institute for AI",
       "venueOrOrg": "AI2",
-      "summary": "提供从 SFT 到偏好优化的开放后训练流程与配套实验脚本，用于构建可复现的 instruction-tuned 模型。",
-      "whyMilestone": "它把后训练从论文方法变成可运行、可扩展、可比较的工程流水线，是后训练基础设施的重要代表。",
-      "tags": ["后训练", "pipeline", "OpenInstruct", "可复现"],
+      "summary": "Provides an open post-training workflow from SFT to preference optimization, along with experiment scripts for building reproducible instruction-tuned models.",
+      "whyMilestone": "It turns post-training from a paper method into an executable, scalable, and comparable engineering pipeline, making it an important representative of post-training infrastructure.",
+      "tags": [
+        "Post-Training",
+        "Pipeline",
+        "OpenInstruct",
+        "Reproducibility"
+      ],
       "url": "https://github.com/allenai/open-instruct"
     },
     {
@@ -294,9 +404,14 @@
       "year": 2022,
       "authors": "Percy Liang et al.",
       "venueOrOrg": "Transactions on Machine Learning Research",
-      "summary": "提出从准确性、校准、稳健性、公平性等多维度评估语言模型的统一框架。",
-      "whyMilestone": "HELM 让模型评测从单一分数转向系统画像，是 benchmark 基础设施思维的重要代表。",
-      "tags": ["评测", "HELM", "benchmark", "模型画像"],
+      "summary": "Proposes a unified framework for evaluating language models across dimensions such as accuracy, calibration, robustness, and fairness.",
+      "whyMilestone": "HELM shifts model evaluation away from a single score toward a full system profile, making it a representative benchmark-infrastructure mindset.",
+      "tags": [
+        "Evaluation",
+        "HELM",
+        "Benchmark",
+        "Model Profiling"
+      ],
       "url": "https://openreview.net/forum?id=iO4LZibEqW"
     },
     {
@@ -307,9 +422,14 @@
       "year": 2021,
       "authors": "Aakanksha Chowdhery et al.",
       "venueOrOrg": "NeurIPS Datasets and Benchmarks 2021",
-      "summary": "构建高难度数学问题基准，用于评估模型在分步推理和复杂求解任务上的能力。",
-      "whyMilestone": "MATH 是逻辑数理能力评测中最具代表性的 benchmark 之一，让数学推理从 anecdotal demo 转向可比较的实验设置。",
-      "tags": ["MATH", "benchmark", "数学推理", "评测"],
+      "summary": "Builds a challenging mathematics benchmark for evaluating models on step-by-step reasoning and complex problem solving.",
+      "whyMilestone": "MATH is one of the most representative benchmarks for logical-mathematical capability, moving math reasoning from anecdotal demos to comparable experimental settings.",
+      "tags": [
+        "MATH",
+        "Benchmark",
+        "Mathematical Reasoning",
+        "Evaluation"
+      ],
       "url": "https://openreview.net/forum?id=7Bywt2mQsCe"
     },
     {
@@ -320,9 +440,14 @@
       "year": 2017,
       "authors": "Vaswani Ashish et al.",
       "venueOrOrg": "NeurIPS 2017",
-      "summary": "提出Transformer架构，用自注意力机制替代RNN进行序列建模",
-      "whyMilestone": "现代深度学习最重要的里程碑之一，成为大语言模型和众多NLP系统的基础架构",
-      "tags": ["Transformer", "注意力机制", "NLP", "架构创新"],
+      "summary": "Introduces the Transformer architecture and replaces RNNs with self-attention for sequence modeling.",
+      "whyMilestone": "One of the most important milestones in modern deep learning, it became the foundational architecture for LLMs and many NLP systems.",
+      "tags": [
+        "Transformer",
+        "Self-Attention",
+        "NLP",
+        "Architecture Innovation"
+      ],
       "url": "https://arxiv.org/abs/1706.03762"
     },
     {
@@ -333,9 +458,14 @@
       "year": 2020,
       "authors": "Brown Tom et al.",
       "venueOrOrg": "NeurIPS 2020",
-      "summary": "展示了1750亿参数的GPT-3在少样本和零样本学习场景下的强大能力",
-      "whyMilestone": "证明了规模化的语言模型具备惊人的few-shot学习能力，开启了LLM时代",
-      "tags": ["GPT-3", "Few-shot", "大语言模型", "规模化"],
+      "summary": "Shows the powerful few-shot and zero-shot capabilities of GPT-3 with 175 billion parameters.",
+      "whyMilestone": "It demonstrated that scaled language models have remarkable few-shot learning ability and helped launch the LLM era.",
+      "tags": [
+        "GPT-3",
+        "Few-Shot",
+        "Large Language Models",
+        "Scaling"
+      ],
       "url": "https://arxiv.org/abs/2005.14165"
     },
     {
@@ -346,9 +476,14 @@
       "year": 2021,
       "authors": "Dosovitskiy Alexey et al.",
       "venueOrOrg": "ICLR 2021",
-      "summary": "将纯Transformer架构应用于图像分类任务，Vision Transformer (ViT)",
-      "whyMilestone": "挑战了CNN在计算机视觉的统治地位，证明了Transformer的跨领域通用性",
-      "tags": ["ViT", "Transformer", "图像分类", "计算机视觉"],
+      "summary": "Applies a pure Transformer architecture to image classification in the form of Vision Transformer (ViT).",
+      "whyMilestone": "It challenged CNN dominance in computer vision and demonstrated the cross-domain generality of Transformers.",
+      "tags": [
+        "ViT",
+        "Transformer",
+        "Image Classification",
+        "Computer Vision"
+      ],
       "url": "https://arxiv.org/abs/2010.11929"
     },
     {
@@ -359,9 +494,14 @@
       "year": 2022,
       "authors": "He Kaiming et al.",
       "venueOrOrg": "CVPR 2022",
-      "summary": "提出掩码自编码器(MAE)用于视觉表示学习，大幅提升ViT的训练效率",
-      "whyMilestone": "展示了掩码学习在视觉领域的有效性，为大规模视觉模型训练提供新范式",
-      "tags": ["MAE", "自监督学习", "ViT", "掩码建模"],
+      "summary": "Introduces masked autoencoders (MAE) for visual representation learning and substantially improves ViT training efficiency.",
+      "whyMilestone": "It shows the effectiveness of masked learning in vision and offers a new paradigm for large-scale visual model training.",
+      "tags": [
+        "MAE",
+        "Self-Supervised Learning",
+        "ViT",
+        "Masked Modeling"
+      ],
       "url": "https://arxiv.org/abs/2111.06377"
     },
     {
@@ -372,9 +512,14 @@
       "year": 2020,
       "authors": "Ho Jonathan et al.",
       "venueOrOrg": "NeurIPS 2020",
-      "summary": "提出去噪扩散概率模型(DDPM)，通过渐进式去噪生成高质量图像",
-      "whyMilestone": "复兴了扩散模型研究方向，成为当前生成式AI的主流技术之一",
-      "tags": ["DDPM", "扩散模型", "图像生成", "生成式AI"],
+      "summary": "Introduces denoising diffusion probabilistic models (DDPM) for generating high-quality images through progressive denoising.",
+      "whyMilestone": "It revitalized diffusion-model research and became one of the mainstream technologies in modern generative AI.",
+      "tags": [
+        "DDPM",
+        "Diffusion Models",
+        "Image Generation",
+        "Generative AI"
+      ],
       "url": "https://arxiv.org/abs/2006.11239"
     },
     {
@@ -385,9 +530,14 @@
       "year": 2022,
       "authors": "Rombach Robin et al.",
       "venueOrOrg": "CVPR 2022 / Stability AI",
-      "summary": "在潜在空间进行扩散建模，大幅提升生成效率和图像质量",
-      "whyMilestone": "让高质量AI图像生成走向大众，推动了AIGC的爆发式发展",
-      "tags": ["Stable Diffusion", "潜在空间", "AIGC", "开源"],
+      "summary": "Performs diffusion modeling in latent space, greatly improving generation efficiency and image quality.",
+      "whyMilestone": "It brought high-quality AI image generation to a broad audience and accelerated the explosive growth of AIGC.",
+      "tags": [
+        "Stable Diffusion",
+        "Latent Space",
+        "AIGC",
+        "Open Source"
+      ],
       "url": "https://stability.ai/"
     },
     {
@@ -398,9 +548,14 @@
       "year": 2015,
       "authors": "Mnih Volodymyr et al.",
       "venueOrOrg": "Nature 2015",
-      "summary": "提出Deep Q-Network (DQN)，在Atari游戏上达到人类水平",
-      "whyMilestone": "深度强化学习的开山之作，展示了深度学习与RL结合的巨大潜力",
-      "tags": ["DQN", "深度强化学习", "Atari", "Q-learning"],
+      "summary": "Introduces Deep Q-Network (DQN) and reaches human-level performance on Atari games.",
+      "whyMilestone": "A foundational work in deep reinforcement learning that showed the huge potential of combining deep learning with RL.",
+      "tags": [
+        "DQN",
+        "Deep Reinforcement Learning",
+        "Atari",
+        "Q-Learning"
+      ],
       "url": "https://www.nature.com/articles/nature14236"
     },
     {
@@ -411,9 +566,14 @@
       "year": 2021,
       "authors": "Jumper J. et al.",
       "venueOrOrg": "Nature 2021",
-      "summary": "解决50年来的蛋白质折叠难题，达到实验级别的预测精度",
-      "whyMilestone": "AI for Science的里程碑，展示了AI在解决复杂科学问题上的巨大潜力",
-      "tags": ["AlphaFold", "蛋白质折叠", "AI4Science", "DeepMind"],
+      "summary": "Solves the 50-year protein folding problem with near-experimental prediction accuracy.",
+      "whyMilestone": "A milestone for AI for Science that demonstrates AI's huge potential in solving complex scientific problems.",
+      "tags": [
+        "AlphaFold",
+        "Protein Folding",
+        "AI4Science",
+        "DeepMind"
+      ],
       "url": "https://www.nature.com/articles/s41586-021-03819-2"
     },
     {
@@ -424,9 +584,14 @@
       "year": 2017,
       "authors": "Wang Y. et al.",
       "venueOrOrg": "Interspeech 2017",
-      "summary": "提出端到端语音合成架构Tacotron，直接从文本生成语音波形",
-      "whyMilestone": "开创了端到端语音合成的新范式，大幅提升了合成语音的自然度",
-      "tags": ["Tacotron", "语音合成", "端到端", "TTS"],
+      "summary": "Introduces the Tacotron end-to-end speech synthesis architecture, generating speech waveforms directly from text.",
+      "whyMilestone": "It opened a new paradigm for end-to-end speech synthesis and greatly improved the naturalness of generated speech.",
+      "tags": [
+        "Tacotron",
+        "Speech Synthesis",
+        "End-to-End",
+        "TTS"
+      ],
       "url": "https://arxiv.org/abs/1703.10135"
     },
     {
@@ -437,9 +602,14 @@
       "year": 2018,
       "authors": "Yang Y. et al.",
       "venueOrOrg": "NeurIPS 2018",
-      "summary": "结合VAE和对抗学习的端到端TTS系统，提升语音表现力",
-      "whyMilestone": "提升了语音合成的音质和表现力，推动了高质量TTS的发展",
-      "tags": ["VAE", "对抗学习", "TTS", "语音合成"],
+      "summary": "Combines VAE and adversarial learning in an end-to-end TTS system to improve speech expressiveness.",
+      "whyMilestone": "It improved speech quality and expressiveness, helping advance high-quality TTS systems.",
+      "tags": [
+        "VAE",
+        "Adversarial Learning",
+        "TTS",
+        "Speech Synthesis"
+      ],
       "url": "https://arxiv.org/abs/1806.04538"
     },
     {
@@ -450,9 +620,14 @@
       "year": 2016,
       "authors": "Silver D. et al.",
       "venueOrOrg": "Nature 2016",
-      "summary": "AlphaGo在围棋这一最复杂棋类游戏中击败世界冠军",
-      "whyMilestone": "AI发展史上的里程碑，展示了深度学习在复杂决策问题上的突破性进展",
-      "tags": ["AlphaGo", "围棋", "深度强化学习", "游戏AI"],
+      "summary": "AlphaGo defeated a world champion in Go, one of the most complex board games.",
+      "whyMilestone": "A landmark in AI history that demonstrated breakthroughs from deep learning in complex decision-making problems.",
+      "tags": [
+        "AlphaGo",
+        "Go",
+        "Deep Reinforcement Learning",
+        "Game AI"
+      ],
       "url": "https://www.nature.com/articles/nature16961"
     },
     {
@@ -463,9 +638,14 @@
       "year": 2019,
       "authors": "OpenAI Team",
       "venueOrOrg": "OpenAI",
-      "summary": "OpenAI Five在复杂的多智能体游戏Dota 2中击败世界顶尖队伍",
-      "whyMilestone": "展示了多智能体协作学习的潜力，推动了复杂环境下的RL研究",
-      "tags": ["OpenAI Five", "Dota 2", "多智能体", "协作学习"],
+      "summary": "OpenAI Five defeated world-class teams in the complex multi-agent game Dota 2.",
+      "whyMilestone": "It demonstrated the potential of collaborative multi-agent learning and pushed RL research in complex environments.",
+      "tags": [
+        "OpenAI Five",
+        "Dota 2",
+        "Multi-Agent",
+        "Collaborative Learning"
+      ],
       "url": "https://openai.com/research/openai-five"
     },
     {
@@ -476,9 +656,14 @@
       "year": 2017,
       "authors": "Finn C. et al.",
       "venueOrOrg": "ICML 2017",
-      "summary": "提出MAML算法，让模型能够快速适应新任务",
-      "whyMilestone": "元学习领域的经典工作，为few-shot学习提供了通用解决方案",
-      "tags": ["MAML", "元学习", "Few-shot", "快速适应"],
+      "summary": "Introduces MAML, enabling models to adapt quickly to new tasks.",
+      "whyMilestone": "A classic work in meta-learning that provides a general solution for few-shot learning.",
+      "tags": [
+        "MAML",
+        "Meta-Learning",
+        "Few-Shot",
+        "Fast Adaptation"
+      ],
       "url": "https://arxiv.org/abs/1703.03400"
     },
     {
@@ -489,9 +674,14 @@
       "year": 2020,
       "authors": "Brown Tom et al.",
       "venueOrOrg": "NeurIPS 2020",
-      "summary": "展示了大规模语言模型内在的元学习能力",
-      "whyMilestone": "揭示了模型规模与元学习能力的关系，为大模型few-shot学习奠定理论基础",
-      "tags": ["GPT-3", "Few-shot", "元学习", "模型规模"],
+      "summary": "Shows the intrinsic meta-learning ability of large-scale language models.",
+      "whyMilestone": "It reveals the relationship between model scale and meta-learning ability, laying theoretical groundwork for few-shot learning in large models.",
+      "tags": [
+        "GPT-3",
+        "Few-Shot",
+        "Meta-Learning",
+        "Model Scale"
+      ],
       "url": "https://arxiv.org/abs/2005.14165"
     }
   ]

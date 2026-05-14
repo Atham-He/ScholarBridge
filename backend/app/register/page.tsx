@@ -34,14 +34,14 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "发送失败");
+        setError(data.error || "Failed to send code");
         setLoading(false);
         return;
       }
 
       setStep("verify");
     } catch {
-      setError("网络错误，请重试");
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -75,11 +75,11 @@ export default function RegisterPage() {
           <div className="mb-7">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#2C5F7C]">Create account</p>
             <h1 className="font-display text-[34px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1A1A]">
-              注册 ScholarBridge
+              Create your ScholarBridge account
             </h1>
             <p className="mt-3 text-sm leading-6 text-[#1A1A1A]">
-              {step === "email" && "输入邮箱，开始发现、申请或发布研究机会。"}
-              {step === "verify" && "输入验证码并设置账号信息，完成注册。"}
+              {step === "email" && "Enter your email to start discovering, applying for, or publishing research opportunities."}
+              {step === "verify" && "Enter the verification code and set up your account to finish registration."}
             </p>
           </div>
 
@@ -93,7 +93,7 @@ export default function RegisterPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-                  邮箱地址
+                  Email address
                 </label>
                 <input
                   type="email"
@@ -106,13 +106,13 @@ export default function RegisterPage() {
               </div>
 
               <Button type="submit" disabled={loading} className="w-full">
-                {loading ? "发送中..." : "发送验证码"}
+                {loading ? "Sending..." : "Send verification code"}
               </Button>
 
               <p className="text-center text-sm text-[#1A1A1A]">
-                已有账号？{" "}
+                Already have an account?{" "}
                 <Link href="/login" className="font-semibold text-[#2C5F7C] hover:underline">
-                  立即登录
+                  Sign in now
                 </Link>
               </p>
             </form>

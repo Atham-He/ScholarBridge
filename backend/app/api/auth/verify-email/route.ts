@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
   // Check expiration
   if (isCodeExpired(verification.expiresAt)) {
     return NextResponse.json(
-      { error: "验证码已过期，请重新获取" },
+      { error: "The verification code has expired. Please request a new one." },
       { status: 400 }
     );
   }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { error: "验证码错误" },
+      { error: "Incorrect verification code" },
       { status: 400 }
     );
   }

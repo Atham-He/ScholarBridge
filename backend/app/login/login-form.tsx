@@ -27,7 +27,7 @@ export function LoginForm() {
     setLoading(false);
     if (!res.ok) {
       const data = (await res.json()) as { error?: string };
-      setError(data.error ?? "登录失败");
+      setError(data.error ?? "Sign-in failed");
       return;
     }
     router.push(nextParam || "/browse");
@@ -58,17 +58,17 @@ export function LoginForm() {
           <div className="mb-7">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#2C5F7C]">Welcome back</p>
             <h1 className="font-display text-[34px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1A1A]">
-              登录 ScholarBridge
+              Sign in to ScholarBridge
             </h1>
             <p className="mt-3 text-sm leading-6 text-[#1A1A1A]">
-              登录后可以申请项目、收藏机会，也可以发布和管理自己的研究项目。
+              Sign in to apply for projects, save opportunities, and publish or manage your own research projects.
             </p>
           </div>
 
           <form onSubmit={onSubmit} className="space-y-5">
             <div>
               <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-                邮箱
+                Email
               </label>
               <input
                 type="email"
@@ -82,7 +82,7 @@ export function LoginForm() {
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-[#1A1A1A]">
-                密码
+                Password
               </label>
               <input
                 type="password"
@@ -90,7 +90,7 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded border border-[#E0D8CC] bg-white px-4 py-3 text-sm text-[#1A1A1A] outline-none transition-all duration-200 ease placeholder:text-[#4A4A4A] focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
-                placeholder="请输入密码"
+                placeholder="Enter your password"
               />
             </div>
 
@@ -101,14 +101,14 @@ export function LoginForm() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "登录中..." : "登录"}
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-[#1A1A1A]">
-            没有账号？{" "}
+            Don't have an account?{" "}
             <Link href="/register" className="font-semibold text-[#2C5F7C] hover:underline">
-              注册
+              Create one
             </Link>
           </p>
         </section>

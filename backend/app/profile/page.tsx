@@ -128,7 +128,7 @@ export default function UserProfilePage() {
         return;
       } else {
         const data = await profileRes.json().catch(() => ({}));
-        setLoadError(data.error || '加载个人信息失败，请稍后重试');
+        setLoadError(data.error || 'Failed to load your profile. Please try again later.');
         return;
       }
 
@@ -147,7 +147,7 @@ export default function UserProfilePage() {
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      setLoadError('加载个人信息失败，请稍后重试');
+      setLoadError('Failed to load your profile. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -182,12 +182,12 @@ export default function UserProfilePage() {
       });
 
       if (response.ok) {
-        alert('保存成功');
+        alert('Profile saved successfully.');
       } else {
-        alert('保存失败');
+        alert('Failed to save profile.');
       }
     } catch {
-      alert('保存失败');
+      alert('Failed to save profile.');
     } finally {
       setSaving(false);
     }
@@ -205,12 +205,12 @@ export default function UserProfilePage() {
 
   const handleResumeUpload = async () => {
     if (!selectedResumeFile) {
-      alert('请先选择 PDF 简历');
+      alert('Please choose a PDF resume first.');
       return;
     }
 
     if (selectedResumeFile.type !== 'application/pdf') {
-      alert('只支持上传 PDF 文件');
+      alert('Only PDF files are supported.');
       return;
     }
 
@@ -226,7 +226,7 @@ export default function UserProfilePage() {
 
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        alert(data.error || '上传失败');
+        alert(data.error || 'Upload failed.');
         return;
       }
 
@@ -238,9 +238,9 @@ export default function UserProfilePage() {
         resumeUploadedAt: data.resume?.resumeUploadedAt || new Date().toISOString(),
       }));
       setSelectedResumeFile(null);
-      alert('简历上传成功');
+      alert('Resume uploaded successfully.');
     } catch {
-      alert('上传失败');
+      alert('Upload failed.');
     } finally {
       setResumeUploading(false);
     }
@@ -248,10 +248,10 @@ export default function UserProfilePage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending': return '待审核';
-      case 'accepted': return '已接受';
-      case 'rejected': return '已拒绝';
-      case 'WITHDRAWN': return '已撤回';
+      case 'pending': return 'Pending';
+      case 'accepted': return 'Accepted';
+      case 'rejected': return 'Rejected';
+      case 'WITHDRAWN': return 'Withdrawn';
       default: return status;
     }
   };
@@ -321,7 +321,7 @@ export default function UserProfilePage() {
         : undefined,
     owner: {
       displayName: app.owner.profile?.displayName ?? app.owner.email,
-      institution: app.owner.profile?.institution ?? '未知',
+      institution: app.owner.profile?.institution ?? 'Unknown',
       department: app.owner.profile?.department,
       title: app.owner.profile?.title,
       bioShort: app.owner.profile?.bioShort,
@@ -333,7 +333,7 @@ export default function UserProfilePage() {
       <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
         <div className="text-center">
           <div className="inline-block w-8 h-8 border-2 border-[#2C5F7C] border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-[#1A1A1A]">加载中...</p>
+          <p className="text-[#1A1A1A]">Loading...</p>
         </div>
       </div>
     );
@@ -358,9 +358,9 @@ export default function UserProfilePage() {
         </nav>
         <main className="mx-auto max-w-3xl px-10 py-12">
           <section className="rounded-[10px] border border-red-200 bg-red-50 p-6">
-            <h2 className="mb-2 text-[18px] font-semibold text-red-800">个人中心加载失败</h2>
+            <h2 className="mb-2 text-[18px] font-semibold text-red-800">Failed to load profile</h2>
             <p className="mb-5 text-sm text-red-700">{loadError}</p>
-            <Button variant="outline" onClick={fetchData}>重新加载</Button>
+            <Button variant="outline" onClick={fetchData}>Reload</Button>
           </section>
         </main>
         <style jsx>{`
@@ -393,7 +393,7 @@ export default function UserProfilePage() {
       <div className="py-8 px-10 max-w-6xl mx-auto">
         <div className="mb-8">
           <h2 className="font-display text-[32px] font-semibold text-[#1A1A1A] tracking-[-0.02em]">
-            个人中心
+            Profile
           </h2>
         </div>
 
@@ -405,8 +405,8 @@ export default function UserProfilePage() {
               onClick={() => toggleSection('profile')}
             >
               <span>
-                <span className="block text-[18px] font-semibold text-[#1A1A1A]">基本信息</span>
-                <span className="mt-1 block text-sm text-[#1A1A1A]">姓名、教育背景、简介、兴趣和技能</span>
+                <span className="block text-[18px] font-semibold text-[#1A1A1A]">Basic information</span>
+                <span className="mt-1 block text-sm text-[#1A1A1A]">Name, education, bio, interests, and skills</span>
               </span>
               <span className="text-[20px] font-semibold text-[#2C5F7C]">{expandedSections.profile ? '-' : '+'}</span>
             </button>
@@ -415,7 +415,7 @@ export default function UserProfilePage() {
               <div className="mt-3 bg-white border border-[#E0D8CC] rounded-[10px] p-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">姓名</label>
+                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Name</label>
                     <input
                       type="text"
                       value={profile.displayName}
@@ -425,65 +425,65 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">教育背景</label>
+                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Education</label>
                     <input
                       type="text"
                       value={profile.education || ''}
                       onChange={(e) => setProfile({...profile, education: e.target.value})}
                       className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                      placeholder="例如：北京大学 · 计算机科学 · 本科三年级"
+                      placeholder="Example: Peking University · Computer Science · Junior"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">个人简介</label>
+                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Short bio</label>
                     <textarea
                       value={profile.bioShort || ''}
                       onChange={(e) => setProfile({...profile, bioShort: e.target.value})}
                       rows={4}
                       className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                      placeholder="简单介绍一下自己的研究兴趣和经历..."
+                      placeholder="Briefly introduce your research interests and background..."
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-                      研究兴趣（用逗号分隔）
+                      Research interests (comma-separated)
                     </label>
                     <input
                       type="text"
                       value={profile.interests?.join(', ') || ''}
                       onChange={(e) => setProfile({...profile, interests: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})}
                       className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                      placeholder="例如：机器学习, 计算机视觉, 自然语言处理"
+                      placeholder="Example: Machine Learning, Computer Vision, NLP"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-                      技能（用逗号分隔）
+                      Skills (comma-separated)
                     </label>
                     <input
                       type="text"
                       value={profile.skills?.join(', ') || ''}
                       onChange={(e) => setProfile({...profile, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})}
                       className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                      placeholder="例如：Python, PyTorch, 数据分析"
+                      placeholder="Example: Python, PyTorch, Data Analysis"
                     />
                   </div>
 
                   <div className="rounded-lg border border-[#E0D8CC] bg-[#FAF8F5] p-4">
                     <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-[#1A1A1A]">PDF 简历</p>
+                        <p className="text-sm font-semibold text-[#1A1A1A]">PDF resume</p>
                         <p className="mt-1 text-sm text-[#1A1A1A]">
                           {profile.resumeFileName
                             ? `${profile.resumeFileName}${profile.resumeSize ? ` · ${formatFileSize(profile.resumeSize)}` : ''}`
-                            : '还没有上传简历'}
+                            : 'No resume uploaded yet'}
                         </p>
                         {profile.resumeUploadedAt && (
                           <p className="mt-1 text-xs text-[#4A4A4A]">
-                            上传时间：{new Date(profile.resumeUploadedAt).toLocaleString('zh-CN')}
+                            Uploaded: {new Date(profile.resumeUploadedAt).toLocaleString('en-US')}
                           </p>
                         )}
                       </div>
@@ -493,7 +493,7 @@ export default function UserProfilePage() {
                           size="sm"
                           onClick={() => window.open('/api/profile/resume', '_blank', 'noopener,noreferrer')}
                         >
-                          查看简历
+                          View resume
                         </Button>
                       )}
                     </div>
@@ -510,10 +510,10 @@ export default function UserProfilePage() {
                         onClick={handleResumeUpload}
                         disabled={resumeUploading || !selectedResumeFile}
                       >
-                        {resumeUploading ? '上传中...' : '上传简历'}
+                        {resumeUploading ? 'Uploading...' : 'Upload resume'}
                       </Button>
                     </div>
-                    <p className="mt-2 text-xs text-[#4A4A4A]">仅支持 PDF，最大 10MB。上传后会保存到数据库。</p>
+                    <p className="mt-2 text-xs text-[#4A4A4A]">PDF only, up to 10MB. Uploaded files are stored in the database.</p>
                   </div>
                 </div>
 
@@ -523,7 +523,7 @@ export default function UserProfilePage() {
                     onClick={handleSave}
                     disabled={saving}
                   >
-                    {saving ? '保存中...' : '保存更改'}
+                    {saving ? 'Saving...' : 'Save changes'}
                   </Button>
                 </div>
               </div>
@@ -537,8 +537,8 @@ export default function UserProfilePage() {
               onClick={() => toggleSection('saved')}
             >
               <span>
-                <span className="block text-[18px] font-semibold text-[#1A1A1A]">我的收藏</span>
-                <span className="mt-1 block text-sm text-[#1A1A1A]">{savedProjects.length} 个收藏项目</span>
+                <span className="block text-[18px] font-semibold text-[#1A1A1A]">Saved projects</span>
+                <span className="mt-1 block text-sm text-[#1A1A1A]">{savedProjects.length} saved projects</span>
               </span>
               <span className="text-[20px] font-semibold text-[#2C5F7C]">{expandedSections.saved ? '-' : '+'}</span>
             </button>
@@ -547,13 +547,13 @@ export default function UserProfilePage() {
               <div className="mt-3 bg-white border border-[#E0D8CC] rounded-[10px] p-6">
                 {savedProjects.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-[#1A1A1A] text-sm mb-4">还没有收藏任何项目</p>
+                    <p className="text-[#1A1A1A] text-sm mb-4">You have not saved any projects yet.</p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => router.push('/browse')}
                     >
-                      去浏览项目
+                      Browse projects
                     </Button>
                   </div>
                 ) : (
@@ -592,8 +592,8 @@ export default function UserProfilePage() {
               onClick={() => toggleSection('applications')}
             >
               <span>
-                <span className="block text-[18px] font-semibold text-[#1A1A1A]">我的申请</span>
-                <span className="mt-1 block text-sm text-[#1A1A1A]">{applications.length} 条申请记录</span>
+                <span className="block text-[18px] font-semibold text-[#1A1A1A]">My applications</span>
+                <span className="mt-1 block text-sm text-[#1A1A1A]">{applications.length} applications</span>
               </span>
               <span className="text-[20px] font-semibold text-[#2C5F7C]">{expandedSections.applications ? '-' : '+'}</span>
             </button>
@@ -602,13 +602,13 @@ export default function UserProfilePage() {
               <div className="mt-3 bg-white border border-[#E0D8CC] rounded-[10px] p-6">
                 {applications.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-[#1A1A1A] text-sm mb-4">还没有申请任何项目</p>
+                    <p className="text-[#1A1A1A] text-sm mb-4">You have not applied to any projects yet.</p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => router.push('/browse')}
                     >
-                      去浏览项目
+                      Browse projects
                     </Button>
                   </div>
                 ) : (
@@ -636,10 +636,10 @@ export default function UserProfilePage() {
                               </span>
                             </div>
                             <div className="grid gap-1 text-sm text-[#1A1A1A]">
-                              <p><span className="font-semibold">发布者：</span>{app.owner.profile?.displayName ?? app.owner.email}</p>
-                              <p><span className="font-semibold">学校：</span>{app.owner.profile?.institution ?? '未知'}</p>
-                              <p><span className="font-semibold">研究方向：</span>{app.project.researchArea}</p>
-                              <p><span className="font-semibold">申请时间：</span>{new Date(app.createdAt).toLocaleDateString('zh-CN')}</p>
+                              <p><span className="font-semibold">Project owner:</span> {app.owner.profile?.displayName ?? app.owner.email}</p>
+                              <p><span className="font-semibold">Institution:</span> {app.owner.profile?.institution ?? 'Unknown'}</p>
+                              <p><span className="font-semibold">Research area:</span> {app.project.researchArea}</p>
+                              <p><span className="font-semibold">Applied on:</span> {new Date(app.createdAt).toLocaleDateString('en-US')}</p>
                             </div>
                           </div>
 
@@ -652,7 +652,7 @@ export default function UserProfilePage() {
 
                         {app.ownerFeedback && (
                           <div className="mt-4 rounded border border-[#E0D8CC] bg-[#EBF3F8] p-3 text-sm leading-6 text-[#1A1A1A]">
-                            <p className="mb-1 font-semibold">发布者反馈：</p>
+                            <p className="mb-1 font-semibold">Owner feedback:</p>
                             {app.ownerFeedback}
                           </div>
                         )}
@@ -671,8 +671,8 @@ export default function UserProfilePage() {
               onClick={() => toggleSection('projects')}
             >
               <span>
-                <span className="block text-[18px] font-semibold text-[#1A1A1A]">我的项目</span>
-                <span className="mt-1 block text-sm text-[#1A1A1A]">发布项目、查看申请、处理反馈和 AI 简历评分</span>
+                <span className="block text-[18px] font-semibold text-[#1A1A1A]">My projects</span>
+                <span className="mt-1 block text-sm text-[#1A1A1A]">Publish projects, review applications, manage feedback, and use AI resume scoring</span>
               </span>
               <span className="text-[20px] font-semibold text-[#2C5F7C]">{expandedSections.projects ? '-' : '+'}</span>
             </button>
@@ -767,7 +767,7 @@ export default function UserProfilePage() {
 
               {selectedProject.ownerFeedback && (
                 <div className="rounded border border-[#E0D8CC] bg-[#EBF3F8] p-4">
-                  <p className="mb-2 font-semibold">发布者反馈</p>
+                  <p className="mb-2 font-semibold">Owner feedback</p>
                   <p>{selectedProject.ownerFeedback}</p>
                 </div>
               )}

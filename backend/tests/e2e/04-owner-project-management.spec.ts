@@ -9,18 +9,18 @@ test("owner project management + application full state buttons", async ({ page 
   });
 
   await login(page, demoAccounts.priya.email, demoAccounts.priya.password, "/profile");
-  await page.getByRole("button", { name: /我的项目/ }).click();
+  await page.getByRole("button", { name: /My projects/ }).click();
 
-  await page.getByRole("button", { name: "新建项目" }).click();
-  await page.locator('label:has-text("项目标题") input').fill(projectTitle);
-  await page.locator('label:has-text("研究方向") input').fill("E2E");
-  await page.locator('label:has-text("开始时间") input').fill("2026-10");
-  await page.locator('label:has-text("结束时间") input').fill("2027-03");
-  await page.locator('label:has-text("地点") input').fill("Remote");
-  await page.locator('label:has-text("名额") input').fill("2");
-  await page.locator('label:has-text("项目描述") textarea').fill("E2E description");
-  await page.locator('label:has-text("申请要求") textarea').fill("E2E requirements");
-  await page.getByRole("button", { name: "发布项目", exact: true }).click();
+  await page.getByRole("button", { name: "New project" }).click();
+  await page.locator('label:has-text("Project title") input').fill(projectTitle);
+  await page.locator('label:has-text("Research area") input').fill("E2E");
+  await page.locator('label:has-text("Start time") input').fill("2026-10");
+  await page.locator('label:has-text("End time") input').fill("2027-03");
+  await page.locator('label:has-text("Location") input').fill("Remote");
+  await page.locator('label:has-text("Capacity") input').fill("2");
+  await page.locator('label:has-text("Project description") textarea').fill("E2E description");
+  await page.locator('label:has-text("Application requirements") textarea').fill("E2E requirements");
+  await page.getByRole("button", { name: "Publish project", exact: true }).click();
 
   const createdProjectCard = page.locator("article", { hasText: projectTitle });
   await expect(createdProjectCard).toBeVisible();
@@ -29,7 +29,7 @@ test("owner project management + application full state buttons", async ({ page 
   await expect(page).toHaveURL(/\/$/);
 
   await login(page, demoAccounts.alex.email, demoAccounts.alex.password, "/profile");
-  await page.getByRole("button", { name: /基本信息/ }).click();
+  await page.getByRole("button", { name: /Basic information/ }).click();
   const fileInput = page.locator('input[type="file"][accept="application/pdf,.pdf"]');
   await fileInput.setInputFiles({
     name: "resume-owner-flow.pdf",
@@ -40,7 +40,7 @@ test("owner project management + application full state buttons", async ({ page 
   page.once("dialog", async (dialog) => {
     await dialog.accept();
   });
-  await page.getByRole("button", { name: "上传简历" }).click();
+  await page.getByRole("button", { name: "Upload resume" }).click();
 
   await page.getByRole("button", { name: /^Browse$/ }).click();
   await expect(page).toHaveURL(/\/browse$/);
@@ -55,11 +55,11 @@ test("owner project management + application full state buttons", async ({ page 
   await signOutIfVisible(page);
 
   await login(page, demoAccounts.priya.email, demoAccounts.priya.password, "/profile");
-  await page.getByRole("button", { name: /我的项目/ }).click();
+  await page.getByRole("button", { name: /My projects/ }).click();
 
   const ownerProjectCard = page.locator("article", { hasText: projectTitle });
   await expect(ownerProjectCard).toBeVisible();
-  await ownerProjectCard.getByRole("button", { name: "查看申请" }).click();
+  await ownerProjectCard.getByRole("button", { name: "View applications" }).click();
 
   const applicationsModal = page.locator("section").filter({ hasText: "Applications" }).first();
   await expect(applicationsModal).toBeVisible();
@@ -67,7 +67,7 @@ test("owner project management + application full state buttons", async ({ page 
   const applicantArticle = applicationsModal.locator("article", { hasText: "Alex" }).first();
   await expect(applicantArticle).toBeVisible();
 
-  const openResumeButton = applicantArticle.getByRole("button", { name: /查看简历|未上传简历/ });
+  const openResumeButton = applicantArticle.getByRole("button", { name: /View resume|Resume not uploaded/ });
   if (await openResumeButton.isEnabled().catch(() => false)) {
     const [popup] = await Promise.all([
       page.waitForEvent("popup"),
@@ -77,22 +77,22 @@ test("owner project management + application full state buttons", async ({ page 
     await popup.close();
   }
 
-  const scoreButton = applicantArticle.getByRole("button", { name: /^AI 评分$/ });
+  const scoreButton = applicantArticle.getByRole("button", { name: /^Run AI score$/ });
   if (await scoreButton.isEnabled().catch(() => false)) {
     await scoreButton.click();
-    await expect(applicantArticle.getByText(/总分|本地启发式评分|尚未评分|申请者尚未上传|评分时间/)).toBeVisible();
+    await expect(applicantArticle.getByText(/Overall score|Local heuristic score|Not scored yet|has not uploaded|Scored at/)).toBeVisible();
   }
 
-  await applicantArticle.getByRole("button", { name: "查看申请者详情" }).click();
+  await applicantArticle.getByRole("button", { name: "View applicant details" }).click();
   const applicantModal = page.locator("section").filter({ hasText: "Applicant profile" }).first();
   await expect(applicantModal).toBeVisible();
 
   const [acceptResponse] = await Promise.all([
     page.waitForResponse((res) => res.url().includes("/api/applications/") && res.request().method() === "PATCH"),
-    applicantModal.getByRole("button", { name: "同意申请" }).click(),
+    applicantModal.getByRole("button", { name: "Accept application" }).click(),
   ]);
   expect(acceptResponse.ok()).toBeTruthy();
-  const undoAcceptButton = applicantModal.getByRole("button", { name: "撤销同意" }).first();
+  const undoAcceptButton = applicantModal.getByRole("button", { name: "Undo accept" }).first();
   await expect(undoAcceptButton).toBeVisible();
   await expect(undoAcceptButton).toBeEnabled();
   const [undoAcceptResponse] = await Promise.all([
@@ -100,14 +100,14 @@ test("owner project management + application full state buttons", async ({ page 
     undoAcceptButton.evaluate((element) => (element as HTMLButtonElement).click()),
   ]);
   expect(undoAcceptResponse.ok()).toBeTruthy();
-  await expect(applicantModal.getByRole("button", { name: "同意申请" })).toBeVisible({ timeout: 30_000 });
+  await expect(applicantModal.getByRole("button", { name: "Accept application" })).toBeVisible({ timeout: 30_000 });
 
   const [rejectResponse] = await Promise.all([
     page.waitForResponse((res) => res.url().includes("/api/applications/") && res.request().method() === "PATCH"),
-    applicantModal.getByRole("button", { name: "拒绝申请" }).click(),
+    applicantModal.getByRole("button", { name: "Reject application" }).click(),
   ]);
   expect(rejectResponse.ok()).toBeTruthy();
-  const undoRejectButton = applicantModal.getByRole("button", { name: "撤销拒绝" }).first();
+  const undoRejectButton = applicantModal.getByRole("button", { name: "Undo reject" }).first();
   await expect(undoRejectButton).toBeVisible();
   await expect(undoRejectButton).toBeEnabled();
   const [undoRejectResponse] = await Promise.all([
@@ -115,14 +115,14 @@ test("owner project management + application full state buttons", async ({ page 
     undoRejectButton.evaluate((element) => (element as HTMLButtonElement).click()),
   ]);
   expect(undoRejectResponse.ok()).toBeTruthy();
-  await expect(applicantModal.getByRole("button", { name: "拒绝申请" })).toBeVisible({ timeout: 30_000 });
+  await expect(applicantModal.getByRole("button", { name: "Reject application" })).toBeVisible({ timeout: 30_000 });
 
   const [acceptResponse2] = await Promise.all([
     page.waitForResponse((res) => res.url().includes("/api/applications/") && res.request().method() === "PATCH"),
-    applicantModal.getByRole("button", { name: "同意申请" }).click(),
+    applicantModal.getByRole("button", { name: "Accept application" }).click(),
   ]);
   expect(acceptResponse2.ok()).toBeTruthy();
-  const feedbackButton = applicantModal.getByRole("button", { name: /填写反馈|编辑反馈/ }).first();
+  const feedbackButton = applicantModal.getByRole("button", { name: /Add feedback|Edit feedback/ }).first();
   await expect(feedbackButton).toBeVisible();
   await expect(feedbackButton).toBeEnabled();
   const [feedbackResponse] = await Promise.all([
@@ -131,7 +131,7 @@ test("owner project management + application full state buttons", async ({ page 
   ]);
   expect(feedbackResponse.ok()).toBeTruthy();
 
-  const viewResumeContentButton = applicantModal.getByRole("button", { name: "查看简历内容" });
+  const viewResumeContentButton = applicantModal.getByRole("button", { name: "View resume contents" });
   const [popup2] = await Promise.all([page.waitForEvent("popup"), viewResumeContentButton.click()]);
   await popup2.waitForTimeout(500);
   await popup2.close();
@@ -147,14 +147,14 @@ test("owner project management + application full state buttons", async ({ page 
   }
   await expect(applicationsModal).toBeHidden();
 
-  await ownerProjectCard.getByRole("button", { name: "关闭" }).click();
-  await expect(ownerProjectCard.getByText("已关闭")).toBeVisible();
-  await ownerProjectCard.getByRole("button", { name: "开启" }).click();
-  await expect(ownerProjectCard.getByText("招募中")).toBeVisible();
+  await ownerProjectCard.getByRole("button", { name: "Close" }).click();
+  await expect(ownerProjectCard.getByText("Closed")).toBeVisible();
+  await ownerProjectCard.getByRole("button", { name: "Reopen" }).click();
+  await expect(ownerProjectCard.getByText("Open")).toBeVisible();
 
   page.once("dialog", async (dialog) => {
     await dialog.accept();
   });
-  await ownerProjectCard.getByRole("button", { name: "删除" }).click();
+  await ownerProjectCard.getByRole("button", { name: "Delete" }).click();
   await expect(ownerProjectCard).toBeHidden();
 });

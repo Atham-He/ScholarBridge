@@ -63,7 +63,7 @@ export async function scoreApplicationResume(applicationId: string) {
         aiHardScore: null,
         aiFitScore: null,
         aiScoreSummary: null,
-        aiScoreError: "申请者尚未上传可解析的 PDF 简历",
+        aiScoreError: "The applicant has not uploaded a readable PDF resume yet",
         aiScoredAt: new Date(),
       },
     });
@@ -135,19 +135,19 @@ async function scoreWithAiOrFallback(params: {
           "Score strictly from 0 to 100.",
           "hardScore measures objective academic/research strength: GPA, publications, awards, rigorous coursework, research output, technical depth.",
           "fitScore measures project match: overlap between project topic/requirements and the applicant's research experience, skills, and cover letter.",
-          "Return only JSON: {\"hardScore\":number,\"fitScore\":number,\"summary\":\"short Chinese explanation\"}.",
+          "Return only JSON: {\"hardScore\":number,\"fitScore\":number,\"summary\":\"short English explanation\"}.",
         ].join("\n"),
       },
       {
         role: "user",
         content: [
-          params.ownerAgentPrompt ? `发布者自定义筛选偏好：\n${params.ownerAgentPrompt}` : "",
-          `项目标题：${params.projectTitle}`,
-          `研究方向：${params.projectResearchArea}`,
-          `项目描述：${params.projectDescription}`,
-          `项目要求：${params.projectRequirements || "未列出"}`,
-          `申请说明：${params.coverLetter || "未填写"}`,
-          `申请者 PDF 简历文本：\n${truncate(params.resumeText, 12000)}`,
+          params.ownerAgentPrompt ? `Project owner's custom screening preferences:\n${params.ownerAgentPrompt}` : "",
+          `Project title: ${params.projectTitle}`,
+          `Research area: ${params.projectResearchArea}`,
+          `Project description: ${params.projectDescription}`,
+          `Project requirements: ${params.projectRequirements || "Not provided"}`,
+          `Cover letter: ${params.coverLetter || "Not provided"}`,
+          `Applicant PDF resume text:\n${truncate(params.resumeText, 12000)}`,
         ].filter(Boolean).join("\n\n"),
       },
     ],
@@ -158,7 +158,7 @@ async function scoreWithAiOrFallback(params: {
   return {
     hardScore: clampScore(parsed.hardScore),
     fitScore: clampScore(parsed.fitScore),
-    summary: parsed.summary?.trim() || "AI 已完成简历评分。",
+    summary: parsed.summary?.trim() || "AI resume screening completed.",
     source: "openai",
   };
 }
@@ -184,14 +184,14 @@ function heuristicScore(params: {
   const hardSignals = [
     "gpa", "publication", "published", "paper", "conference", "journal", "award",
     "honor", "scholarship", "research assistant", "internship", "python", "pytorch",
-    "tensorflow", "statistics", "machine learning", "实验", "论文", "发表", "奖学金",
-    "绩点", "科研", "竞赛", "实习",
+    "tensorflow", "statistics", "machine learning", "experiment", "thesis", "research",
+    "competition", "intern",
   ];
   const hardHits = hardSignals.filter((signal) => resume.includes(signal)).length;
   const hardScore = clampScore(45 + hardHits * 5 + Math.min(15, params.resumeText.length / 1000));
 
   const keywords = Array.from(new Set(projectText.match(/[\p{L}\p{N}+#.-]{3,}/gu) || []))
-    .filter((word) => !["the", "and", "with", "for", "this", "that", "研究", "项目"].includes(word))
+    .filter((word) => !["the", "and", "with", "for", "this", "that", "research", "project"].includes(word))
     .slice(0, 60);
   const matched = keywords.filter((word) => resume.includes(word));
   const fitScore = clampScore(40 + matched.length * 4 + (params.coverLetter ? 8 : 0));
@@ -199,7 +199,7 @@ function heuristicScore(params: {
   return {
     hardScore,
     fitScore,
-    summary: `本地启发式评分：检测到 ${hardHits} 个硬实力信号，项目关键词匹配 ${matched.length} 个。配置 OPENAI_API_KEY 后会使用 AI 评分。`,
+    summary: `Local heuristic score: detected ${hardHits} hard-signal matches and ${matched.length} overlapping project keywords. Configure OPENAI_API_KEY to enable AI scoring.`,
     source: "heuristic",
   };
 }
@@ -220,16 +220,16 @@ function truncate(text: string, maxLength: number) {
 function getAiErrorMessage(error: unknown) {
   const status = typeof error === "object" && error && "status" in error ? Number(error.status) : null;
   if (status === 401 || status === 403) {
-    return "AI 服务鉴权失败：请检查 OPENAI_API_KEY 是否属于当前 OPENAI_BASE_URL，并在修改 .env 后重启服务。";
+    return "AI service authentication failed. Check whether OPENAI_API_KEY matches the current OPENAI_BASE_URL, then restart the service after updating .env.";
   }
 
   if (status === 404) {
-    return "AI 模型不可用：请检查 OPENAI_MODEL 是否被当前服务支持。";
+    return "AI model unavailable. Check whether the current service supports OPENAI_MODEL.";
   }
 
   if (status === 429) {
-    return "AI 服务额度或频率受限：请稍后重试或检查账户额度。";
+    return "AI service is rate-limited or out of quota. Please try again later or check your account quota.";
   }
 
-  return "AI 评分失败，请稍后重试";
+  return "AI scoring failed. Please try again later.";
 }
