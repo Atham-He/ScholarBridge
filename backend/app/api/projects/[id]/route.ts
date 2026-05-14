@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ProjectStatus, type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 type Params = { params: Promise<{ id: string }> };
+const PROJECT_STATUSES = ["OPEN", "CLOSED", "COMPLETED"] as const;
+type ProjectStatusValue = (typeof PROJECT_STATUSES)[number];
 
 export async function GET(_request: NextRequest, context: Params) {
   const { id } = await context.params;
@@ -43,8 +45,8 @@ export async function PATCH(request: NextRequest, context: Params) {
   const payload = body && typeof body === "object" ? body as Record<string, unknown> : {};
 
   const status = typeof payload.status === "string" &&
-    Object.values(ProjectStatus).includes(payload.status as ProjectStatus)
-    ? payload.status as ProjectStatus
+    PROJECT_STATUSES.includes(payload.status as ProjectStatusValue)
+    ? payload.status as ProjectStatusValue
     : undefined;
 
   const data: Prisma.ProjectUpdateInput = {
