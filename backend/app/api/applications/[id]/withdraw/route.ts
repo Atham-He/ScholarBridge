@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -33,7 +34,7 @@ export async function POST(
     }
 
     // 更新申请状态为 WITHDRAWN
-    const updated = await db.$transaction(async (tx) => {
+    const updated = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const updatedApplication = await tx.application.update({
         where: { id: applicationId },
         data: { status: "WITHDRAWN" },

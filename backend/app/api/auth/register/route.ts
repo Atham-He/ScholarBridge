@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
   const passwordHash = await hashPassword(data.password);
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  const user = await db.$transaction(async (tx) => {
+  const user = await db.$transaction(async (tx: Prisma.TransactionClient) => {
     const created = await tx.user.create({
       data: {
         email: data.email,
