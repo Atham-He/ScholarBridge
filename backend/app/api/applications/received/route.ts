@@ -41,6 +41,10 @@ export async function GET() {
   const hardWeight = user.profile?.aiHardWeight ?? 50;
   type ReceivedProject = (typeof projects)[number];
   type ReceivedApplication = ReceivedProject["applications"][number];
+  type RankedApplication = {
+    aiWeightedScore: number | null;
+    createdAt: Date;
+  };
 
   return NextResponse.json({
     projects: projects.map((project: ReceivedProject) => ({
@@ -74,7 +78,7 @@ export async function GET() {
             resumeUploadedAt: application.applicant.profile?.resumeUploadedAt,
           },
         };
-      }).sort((a, b) => {
+      }).sort((a: RankedApplication, b: RankedApplication) => {
         const scoreA = a.aiWeightedScore ?? -1;
         const scoreB = b.aiWeightedScore ?? -1;
         if (scoreA !== scoreB) {
@@ -82,7 +86,7 @@ export async function GET() {
         }
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }),
-      applicationCount: project.applications.filter((application) => application.status !== "WITHDRAWN").length,
+      applicationCount: project.applications.filter((application: ReceivedApplication) => application.status !== "WITHDRAWN").length,
     })),
     aiConfig: {
       aiAgentEnabled: user.profile?.aiAgentEnabled ?? true,
