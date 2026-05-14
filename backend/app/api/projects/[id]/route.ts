@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
@@ -49,7 +48,7 @@ export async function PATCH(request: NextRequest, context: Params) {
     ? payload.status as ProjectStatusValue
     : undefined;
 
-  const data: Prisma.ProjectUpdateInput = {
+  const data = {
     ...(payload.title !== undefined && { title: String(payload.title) }),
     ...(payload.description !== undefined && { description: String(payload.description) }),
     ...(payload.researchArea !== undefined && { researchArea: String(payload.researchArea) }),
