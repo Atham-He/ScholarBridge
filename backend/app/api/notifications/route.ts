@@ -13,9 +13,10 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
     take: 50,
   });
+  type NotificationItem = (typeof items)[number];
 
   return NextResponse.json({
-    notifications: items.map((n) => ({
+    notifications: items.map((n: NotificationItem) => ({
       id: n.id,
       message: n.message,
       read: n.read,

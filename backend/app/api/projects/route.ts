@@ -22,8 +22,10 @@ export async function GET() {
       },
     });
 
+    type ProjectItem = (typeof projects)[number];
+
     return NextResponse.json({
-      projects: projects.map((project) => ({
+      projects: projects.map((project: ProjectItem) => ({
         id: project.id,
         title: project.title,
         description: project.description,
@@ -47,7 +49,7 @@ export async function GET() {
           researchAreas: (project.owner.profile?.researchAreas as string[]) || [],
           initials: (project.owner.profile?.displayName || project.owner.email)
             .split(" ")
-            .map((name) => name[0])
+            .map((name: string) => name[0])
             .join("")
             .toUpperCase()
             .slice(0, 2),

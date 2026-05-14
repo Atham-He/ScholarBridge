@@ -39,11 +39,13 @@ export async function GET() {
     },
   });
   const hardWeight = user.profile?.aiHardWeight ?? 50;
+  type ReceivedProject = (typeof projects)[number];
+  type ReceivedApplication = ReceivedProject["applications"][number];
 
   return NextResponse.json({
-    projects: projects.map((project) => ({
+    projects: projects.map((project: ReceivedProject) => ({
       ...project,
-      applications: project.applications.map((application) => {
+      applications: project.applications.map((application: ReceivedApplication) => {
         const aiWeightedScore = calculateWeightedAiScore(application.aiHardScore, application.aiFitScore, hardWeight);
 
         return {

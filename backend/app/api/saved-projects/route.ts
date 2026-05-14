@@ -22,8 +22,10 @@ export async function GET() {
       },
     });
 
+    type SavedProjectItem = (typeof savedProjects)[number];
+
     return NextResponse.json({
-      projects: savedProjects.map(({ id, project, createdAt }) => ({
+      projects: savedProjects.map(({ id, project, createdAt }: SavedProjectItem) => ({
         id,
         savedAt: createdAt,
         project: {
