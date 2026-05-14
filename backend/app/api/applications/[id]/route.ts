@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -47,7 +48,7 @@ export async function PATCH(request: NextRequest, context: Params) {
       return NextResponse.json({ error: "Withdrawn applications cannot be updated" }, { status: 409 });
     }
 
-    const updated = await db.$transaction(async (tx) => {
+    const updated = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const wasAccepted = application.status === "accepted";
       const willAccept = status === "accepted";
 
