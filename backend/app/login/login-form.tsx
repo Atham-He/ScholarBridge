@@ -19,19 +19,24 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    setLoading(false);
-    if (!res.ok) {
-      const data = (await res.json()) as { error?: string };
-      setError(data.error ?? "Sign-in failed");
-      return;
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      setLoading(false);
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(data.error ?? "Sign-in failed");
+        return;
+      }
+      router.push(nextParam || "/browse");
+      router.refresh();
+    } catch {
+      setLoading(false);
+      setError("Sign-in failed. Please try again.");
     }
-    router.push(nextParam || "/browse");
-    router.refresh();
   }
 
   return (

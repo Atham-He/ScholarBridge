@@ -5,6 +5,10 @@ import { hashPassword } from "@/lib/password";
 import { registerSchema } from "@/lib/validation";
 import { emailService } from "@/lib/email";
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 export async function POST(request: NextRequest) {
   let body: unknown;
   try {
@@ -22,8 +26,9 @@ export async function POST(request: NextRequest) {
   }
 
   const data = parsed.data;
+  const normalizedEmail = normalizeEmail(data.email);
   const existing = await db.user.findUnique({
-    where: { email: data.email },
+    where: { email: normalizedEmail },
   });
   if (existing) {
     return NextResponse.json({ error: "This email is already registered" }, { status: 409 });
@@ -35,7 +40,7 @@ export async function POST(request: NextRequest) {
   const user = await db.$transaction(async (tx: Prisma.TransactionClient) => {
     const created = await tx.user.create({
       data: {
-        email: data.email,
+        email: normalizedEmail,
         passwordHash,
         emailVerificationCode: code, 
         emailVerified: false,        

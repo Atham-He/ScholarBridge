@@ -8,11 +8,6 @@ export async function GET() {
     const projects = await db.project.findMany({
       where: {
         status: "OPEN",
-        owner: {
-          profile: {
-          status: "active",
-          },
-        },
       },
       orderBy: {
         updatedAt: "desc",
