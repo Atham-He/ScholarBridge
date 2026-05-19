@@ -10,7 +10,6 @@ import { WithdrawButton } from '@/app/withdraw-button';
 import { ProfileProjectPanel } from '@/app/profile/project-management-panel';
 import { AppNav } from '@/components/layout/AppNav';
 import { ResearchEvolutionTimeline } from '@/components/research/ResearchEvolutionTimeline';
-import { ResearchInterestCloud } from '@/components/research/ResearchInterestCloud';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -164,6 +163,10 @@ type ActiveSection = 'profile' | 'applications' | 'saved' | 'updates' | 'project
 type ApplicationFilter = 'all' | 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 
 const normalizeApplicationStatus = (status: string) => status.toLowerCase();
+const listToInput = (items?: unknown) => Array.isArray(items)
+  ? items.filter((item): item is string => typeof item === 'string').join(', ')
+  : '';
+const inputToList = (value: string) => value.split(',').map((item) => item.trim()).filter(Boolean);
 
 const isActiveSection = (section: string | null): section is ActiveSection =>
   section === 'profile' ||
@@ -192,7 +195,8 @@ export default function UserProfilePage() {
   const [activeSection, setActiveSection] = useState<ActiveSection>(getInitialActiveSection);
   const [applicationFilter, setApplicationFilter] = useState<ApplicationFilter>('all');
   const [compareMode, setCompareMode] = useState(false);
-  const [editingProfile, setEditingProfile] = useState(false);
+  const [interestsText, setInterestsText] = useState('');
+  const [skillsText, setSkillsText] = useState('');
   const [profile, setProfile] = useState<UserProfile>({
     displayName: '',
     bioShort: '',
@@ -219,7 +223,7 @@ export default function UserProfilePage() {
       const profileRes = await fetch('/api/profile');
       if (profileRes.ok) {
         const data = await profileRes.json();
-        setProfile(data.profile || {
+        const nextProfile = data.profile || {
           displayName: '',
           bioShort: '',
           interests: [],
@@ -229,7 +233,10 @@ export default function UserProfilePage() {
           resumeMimeType: null,
           resumeSize: null,
           resumeUploadedAt: null,
-        });
+        };
+        setProfile(nextProfile);
+        setInterestsText(listToInput(nextProfile.interests));
+        setSkillsText(listToInput(nextProfile.skills));
       } else if (profileRes.status === 401 || profileRes.status === 403) {
         router.replace(`/login?next=${encodeURIComponent('/profile')}`);
         return;
@@ -282,16 +289,32 @@ export default function UserProfilePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const payload = {
+        ...profile,
+        displayName: profile.displayName.trim(),
+        education: profile.education?.trim() || '',
+        bioShort: profile.bioShort?.trim() || '',
+        interests: inputToList(interestsText),
+        skills: inputToList(skillsText),
+      };
+
       const response = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
+        const data = await response.json().catch(() => ({}));
+        if (data.profile) {
+          setProfile(data.profile);
+          setInterestsText(listToInput(data.profile.interests));
+          setSkillsText(listToInput(data.profile.skills));
+        }
         showMessage('success', 'Profile saved.');
       } else {
-        showMessage('error', 'Failed to save profile.');
+        const data = await response.json().catch(() => ({}));
+        showMessage('error', data.error || 'Failed to save profile.');
       }
     } catch {
       showMessage('error', 'Failed to save profile.');
@@ -422,18 +445,19 @@ export default function UserProfilePage() {
     },
   });
 
+  const researchInterests = inputToList(interestsText);
+  const currentSkills = inputToList(skillsText);
   const profileCompletionItems = [
     Boolean(profile.displayName),
     Boolean(profile.education),
     Boolean(profile.bioShort),
-    Boolean(profile.interests?.length),
-    Boolean(profile.skills?.length),
+    Boolean(researchInterests.length),
+    Boolean(currentSkills.length),
     Boolean(profile.resumeFileName),
   ];
   const profileCompletion = Math.round(
     (profileCompletionItems.filter(Boolean).length / profileCompletionItems.length) * 100,
   );
-  const researchInterests = profile.interests || [];
   const pendingApplications = applications.filter((app) => normalizeApplicationStatus(app.status) === 'pending').length;
   const acceptedApplications = applications.filter((app) => normalizeApplicationStatus(app.status) === 'accepted').length;
   const rejectedApplications = applications.filter((app) => normalizeApplicationStatus(app.status) === 'rejected').length;
@@ -473,9 +497,12 @@ export default function UserProfilePage() {
       tone: 'border-[#E0D8CC] bg-[#F5F2ED]',
     },
   ] as const;
+  const visibleApplicationGroups = applicationFilter === 'all'
+    ? applicationGroups
+    : applicationGroups.filter((group) => group.key === applicationFilter);
   const recentFeedback = applications.find((app) => app.ownerFeedback)?.ownerFeedback;
   const getMatchScore = (project: ProjectDetail, index: number) => {
-    const interestHit = profile.interests?.some((interest) =>
+    const interestHit = researchInterests.some((interest) =>
       project.researchArea.toLowerCase().includes(interest.toLowerCase()) ||
       project.title.toLowerCase().includes(interest.toLowerCase()),
     );
@@ -611,12 +638,13 @@ export default function UserProfilePage() {
 
                   <button
                     type="button"
-                    aria-label={editingProfile ? 'Close profile editing' : 'Edit profile'}
-                    onClick={() => setEditingProfile((current) => !current)}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#E0D8CC] bg-white px-4 text-sm font-semibold text-[#2b241d] transition hover:border-[#8b603b]"
+                    aria-label="Save public profile"
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#E0D8CC] bg-white px-4 text-sm font-semibold text-[#2b241d] transition hover:border-[#8b603b] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <EditIcon />
-                    {editingProfile ? 'Done' : 'Edit Profile'}
+                    {saving ? 'Saving...' : 'Save Profile'}
                   </button>
                 </div>
 
@@ -634,13 +662,6 @@ export default function UserProfilePage() {
                         <span className="grid h-10 w-10 place-items-center rounded-full bg-white">{profileCompletion}</span>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setEditingProfile(true)}
-                      className="mt-4 text-xs font-semibold text-[#17425d] hover:underline"
-                    >
-                      Continue editing
-                    </button>
                   </div>
 
                   <button
@@ -692,14 +713,9 @@ export default function UserProfilePage() {
                 <section className="rounded-[8px] border border-[#E0D8CC] bg-white shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
                   <div className="flex items-center justify-between gap-4 border-b border-[#eee6dc] px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        aria-label="Edit basic information"
-                        onClick={() => setEditingProfile((current) => !current)}
-                        className="grid h-9 w-9 place-items-center rounded-[8px] bg-[#E8F2F7] text-[#17425d] transition hover:bg-[#d7ebf5]"
-                      >
+                      <div className="grid h-9 w-9 place-items-center rounded-[8px] bg-[#E8F2F7] text-[#17425d]">
                         <ProfileIcon />
-                      </button>
+                      </div>
                       <div>
                         <h2 className="text-[18px] font-semibold text-[#17120e]">Public Profile</h2>
                         <p className="mt-1 text-sm text-[#5B5148]">The information project owners see when reviewing your applications.</p>
@@ -710,97 +726,62 @@ export default function UserProfilePage() {
                     </Button>
                   </div>
 
-                  {!editingProfile ? (
-                    <div className="p-5">
-                      <div className="grid gap-5 md:grid-cols-4">
-                        {[
-                          ['Name', profile.displayName || 'Not set'],
-                          ['Education', profile.education || 'Not set'],
-                          ['Focus', profile.interests?.[0] || 'Not set'],
-                          ['Skills', `${profile.skills?.length || 0} listed`],
-                        ].map(([label, value]) => (
-                          <div key={label}>
-                            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#8a8178]">{label}</p>
-                            <p className="mt-2 text-sm font-semibold text-[#17120e]">{value}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-5 border-t border-[#eee6dc] pt-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#8a8178]">Research Interests</p>
-                        <div className="mt-3">
-                          <ResearchInterestCloud
-                            areas={researchInterests}
-                            emptyText="No research interests listed."
-                            onAdd={() => setEditingProfile(true)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mt-5 border-t border-[#eee6dc] pt-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#8a8178]">Bio</p>
-                        <p className="mt-2 text-sm leading-6 text-[#5B5148]">
-                          {profile.bioShort || 'Add a short bio so project owners can quickly understand your research direction.'}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid gap-4 p-5">
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
-                          Name
-                          <input
-                            type="text"
-                            value={profile.displayName}
-                            onChange={(event) => setProfile({ ...profile, displayName: event.target.value })}
-                            className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
-                          />
-                        </label>
-                        <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
-                          Education
-                          <input
-                            type="text"
-                            value={profile.education || ''}
-                            onChange={(event) => setProfile({ ...profile, education: event.target.value })}
-                            className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
-                            placeholder="MIT · Computer Science · Master 1"
-                          />
-                        </label>
-                      </div>
+                  <div className="grid gap-4 p-5">
+                    <div className="grid gap-4 md:grid-cols-2">
                       <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
-                        Short Bio
-                        <textarea
-                          value={profile.bioShort || ''}
-                          onChange={(event) => setProfile({ ...profile, bioShort: event.target.value })}
-                          rows={3}
-                          className="resize-none rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 py-3 text-sm font-medium leading-6 text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
-                          placeholder="Summarize your research interests and project experience."
+                        Name
+                        <input
+                          type="text"
+                          value={profile.displayName}
+                          onChange={(event) => setProfile({ ...profile, displayName: event.target.value })}
+                          className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                          placeholder="Your public name"
                         />
                       </label>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
-                          Research Interests
-                          <input
-                            type="text"
-                            value={profile.interests?.join(', ') || ''}
-                            onChange={(event) => setProfile({ ...profile, interests: event.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
-                            className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
-                            placeholder="Reinforcement Learning, Robotics"
-                          />
-                        </label>
-                        <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
-                          Skills
-                          <input
-                            type="text"
-                            value={profile.skills?.join(', ') || ''}
-                            onChange={(event) => setProfile({ ...profile, skills: event.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
-                            className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
-                            placeholder="Python, PyTorch, Data Analysis"
-                          />
-                        </label>
-                      </div>
+                      <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                        Education
+                        <input
+                          type="text"
+                          value={profile.education || ''}
+                          onChange={(event) => setProfile({ ...profile, education: event.target.value })}
+                          className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                          placeholder="MIT · Computer Science · Master 1"
+                        />
+                      </label>
                     </div>
-                  )}
+                    <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                      Short Bio
+                      <textarea
+                        value={profile.bioShort || ''}
+                        onChange={(event) => setProfile({ ...profile, bioShort: event.target.value })}
+                        rows={3}
+                        className="resize-none rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 py-3 text-sm font-medium leading-6 text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                        placeholder="Summarize your research interests and project experience."
+                      />
+                    </label>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                        Research Interests
+                        <input
+                          type="text"
+                          value={interestsText}
+                          onChange={(event) => setInterestsText(event.target.value)}
+                          className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                          placeholder="Reinforcement Learning, Robotics"
+                        />
+                      </label>
+                      <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                        Skills
+                        <input
+                          type="text"
+                          value={skillsText}
+                          onChange={(event) => setSkillsText(event.target.value)}
+                          className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                          placeholder="Python, PyTorch, Data Analysis"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </section>
 
                 <section className="rounded-[8px] border border-[#E0D8CC] bg-white shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
@@ -941,12 +922,9 @@ export default function UserProfilePage() {
               </section>
 
               <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
-                <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
-                  {applicationGroups.map((group) => {
-                    const groupApplications = filteredApplications.filter((app) => normalizeApplicationStatus(app.status) === group.key);
-                    const visibleApplications = applicationFilter === 'all'
-                      ? applications.filter((app) => normalizeApplicationStatus(app.status) === group.key)
-                      : groupApplications;
+                <section className={applicationFilter === 'all' ? 'grid gap-4 md:grid-cols-2 2xl:grid-cols-4' : 'grid gap-4'}>
+                  {visibleApplicationGroups.map((group) => {
+                    const visibleApplications = filteredApplications.filter((app) => normalizeApplicationStatus(app.status) === group.key);
                     return (
                       <div key={group.key} className={`rounded-[8px] border p-4 ${group.tone}`}>
                         <div className="mb-4 flex items-center justify-between">
