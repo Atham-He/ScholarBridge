@@ -30,6 +30,22 @@ const profileSelect = {
   aiFitWeight: true,
 };
 
+const cleanString = (value: unknown) => (typeof value === "string" ? value.trim() : undefined);
+const nullableString = (value: unknown) => {
+  const cleaned = cleanString(value);
+  return cleaned === undefined ? undefined : cleaned || null;
+};
+const stringList = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
 export async function GET() {
   try {
     const user = await getCurrentUser();
@@ -91,49 +107,53 @@ export async function PATCH(request: NextRequest) {
       aiHardWeight,
       aiFitWeight,
     } = body;
+    const nextDisplayName = cleanString(displayName) || user.email?.split("@")[0] || "ScholarBridge User";
+    const nextResearchAreas = stringList(researchAreas);
+    const nextInterests = stringList(interests);
+    const nextSkills = stringList(skills);
 
     const profile = await db.profile.upsert({
       where: { userId: user.id },
       create: {
         userId: user.id,
-        displayName: displayName || user.email?.split("@")[0] || "ScholarBridge User",
-        institution: institution || undefined,
-        department: department || undefined,
-        title: title || undefined,
-        bioShort: bioShort || undefined,
-        backgroundBrief: backgroundBrief || undefined,
-        education: education || undefined,
-        location: location || undefined,
-        contactEmail: contactEmail || undefined,
-        phone: phone || undefined,
-        website: website || undefined,
-        researchAreas: researchAreas || undefined,
-        interests: interests || undefined,
-        skills: skills || undefined,
-        status: status || "active",
+        displayName: nextDisplayName,
+        institution: nullableString(institution),
+        department: nullableString(department),
+        title: nullableString(title),
+        bioShort: nullableString(bioShort),
+        backgroundBrief: nullableString(backgroundBrief),
+        education: nullableString(education),
+        location: nullableString(location),
+        contactEmail: nullableString(contactEmail),
+        phone: nullableString(phone),
+        website: nullableString(website),
+        researchAreas: nextResearchAreas,
+        interests: nextInterests,
+        skills: nextSkills,
+        status: cleanString(status) || "active",
         aiAgentEnabled: typeof aiAgentEnabled === "boolean" ? aiAgentEnabled : true,
-        aiAgentPrompt: aiAgentPrompt || undefined,
+        aiAgentPrompt: nullableString(aiAgentPrompt),
         aiHardWeight: typeof aiHardWeight === "number" ? aiHardWeight : 50,
         aiFitWeight: typeof aiFitWeight === "number" ? aiFitWeight : 50,
       },
       update: {
-        displayName: displayName || undefined,
-        institution: institution || undefined,
-        department: department || undefined,
-        title: title || undefined,
-        bioShort: bioShort || undefined,
-        backgroundBrief: backgroundBrief || undefined,
-        education: education || undefined,
-        location: location || undefined,
-        contactEmail: contactEmail || undefined,
-        phone: phone || undefined,
-        website: website || undefined,
-        researchAreas: researchAreas || undefined,
-        interests: interests || undefined,
-        skills: skills || undefined,
-        status: status || undefined,
+        displayName: nextDisplayName,
+        institution: nullableString(institution),
+        department: nullableString(department),
+        title: nullableString(title),
+        bioShort: nullableString(bioShort),
+        backgroundBrief: nullableString(backgroundBrief),
+        education: nullableString(education),
+        location: nullableString(location),
+        contactEmail: nullableString(contactEmail),
+        phone: nullableString(phone),
+        website: nullableString(website),
+        researchAreas: nextResearchAreas,
+        interests: nextInterests,
+        skills: nextSkills,
+        status: cleanString(status),
         aiAgentEnabled: typeof aiAgentEnabled === "boolean" ? aiAgentEnabled : undefined,
-        aiAgentPrompt: typeof aiAgentPrompt === "string" ? aiAgentPrompt : undefined,
+        aiAgentPrompt: nullableString(aiAgentPrompt),
         aiHardWeight: typeof aiHardWeight === "number" ? aiHardWeight : undefined,
         aiFitWeight: typeof aiFitWeight === "number" ? aiFitWeight : undefined,
       },
