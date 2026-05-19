@@ -44,7 +44,6 @@ export async function GET() {
     });
 
     if (!profile) {
-      // 如果没有profile，创建一个默认的
       const newProfile = await db.profile.create({
         data: {
           userId: user.id,

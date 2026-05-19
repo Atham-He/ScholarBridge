@@ -1,5 +1,5 @@
 /**
- * Input组件 - 基于ScholarBridge设计
+ * Input components for the ScholarBridge interface.
  */
 
 import { InputHTMLAttributes } from 'react';

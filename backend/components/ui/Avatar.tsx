@@ -1,5 +1,5 @@
 /**
- * Avatar组件 - 基于ScholarBridge设计
+ * Avatar component for the ScholarBridge interface.
  */
 
 import { HTMLAttributes } from 'react';
@@ -42,7 +42,6 @@ export function Avatar({
     );
   }
 
-  // 使用渐变背景色
   const gradientStyles = 'bg-[linear-gradient(135deg,#2C5F7C_0%,#4A8AA8_100%)]';
 
   return (

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { normalizeProjectIllustrationUrl } from "@/lib/project-illustration";
 
 type Params = { params: Promise<{ id: string }> };
 const PROJECT_STATUSES = ["OPEN", "CLOSED", "COMPLETED"] as const;
@@ -47,6 +48,15 @@ export async function PATCH(request: NextRequest, context: Params) {
     PROJECT_STATUSES.includes(payload.status as ProjectStatusValue)
     ? payload.status as ProjectStatusValue
     : undefined;
+  let illustrationUrl: string | null | undefined;
+  try {
+    illustrationUrl = normalizeProjectIllustrationUrl(payload.illustrationUrl);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Invalid project illustration" },
+      { status: 400 },
+    );
+  }
 
   const data = {
     ...(payload.title !== undefined && { title: String(payload.title) }),
@@ -56,6 +66,7 @@ export async function PATCH(request: NextRequest, context: Params) {
     ...(payload.endTime !== undefined && { endTime: payload.endTime ? String(payload.endTime) : null }),
     ...(payload.location !== undefined && { location: payload.location ? String(payload.location) : null }),
     ...(payload.requirements !== undefined && { requirements: payload.requirements ? String(payload.requirements) : null }),
+    ...(illustrationUrl !== undefined && { illustrationUrl }),
     ...(payload.capacity !== undefined && { capacity: typeof payload.capacity === "number" ? payload.capacity : Number(payload.capacity) }),
     ...(status !== undefined && { status }),
   };

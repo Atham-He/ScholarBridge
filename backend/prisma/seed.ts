@@ -67,7 +67,7 @@ async function main() {
           displayName: "Prof. Jane Chen",
           institution: "MIT",
           department: "Computer Science",
-          title: "Associate Professor",
+          title: "Research Lead",
           bioShort: "AI researcher focusing on reinforcement learning and robotics.",
           location: "Cambridge, MA",
           researchAreas: ["Reinforcement Learning", "Robotics", "Multi-agent Systems"],
@@ -98,7 +98,7 @@ async function main() {
     data: {
       ownerUserId: priya.id,
       title: "LLM Evaluation for Research Assistants",
-      description: "Build evaluation methods for AI research assistants that help students discover and compare research opportunities.",
+      description: "Build evaluation methods for AI research assistants that help applicants discover and compare research opportunities.",
       researchArea: "NLP",
       startTime: "2026-06",
       endTime: "2026-12",

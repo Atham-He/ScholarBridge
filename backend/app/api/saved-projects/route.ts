@@ -37,6 +37,7 @@ export async function GET() {
           endTime: project.endTime,
           location: project.location,
           requirements: project.requirements,
+          illustrationUrl: project.illustrationUrl,
           capacity: project.capacity,
           enrolled: project.enrolled,
           availableSeats: Math.max(0, project.capacity - project.enrolled),

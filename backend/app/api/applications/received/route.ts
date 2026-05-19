@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { normalizeProjectIllustrationUrl } from "@/lib/project-illustration";
 import { calculateWeightedAiScore } from "@/lib/resume-ai";
 
 export async function GET() {
@@ -119,6 +120,15 @@ export async function POST(request: NextRequest) {
   const location = typeof payload.location === "string" ? payload.location : "";
   const requirements = typeof payload.requirements === "string" ? payload.requirements : "";
   const capacity = typeof payload.capacity === "number" ? payload.capacity : Number(payload.capacity);
+  let illustrationUrl: string | null | undefined;
+  try {
+    illustrationUrl = normalizeProjectIllustrationUrl(payload.illustrationUrl);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Invalid project illustration" },
+      { status: 400 },
+    );
+  }
 
   if (!title || !description || !researchArea || !startTime || !capacity) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -134,6 +144,7 @@ export async function POST(request: NextRequest) {
       endTime: endTime || null,
       location: location || null,
       requirements: requirements || null,
+      illustrationUrl: illustrationUrl || null,
       capacity,
       enrolled: 0,
       status: "OPEN",

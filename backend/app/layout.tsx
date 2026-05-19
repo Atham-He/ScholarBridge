@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ScholarBridge — Mentor-Student Matching",
+  title: "ScholarBridge — Research Matching",
   description:
     "Discover open research projects and connect with research collaborators.",
 };
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <body className="m-0 min-h-screen bg-[#FAF8F5] antialiased">
         {children}
       </body>

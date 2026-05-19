@@ -1,5 +1,5 @@
 /**
- * Navigation组件 - 基于ScholarBridge设计
+ * Navigation component for the ScholarBridge interface.
  */
 
 import Link from 'next/link';
