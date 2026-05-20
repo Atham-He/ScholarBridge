@@ -3,6 +3,16 @@ import { PrismaClient } from "@prisma/client";
 describe("Seed Data Shape", () => {
   let prisma: PrismaClient;
 
+  const cleanupSeedFixtures = async () => {
+    await prisma.user.deleteMany({
+      where: {
+        email: {
+          contains: "test-seed",
+        },
+      },
+    });
+  };
+
   beforeAll(() => {
     prisma = new PrismaClient();
   });
@@ -12,13 +22,11 @@ describe("Seed Data Shape", () => {
   });
 
   beforeEach(async () => {
-    await prisma.user.deleteMany({
-      where: {
-        email: {
-          contains: "test-seed",
-        },
-      },
-    });
+    await cleanupSeedFixtures();
+  });
+
+  afterEach(async () => {
+    await cleanupSeedFixtures();
   });
 
   it("creates a unified user with profile, projects, saved projects, and applications", async () => {
@@ -28,7 +36,7 @@ describe("Seed Data Shape", () => {
         passwordHash: "hash",
         profile: {
           create: {
-            displayName: "Seed Owner",
+            displayName: "__seed_fixture_owner__",
             aiHardWeight: 60,
             aiFitWeight: 40,
           },
@@ -42,7 +50,7 @@ describe("Seed Data Shape", () => {
         passwordHash: "hash",
         profile: {
           create: {
-            displayName: "Seed Applicant",
+            displayName: "__seed_fixture_applicant__",
             education: "PhD",
           },
         },
@@ -52,8 +60,8 @@ describe("Seed Data Shape", () => {
     const project = await prisma.project.create({
       data: {
         ownerUserId: owner.id,
-        title: "Seed Project",
-        description: "Seed project description.",
+        title: "__seed_fixture_project__",
+        description: "Seed fixture project description.",
         researchArea: "NLP",
         startTime: "2026-09",
         capacity: 2,

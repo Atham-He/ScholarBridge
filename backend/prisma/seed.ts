@@ -10,10 +10,10 @@ const xiaoluoTimeline = {
       year: "2025",
       title: "AI4MATH",
       shortTitle: "AI4MATH",
-      subtitle: "Mathematical reasoning",
+      subtitle: "Verifiable problems",
       accent: "blue",
       description:
-        "Develop AI systems that combine language-model reasoning, formal verification, and problem decomposition for reliable mathematical discovery.",
+        "Systematically find low-hanging fruit in mathematics: valuable problems that are computable, formalizable, and easy to verify.",
     },
     {
       id: "neuro-symbolic-2025",
@@ -30,10 +30,10 @@ const xiaoluoTimeline = {
       year: "2026",
       title: "AutoResearch",
       shortTitle: "AutoResearch",
-      subtitle: "Research automation",
+      subtitle: "Verifiable outcomes",
       accent: "gold",
       description:
-        "Build closed-loop research agents that move from literature reading and hypothesis generation to experiment planning, evaluation, and revision.",
+        "Discover verifiable research outcomes, prioritize work with clear return value, and feed verified data back into project strategy and model training.",
     },
   ],
   works: [
@@ -45,7 +45,7 @@ const xiaoluoTimeline = {
       venue: "Research Idea",
       type: "Theme",
       summary:
-        "Use LLM agents, formal tools, and symbolic feedback to make mathematical reasoning more verifiable instead of only fluent. The focus is on proof search, theorem formalization, and multi-step problem solving pipelines that expose intermediate reasoning states.",
+        "Search for low-hanging fruit in mathematics: problems that are valuable, computable, and easy to verify. The direction emphasizes formalizable tasks, automatically checked answers, new verified datasets, iterative model improvement, and human-AI collaboration around problem selection and failure analysis.",
       image: "/images/project-templates/auto-math-scientific.png",
       tags: ["AI4MATH", "Formal Reasoning", "Proof Systems"],
     },
@@ -69,7 +69,7 @@ const xiaoluoTimeline = {
       venue: "Research Idea",
       type: "Theme",
       summary:
-        "Design automated research workflows that can read papers, form hypotheses, design experiments, inspect results, and revise assumptions. The emphasis is on rigorous evaluation loops rather than one-shot content generation.",
+        "Design research workflows that prioritize verifiable outcomes and measurable return value. The direction studies token-economics for research: allocate compute and human attention toward ideas that can be checked, rewarded, converted into training data, and used to produce stronger hypotheses and viewpoints.",
       image: "/images/project-templates/auto-research-scientific.png",
       tags: ["AutoResearch", "AI4SCI", "Research Agents"],
     },
@@ -122,7 +122,7 @@ async function main() {
           bioShort:
             "Researcher building automated research systems for AI4MATH, AI4SCI, and neuro-symbolic reasoning.",
           backgroundBrief:
-            "XiaoLuo Zhang studies how AI systems can help researchers move from literature and hypotheses to verifiable reasoning, controlled experiments, and reproducible scientific workflows. His current direction emphasizes AutoResearch as a rigorous loop rather than a one-shot generation tool.",
+            "XiaoLuo Zhang studies how AI systems can discover verifiable mathematical and scientific opportunities, turn results into useful training data, and support human-AI collaboration. His current direction emphasizes low-hanging-fruit discovery, token-economics for research prioritization, and closed-loop improvement rather than one-shot generation.",
           location: "Remote / Hybrid",
           contactEmail: "xiaoluo.zhang@demo.local",
           researchAreas: ["AI4MATH", "AI4SCI", "Neuro-Symbolic AI", "AutoResearch"],
@@ -144,13 +144,13 @@ async function main() {
       ownerUserId: xiaoluo.id,
       title: "AutoResearch",
       description:
-        "AutoResearch explores a closed-loop academic research agent that links paper reading, hypothesis generation, experiment design, result inspection, and revision. The project focuses on scientific reliability: every step should leave an auditable trace, use explicit evaluation criteria, and support human researchers in deciding which hypotheses are worth pursuing.",
-      researchArea: "AutoResearch / AI4SCI",
+        "AutoResearch explores how to systematically discover verifiable research outcomes instead of only generating more text. The project prioritizes directions where progress can be checked, rewarded, and converted into useful training data. It studies a token-economics view of research: spend compute and human attention first on work with clear return value, use verified outputs to feed back into project design and model training, and develop methods for proposing more numerous and higher-quality viewpoints, hypotheses, and research angles.",
+      researchArea: "AutoResearch / Verifiable Research",
       startTime: "2026 Spring",
       endTime: "Ongoing",
       location: "Remote / Hybrid",
       requirements:
-        "Useful backgrounds include LLM agents, information retrieval, scientific computing, evaluation design, or research workflow tooling. Collaborators should be comfortable reading papers and turning vague research questions into testable system components.",
+        "Useful backgrounds include LLM agents, information retrieval, scientific evaluation, research strategy, incentive design, data flywheels, or hypothesis generation. Collaborators should care about whether an idea can be verified, whether it has return value, and how verified outcomes can improve the next research cycle.",
       illustrationUrl: "/images/project-templates/auto-research-scientific.png",
       capacity: 6,
       status: "OPEN",
@@ -162,13 +162,13 @@ async function main() {
       ownerUserId: xiaoluo.id,
       title: "AutoExperiment",
       description:
-        "AutoExperiment studies how research agents can plan, run, and evaluate experiments with minimal manual friction. The goal is not to replace scientific judgment, but to make experiment loops more reproducible: define variables, select baselines, run checks, compare outcomes, and document failures in a structured way.",
-      researchArea: "AI4SCI / Experiment Automation",
+        "AutoExperiment explores how simulation and embodied intelligence can automatically complete experiments for education and research. The project focuses on building simulation environments, defining protocol standards, training embodied agents, sampling interaction data, and closing the loop between simulated trial outcomes and improved experimental policies. The goal is to make agents understand what to manipulate, what to measure, how to log state transitions, and how to turn simulated practice into reusable educational or research workflows.",
+      researchArea: "Embodied AI / Experiment Simulation",
       startTime: "2026 Spring",
       endTime: "Ongoing",
       location: "Remote / Hybrid",
       requirements:
-        "Best suited for students interested in scientific machine learning, experiment orchestration, benchmark design, lab automation concepts, or data-driven evaluation. Practical engineering ability and careful logging habits are important.",
+        "Helpful backgrounds include robotics simulation, embodied AI, reinforcement learning, protocol design, education technology, data collection, or scientific workflow engineering. Practical engineering ability and careful experiment logging are important.",
       illustrationUrl: "/images/project-templates/auto-experiment-scientific.png",
       capacity: 5,
       status: "OPEN",
@@ -180,13 +180,13 @@ async function main() {
       ownerUserId: xiaoluo.id,
       title: "AutoMath",
       description:
-        "AutoMath focuses on verifiable mathematical reasoning with language models, symbolic tools, and proof-oriented feedback. The project investigates how agents can decompose problems, call formal or semi-formal checkers, recover from invalid steps, and produce reasoning traces that are useful to mathematicians rather than merely plausible.",
-      researchArea: "AI4MATH / Neuro-Symbolic AI",
+        "AutoMath is designed to systematically search for low-hanging fruit in mathematics: problems that are valuable, computable, and easy to verify, such as verifiable computational math problems or mathematical questions that can be formalized. The project treats verification as the organizing principle. Agents propose candidate problems, solve or formalize them, collect new verified data, and use that data to iteratively improve the training and evaluation of reasoning models. A continuing theme is human-AI collaboration: researchers steer problem selection, inspect failures, and decide which verified artifacts should become datasets, benchmarks, or training signals.",
+      researchArea: "AI4MATH / Verifiable Reasoning",
       startTime: "2026 Spring",
       endTime: "Ongoing",
       location: "Remote / Hybrid",
       requirements:
-        "Helpful preparation includes discrete math, theorem proving, symbolic reasoning, algorithms, LLM tooling, or strong mathematical problem solving. Interest in rigorous failure analysis is more important than having every tool already mastered.",
+        "Helpful preparation includes mathematical problem solving, formal methods, theorem proving, symbolic reasoning, algorithms, LLM training and evaluation, or human-AI workflow design. Collaborators should be willing to analyze which problems are genuinely easy to verify and high-value.",
       illustrationUrl: "/images/project-templates/auto-math-scientific.png",
       capacity: 6,
       status: "OPEN",
