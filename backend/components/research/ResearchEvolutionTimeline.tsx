@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-interface ResearchWork {
+export interface ResearchWork {
   id: string;
   topicId: string;
   title: string;
@@ -14,7 +14,7 @@ interface ResearchWork {
   tags: string[];
 }
 
-interface ResearchTopic {
+export interface ResearchTopic {
   id: string;
   year: string;
   title: string;
@@ -62,7 +62,14 @@ const accentStyles: Record<ResearchTopic['accent'], {
   },
 };
 
-const researchTopics: ResearchTopic[] = [
+export interface ResearchTimelineData {
+  topics: ResearchTopic[];
+  works: ResearchWork[];
+}
+
+const accentOptions: ResearchTopic['accent'][] = ['blue', 'gold', 'green', 'teal', 'slate'];
+
+const defaultResearchTopics: ResearchTopic[] = [
   {
     id: 'representation',
     year: '2018',
@@ -88,7 +95,7 @@ const researchTopics: ResearchTopic[] = [
     shortTitle: 'Robotics',
     subtitle: 'Embodied control',
     accent: 'green',
-    description: 'Representative work connecting latent skills, tactile feedback, and robot autonomy.',
+    description: 'Research idea connecting latent skills, tactile feedback, and robot autonomy.',
   },
   {
     id: 'human-ai',
@@ -110,7 +117,7 @@ const researchTopics: ResearchTopic[] = [
   },
 ];
 
-const researchWorks: ResearchWork[] = [
+const defaultResearchWorks: ResearchWork[] = [
   {
     id: 'contrastive-state-abstractions',
     topicId: 'representation',
@@ -223,6 +230,89 @@ const researchWorks: ResearchWork[] = [
   },
 ];
 
+const cloneTimelineData = (data: ResearchTimelineData): ResearchTimelineData => ({
+  topics: data.topics.map((topic) => ({ ...topic })),
+  works: data.works.map((work) => ({ ...work, tags: [...work.tags] })),
+});
+
+const defaultTimelineData = () => cloneTimelineData({
+  topics: defaultResearchTopics,
+  works: defaultResearchWorks,
+});
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+
+const asString = (value: unknown, fallback: string) => {
+  if (typeof value !== 'string') {
+    return fallback;
+  }
+
+  const trimmed = value.trim();
+  return trimmed || fallback;
+};
+
+export function normalizeResearchTimelineData(value: unknown): ResearchTimelineData | null {
+  if (!isRecord(value) || !Array.isArray(value.topics) || !Array.isArray(value.works)) {
+    return null;
+  }
+
+  const topics = value.topics
+    .filter(isRecord)
+    .map((topic, index): ResearchTopic => {
+      const accent = accentOptions.includes(topic.accent as ResearchTopic['accent'])
+        ? topic.accent as ResearchTopic['accent']
+        : accentOptions[index % accentOptions.length];
+
+      return {
+        id: asString(topic.id, `topic-${index + 1}`),
+        year: asString(topic.year, String(2018 + index * 2)),
+        title: asString(topic.title, 'Research Theme'),
+        shortTitle: asString(topic.shortTitle, asString(topic.title, 'Theme').slice(0, 16)),
+        subtitle: asString(topic.subtitle, 'Focus area'),
+        accent,
+        description: asString(topic.description, 'Describe this research direction.'),
+      };
+    });
+
+  if (topics.length === 0) {
+    return null;
+  }
+
+  const topicIds = new Set(topics.map((topic) => topic.id));
+  const works = value.works
+    .filter(isRecord)
+    .map((work, index): ResearchWork => ({
+      id: asString(work.id, `work-${index + 1}`),
+      topicId: topicIds.has(asString(work.topicId, '')) ? asString(work.topicId, '') : topics[0].id,
+      title: asString(work.title, 'Research Idea'),
+      year: asString(work.year, topics[0].year),
+      venue: asString(work.venue, 'Working Draft'),
+      type: asString(work.type, 'Project'),
+      summary: asString(work.summary, 'Summarize the work sample or theme connection.'),
+      image: asString(work.image, '/research-works/multimodal-world-models.png'),
+      tags: Array.isArray(work.tags)
+        ? work.tags.filter((tag): tag is string => typeof tag === 'string').map((tag) => tag.trim()).filter(Boolean)
+        : ['Research'],
+    }));
+
+  if (works.length === 0) {
+    works.push({
+      id: 'work-1',
+      topicId: topics[0].id,
+      title: 'Research Idea',
+      year: topics[0].year,
+      venue: 'Working Draft',
+      type: 'Project',
+      summary: 'Summarize the work sample or theme connection.',
+      image: '/research-works/multimodal-world-models.png',
+      tags: ['Research'],
+    });
+  }
+
+  return { topics, works };
+}
+
 function RepresentativeMiniCard({
   label,
   work,
@@ -238,7 +328,7 @@ function RepresentativeMiniCard({
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Open representative work: ${work.title}`}
+      aria-label={`Open research idea: ${work.title}`}
       className={[
         'group flex min-h-[118px] gap-3 rounded-[8px] border bg-white p-2.5 text-left shadow-[0_1px_2px_rgba(60,42,27,0.03)] transition',
         'hover:-translate-y-0.5 hover:border-[#8f623b] hover:shadow-[0_12px_24px_rgba(60,42,27,0.1)]',
@@ -314,7 +404,7 @@ function RepresentativeFeatureCard({
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Expand representative work: ${work.title}`}
+      aria-label={`Expand research idea: ${work.title}`}
       className="group flex h-full flex-col overflow-hidden rounded-[10px] border-2 border-[#8f623b] bg-white p-3 text-left shadow-[0_10px_22px_rgba(60,42,27,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(60,42,27,0.12)]"
     >
       <span className="relative block overflow-hidden rounded-[8px] border border-[#e5d7c6] bg-[#f5f0ea]">
@@ -325,7 +415,7 @@ function RepresentativeFeatureCard({
       </span>
 
       <span className="flex min-h-0 flex-1 flex-col pt-3">
-        <span className="block text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9a8b7d]">Enlarged Representative Work</span>
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9a8b7d]">Research Idea Summary</span>
         <span className="mt-1.5 line-clamp-2 block text-[19px] font-semibold leading-[23px] text-[#17120e]">{work.title}</span>
         <span className="mt-1.5 block truncate text-[12px] font-semibold leading-5 text-[#8b603b]">{work.venue}</span>
         <span className="mt-2 line-clamp-2 block text-[13px] leading-5 text-[#5B5148]">{work.summary}</span>
@@ -340,47 +430,197 @@ function RepresentativeFeatureCard({
 export function ResearchEvolutionTimeline({
   className = '',
   compact = false,
+  editable = false,
+  initialData,
+  onSave,
 }: {
   className?: string;
   compact?: boolean;
+  editable?: boolean;
+  initialData?: ResearchTimelineData | null;
+  onSave?: (data: ResearchTimelineData) => Promise<void> | void;
 }) {
-  const [selectedTopicId, setSelectedTopicId] = useState('human-ai');
-  const [selectedWorkId, setSelectedWorkId] = useState('multimodal-world-models');
+  const startingData = useMemo(() => cloneTimelineData(initialData || defaultTimelineData()), [initialData]);
+  const [topics, setTopics] = useState<ResearchTopic[]>(startingData.topics);
+  const [works, setWorks] = useState<ResearchWork[]>(startingData.works);
+  const [selectedTopicId, setSelectedTopicId] = useState(startingData.topics[3]?.id || startingData.topics[0].id);
+  const [selectedWorkId, setSelectedWorkId] = useState(startingData.works[0].id);
   const [expandedWorkId, setExpandedWorkId] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const selectedTopic = researchTopics.find((topic) => topic.id === selectedTopicId) || researchTopics[0];
-  const topicWorks = researchWorks.filter((work) => work.topicId === selectedTopic.id);
-  const selectedWork = topicWorks.find((work) => work.id === selectedWorkId) || topicWorks[0];
-  const expandedWork = expandedWorkId ? researchWorks.find((work) => work.id === expandedWorkId) || null : null;
+  useEffect(() => {
+    setTopics(startingData.topics);
+    setWorks(startingData.works);
+    setSelectedTopicId((current) => startingData.topics.some((topic) => topic.id === current)
+      ? current
+      : startingData.topics[0].id);
+    setSelectedWorkId((current) => startingData.works.some((work) => work.id === current)
+      ? current
+      : startingData.works[0].id);
+  }, [startingData]);
+
+  const selectedTopic = topics.find((topic) => topic.id === selectedTopicId) || topics[0] || defaultResearchTopics[0];
+  const topicWorks = works.filter((work) => work.topicId === selectedTopic.id);
+  const selectedWork = topicWorks.find((work) => work.id === selectedWorkId) || topicWorks[0] || works[0] || defaultResearchWorks[0];
+  const expandedWork = expandedWorkId ? works.find((work) => work.id === expandedWorkId) || null : null;
   const expandedTopic = expandedWork
-    ? researchTopics.find((topic) => topic.id === expandedWork.topicId) || selectedTopic
+    ? topics.find((topic) => topic.id === expandedWork.topicId) || selectedTopic
     : null;
-  const selectedTopicIndex = Math.max(0, researchTopics.findIndex((topic) => topic.id === selectedTopic.id));
+  const selectedTopicIndex = Math.max(0, topics.findIndex((topic) => topic.id === selectedTopic.id));
   const selectedAccent = accentStyles[selectedTopic.accent];
   const keyWork = topicWorks[0] || selectedWork;
   const supportingWork = topicWorks[1] || selectedWork;
 
   const handleSelectTopic = (topicId: string) => {
     setSelectedTopicId(topicId);
-    const firstWork = researchWorks.find((work) => work.topicId === topicId);
+    const firstWork = works.find((work) => work.topicId === topicId);
     if (firstWork) {
       setSelectedWorkId(firstWork.id);
     }
   };
 
+  const updateSelectedTopic = (patch: Partial<ResearchTopic>) => {
+    setTopics((current) => current.map((topic) => topic.id === selectedTopic.id ? { ...topic, ...patch } : topic));
+  };
+
+  const updateSelectedWork = (patch: Partial<ResearchWork>) => {
+    setWorks((current) => current.map((work) => work.id === selectedWork.id ? { ...work, ...patch } : work));
+  };
+
+  const addTopic = () => {
+    const id = `topic-${Date.now()}`;
+    const year = String(new Date().getFullYear());
+    const topic: ResearchTopic = {
+      id,
+      year,
+      title: 'New Research Theme',
+      shortTitle: 'New Theme',
+      subtitle: 'Focus area',
+      accent: accentOptions[topics.length % accentOptions.length],
+      description: 'Describe how this research direction developed and why it matters.',
+    };
+    const work: ResearchWork = {
+      id: `work-${Date.now()}`,
+      topicId: id,
+      title: 'New Research Idea',
+      year,
+      venue: 'Working Draft',
+      type: 'Project',
+      summary: 'Add a concise summary for this research idea.',
+      image: '/research-works/multimodal-world-models.png',
+      tags: ['Research'],
+    };
+
+    setTopics((current) => [...current, topic]);
+    setWorks((current) => [...current, work]);
+    setSelectedTopicId(id);
+    setSelectedWorkId(work.id);
+  };
+
+  const deleteTopic = () => {
+    if (topics.length <= 1) {
+      return;
+    }
+
+    const nextTopics = topics.filter((topic) => topic.id !== selectedTopic.id);
+    const nextTopic = nextTopics[0];
+    const nextWorks = works.filter((work) => work.topicId !== selectedTopic.id);
+    const nextWork = nextWorks.find((work) => work.topicId === nextTopic.id) || nextWorks[0];
+
+    setTopics(nextTopics);
+    setWorks(nextWorks);
+    setSelectedTopicId(nextTopic.id);
+    if (nextWork) {
+      setSelectedWorkId(nextWork.id);
+    }
+  };
+
+  const addWork = () => {
+    const work: ResearchWork = {
+      id: `work-${Date.now()}`,
+      topicId: selectedTopic.id,
+      title: 'New Research Idea',
+      year: selectedTopic.year,
+      venue: 'Working Draft',
+      type: 'Project',
+      summary: 'Add a concise summary for this research idea.',
+      image: '/research-works/multimodal-world-models.png',
+      tags: ['Research'],
+    };
+
+    setWorks((current) => [...current, work]);
+    setSelectedWorkId(work.id);
+  };
+
+  const deleteWork = () => {
+    if (topicWorks.length <= 1) {
+      return;
+    }
+
+    const nextWorks = works.filter((work) => work.id !== selectedWork.id);
+    const nextWork = nextWorks.find((work) => work.topicId === selectedTopic.id);
+    setWorks(nextWorks);
+    if (nextWork) {
+      setSelectedWorkId(nextWork.id);
+    }
+  };
+
+  const resetDraft = () => {
+    const next = cloneTimelineData(initialData || defaultTimelineData());
+    setTopics(next.topics);
+    setWorks(next.works);
+    setSelectedTopicId(next.topics[3]?.id || next.topics[0].id);
+    setSelectedWorkId(next.works[0].id);
+    setEditing(false);
+  };
+
+  const saveDraft = async () => {
+    setSaving(true);
+    try {
+      await onSave?.(cloneTimelineData({ topics, works }));
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <>
-      <section className={`overflow-hidden rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] shadow-[0_1px_3px_rgba(60,42,27,0.05)] ${compact ? 'p-5' : 'p-6'} ${className}`}>
+      <section className={`overflow-hidden rounded-[8px] border border-[#E0D8CC] bg-white shadow-[0_1px_3px_rgba(60,42,27,0.05)] ${compact ? 'p-5' : 'p-6'} ${className}`}>
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <h2 className="text-[19px] font-semibold leading-6 text-[#17120e]">Research Interest Evolution</h2>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-[#5B5148]">
-              Dynamic timeline of research interests, key topics, and representative works over time.
+              Dynamic timeline of research interests, key topics, and research ideas over time.
             </p>
           </div>
-          <span className="inline-flex h-8 w-fit items-center rounded-full border border-[#D8E8F2] bg-[#F3FAFD] px-5 text-xs font-semibold text-[#17425d]">
-            Auto-updated from profile signals
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex h-8 w-fit items-center rounded-full border border-[#D8E8F2] bg-[#F3FAFD] px-5 text-xs font-semibold text-[#17425d]">
+              {editable ? 'Editable profile timeline' : 'Auto-updated from profile signals'}
+            </span>
+            {editable && (
+              <>
+                {editing && (
+                  <button
+                    type="button"
+                    onClick={saveDraft}
+                    disabled={saving}
+                    className="inline-flex h-8 items-center rounded-[7px] border border-[#8b603b] bg-[#8b603b] px-4 text-xs font-semibold text-white transition hover:bg-[#765233] disabled:opacity-60"
+                  >
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => editing ? resetDraft() : setEditing(true)}
+                  className="inline-flex h-8 items-center rounded-[7px] border border-[#E0D8CC] bg-white px-4 text-xs font-semibold text-[#17120e] transition hover:border-[#8b603b]"
+                >
+                  {editing ? 'Cancel' : 'Edit'}
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className={`mt-5 grid gap-8 ${compact ? 'xl:grid-cols-[minmax(0,1fr)_360px]' : 'xl:grid-cols-[minmax(0,1fr)_382px]'}`}>
@@ -391,11 +631,14 @@ export function ResearchEvolutionTimeline({
                 <div
                   className="absolute left-[38px] top-[40px] h-1 rounded-full bg-[#8f623b]"
                   style={{
-                    width: `calc((100% - 76px) * ${researchTopics.length > 1 ? selectedTopicIndex / (researchTopics.length - 1) : 0})`,
+                    width: `calc((100% - 76px) * ${topics.length > 1 ? selectedTopicIndex / (topics.length - 1) : 0})`,
                   }}
                 />
-                <ol className="relative grid grid-cols-5 gap-2">
-                  {researchTopics.map((topic) => {
+                <ol
+                  className="relative grid gap-2"
+                  style={{ gridTemplateColumns: `repeat(${topics.length}, minmax(0, 1fr))` }}
+                >
+                  {topics.map((topic) => {
                     const active = topic.id === selectedTopic.id;
                     return (
                       <li key={topic.id}>
@@ -428,7 +671,7 @@ export function ResearchEvolutionTimeline({
 
             <div className="mt-8 grid gap-3 md:grid-cols-3">
               <RepresentativeMiniCard
-                label="Key Work"
+                label="Core Idea"
                 work={keyWork}
                 active={selectedWork.id === keyWork.id}
                 onClick={() => {
@@ -444,7 +687,7 @@ export function ResearchEvolutionTimeline({
               />
 
               <RepresentativeMiniCard
-                label="Selected"
+                label="Direction"
                 work={supportingWork}
                 active={selectedWork.id === supportingWork.id}
                 onClick={() => {
@@ -457,6 +700,100 @@ export function ResearchEvolutionTimeline({
 
           <RepresentativeFeatureCard work={selectedWork} onClick={() => setExpandedWorkId(selectedWork.id)} />
         </div>
+
+        {editable && editing && (
+          <div className="mt-6 grid gap-4 rounded-[8px] border border-[#E0D8CC] bg-[#FAF8F5] p-4 lg:grid-cols-2">
+            <div>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-[#17120e]">Timeline node</p>
+                <div className="flex gap-2">
+                  <button type="button" onClick={addTopic} className="rounded border border-[#E0D8CC] bg-white px-3 py-1.5 text-xs font-semibold text-[#17120e] hover:border-[#8b603b]">Add node</button>
+                  <button type="button" onClick={deleteTopic} disabled={topics.length <= 1} className="rounded border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 disabled:opacity-40">Delete</button>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148]">
+                  Time
+                  <input value={selectedTopic.year} onChange={(event) => updateSelectedTopic({ year: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148]">
+                  Short label
+                  <input value={selectedTopic.shortTitle} onChange={(event) => updateSelectedTopic({ shortTitle: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148] sm:col-span-2">
+                  Title
+                  <input value={selectedTopic.title} onChange={(event) => updateSelectedTopic({ title: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148]">
+                  Subtitle
+                  <input value={selectedTopic.subtitle} onChange={(event) => updateSelectedTopic({ subtitle: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148]">
+                  Accent
+                  <select value={selectedTopic.accent} onChange={(event) => updateSelectedTopic({ accent: event.target.value as ResearchTopic['accent'] })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]">
+                    {accentOptions.map((accent) => <option key={accent} value={accent}>{accent}</option>)}
+                  </select>
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148] sm:col-span-2">
+                  Description
+                  <textarea rows={3} value={selectedTopic.description} onChange={(event) => updateSelectedTopic({ description: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-[#17120e]">Research idea card</p>
+                <div className="flex gap-2">
+                  <button type="button" onClick={addWork} className="rounded border border-[#E0D8CC] bg-white px-3 py-1.5 text-xs font-semibold text-[#17120e] hover:border-[#8b603b]">Add card</button>
+                  <button type="button" onClick={deleteWork} disabled={topicWorks.length <= 1} className="rounded border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 disabled:opacity-40">Delete</button>
+                </div>
+              </div>
+              <div className="mb-3 flex flex-wrap gap-2">
+                {topicWorks.map((work) => (
+                  <button
+                    key={work.id}
+                    type="button"
+                    onClick={() => setSelectedWorkId(work.id)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${work.id === selectedWork.id ? 'border-[#8b603b] bg-[#8b603b] text-white' : 'border-[#E0D8CC] bg-white text-[#17120e]'}`}
+                  >
+                    {work.title || 'Untitled'}
+                  </button>
+                ))}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148] sm:col-span-2">
+                  Card title
+                  <input value={selectedWork.title} onChange={(event) => updateSelectedWork({ title: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148]">
+                  Year
+                  <input value={selectedWork.year} onChange={(event) => updateSelectedWork({ year: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148]">
+                  Type
+                  <input value={selectedWork.type} onChange={(event) => updateSelectedWork({ type: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148] sm:col-span-2">
+                  Venue / source
+                  <input value={selectedWork.venue} onChange={(event) => updateSelectedWork({ venue: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148] sm:col-span-2">
+                  Image path
+                  <input value={selectedWork.image} onChange={(event) => updateSelectedWork({ image: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148] sm:col-span-2">
+                  Summary
+                  <textarea rows={3} value={selectedWork.summary} onChange={(event) => updateSelectedWork({ summary: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-[#5B5148] sm:col-span-2">
+                  Tags
+                  <input value={selectedWork.tags.join(', ')} onChange={(event) => updateSelectedWork({ tags: event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean) })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-normal text-[#17120e]" />
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {expandedWork && expandedTopic && (
@@ -501,7 +838,7 @@ function ResearchWorkModal({
               </div>
               <button
                 type="button"
-                aria-label="Close representative work details"
+                aria-label="Close research idea details"
                 onClick={onClose}
                 className="shrink-0 rounded-[8px] border border-[#E0D8CC] bg-white px-3 py-2 text-sm font-semibold text-[#17120e] transition hover:border-[#8b603b]"
               >
@@ -513,7 +850,7 @@ function ResearchWorkModal({
             <div className="mt-5 rounded-[8px] border border-[#eee6dc] bg-[#fffdf9] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8a8178]">Why this matters</p>
               <p className="mt-2 text-sm leading-6 text-[#5B5148]">
-                This representative work explains how interest in {topic.title.toLowerCase()} connects to current recruiting topics and open project opportunities.
+                This research idea explains how interest in {topic.title.toLowerCase()} connects to current recruiting topics and open project opportunities.
               </p>
             </div>
 

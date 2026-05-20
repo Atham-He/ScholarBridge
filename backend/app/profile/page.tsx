@@ -4,12 +4,16 @@
 
 'use client';
 
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { WithdrawButton } from '@/app/withdraw-button';
 import { ProfileProjectPanel } from '@/app/profile/project-management-panel';
 import { AppNav } from '@/components/layout/AppNav';
-import { ResearchEvolutionTimeline } from '@/components/research/ResearchEvolutionTimeline';
+import {
+  ResearchEvolutionTimeline,
+  normalizeResearchTimelineData,
+  type ResearchTimelineData,
+} from '@/components/research/ResearchEvolutionTimeline';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -20,6 +24,7 @@ interface UserProfile {
   interests?: string[];
   education?: string;
   skills?: string[];
+  materialsJson?: Record<string, unknown> | null;
   resumeFileName?: string | null;
   resumeMimeType?: string | null;
   resumeSize?: number | null;
@@ -184,6 +189,9 @@ const getInitialActiveSection = (): ActiveSection => {
   return isActiveSection(section) ? section : 'profile';
 };
 
+const getProfileMaterials = (materials: UserProfile['materialsJson']) =>
+  materials && typeof materials === 'object' && !Array.isArray(materials) ? materials : {};
+
 export default function UserProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -211,6 +219,10 @@ export default function UserProfilePage() {
   const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
+  const researchTimelineData = useMemo(
+    () => normalizeResearchTimelineData(getProfileMaterials(profile.materialsJson).researchTimeline),
+    [profile.materialsJson]
+  );
 
   const showMessage = useCallback((type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -321,6 +333,37 @@ export default function UserProfilePage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleTimelineSave = async (timeline: ResearchTimelineData) => {
+    const nextMaterials = {
+      ...getProfileMaterials(profile.materialsJson),
+      researchTimeline: timeline,
+    };
+    const payload = {
+      ...profile,
+      materialsJson: nextMaterials,
+    };
+
+    const response = await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      const data = await response.json().catch(() => ({}));
+      if (data.profile) {
+        setProfile(data.profile);
+      } else {
+        setProfile((current) => ({ ...current, materialsJson: nextMaterials }));
+      }
+      showMessage('success', 'Research timeline saved.');
+      return;
+    }
+
+    const data = await response.json().catch(() => ({}));
+    showMessage('error', data.error || 'Failed to save research timeline.');
   };
 
   const handleLogout = async () => {
@@ -865,13 +908,12 @@ export default function UserProfilePage() {
                 </div>
               </section>
 
-              <section className="rounded-[8px] border border-[#E0D8CC] bg-white p-5 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
-                <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-[#17120e]">Research Evolution</h2>
-                  <p className="mt-1 text-sm text-[#5B5148]">A compact timeline view for representative research themes and work samples.</p>
-                </div>
-                <ResearchEvolutionTimeline compact />
-              </section>
+              <ResearchEvolutionTimeline
+                compact
+                editable
+                initialData={researchTimelineData}
+                onSave={handleTimelineSave}
+              />
             </div>
           )}
 

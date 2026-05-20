@@ -40,29 +40,6 @@ function GraduationCapIcon() {
   );
 }
 
-function ProfileIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6">
-      <path
-        d="M12 12.3a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.7"
-      />
-      <path
-        d="M4.8 20.1c.75-3.65 3.15-5.45 7.2-5.45s6.45 1.8 7.2 5.45"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.7"
-      />
-    </svg>
-  );
-}
-
 export default function HomePage() {
   return (
     <main className="min-h-[calc(100vh+60px)] [overflow-x:clip] bg-[#fbf8f3] text-[#15110d]">
@@ -82,25 +59,20 @@ export default function HomePage() {
           <span className="block">Stronger Academic Futures.</span>
         </h1>
         <p className="relative z-10 mx-auto mt-[12px] max-w-[560px] origin-center scale-x-[0.902] text-[16px] leading-[1.55] text-[#4b433b]">
-          ScholarBridge helps researchers discover opportunities and find the right labs.
+          Discover research opportunities.
           <br />
-          Project owners recruit motivated collaborators faster and more effectively.
+          Find the right labs.
+          <br />
+          Recruit motivated collaborators faster.
         </p>
 
-        <div className="relative z-20 mx-auto mt-[17px] flex w-fit -translate-x-[7px] items-center gap-[27px]">
+        <div className="relative z-20 mx-auto mt-[67px] flex w-fit -translate-x-[7px] items-center">
           <Link
             href="/browse"
-            className="inline-flex h-[52px] w-[209px] items-center justify-center gap-3 rounded-[7px] border border-[#8b603b] bg-[#8b603b] text-[16px] font-semibold text-white shadow-[0_10px_24px_rgba(80,51,28,0.18)] transition hover:bg-[#765233]"
+            className="inline-flex h-[52px] w-[290px] items-center justify-center gap-3 rounded-[7px] border border-[#8b603b] bg-[#8b603b] text-[16px] font-semibold text-white shadow-[0_10px_24px_rgba(80,51,28,0.18)] transition hover:bg-[#765233]"
           >
             <GraduationCapIcon />
-            Discover Projects
-          </Link>
-          <Link
-            href="/login?next=%2Fprofile"
-            className="inline-flex h-[52px] w-[202px] items-center justify-center gap-3 rounded-[7px] border border-[#ddd2c8] bg-[#fffdf9] text-[16px] font-semibold text-[#2a2119] shadow-[0_8px_20px_rgba(60,42,27,0.04)] transition hover:border-[#8b603b]"
-          >
-            <ProfileIcon />
-            Manage Profile
+            Start Your Academic Journey
           </Link>
         </div>
 

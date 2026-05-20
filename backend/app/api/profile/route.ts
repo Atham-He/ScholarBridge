@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
@@ -45,6 +46,10 @@ const stringList = (value: unknown) => {
     .map((item) => item.trim())
     .filter(Boolean);
 };
+const jsonObject = (value: unknown) =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? JSON.parse(JSON.stringify(value)) as Prisma.InputJsonObject
+    : undefined;
 
 export async function GET() {
   try {
@@ -101,6 +106,7 @@ export async function PATCH(request: NextRequest) {
       researchAreas,
       interests,
       skills,
+      materialsJson,
       status,
       aiAgentEnabled,
       aiAgentPrompt,
@@ -111,6 +117,7 @@ export async function PATCH(request: NextRequest) {
     const nextResearchAreas = stringList(researchAreas);
     const nextInterests = stringList(interests);
     const nextSkills = stringList(skills);
+    const nextMaterialsJson = jsonObject(materialsJson);
 
     const profile = await db.profile.upsert({
       where: { userId: user.id },
@@ -130,6 +137,7 @@ export async function PATCH(request: NextRequest) {
         researchAreas: nextResearchAreas,
         interests: nextInterests,
         skills: nextSkills,
+        materialsJson: nextMaterialsJson,
         status: cleanString(status) || "active",
         aiAgentEnabled: typeof aiAgentEnabled === "boolean" ? aiAgentEnabled : true,
         aiAgentPrompt: nullableString(aiAgentPrompt),
@@ -151,6 +159,7 @@ export async function PATCH(request: NextRequest) {
         researchAreas: nextResearchAreas,
         interests: nextInterests,
         skills: nextSkills,
+        materialsJson: nextMaterialsJson,
         status: cleanString(status),
         aiAgentEnabled: typeof aiAgentEnabled === "boolean" ? aiAgentEnabled : undefined,
         aiAgentPrompt: nullableString(aiAgentPrompt),

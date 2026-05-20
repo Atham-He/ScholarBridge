@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { AppNav } from "@/components/layout/AppNav";
 import { Button } from "@/components/ui/Button";
 
 export function LoginForm() {
@@ -41,24 +42,15 @@ export function LoginForm() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
-      <nav className="flex items-center justify-between border-b border-[#E0D8CC] bg-[rgba(250,248,245,0.95)] px-10 py-5 backdrop-blur-[10px]">
-        <Link href="/" className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#1A1A1A]">
-          ScholarBridge
-        </Link>
-        <div className="flex gap-2.5">
-          <Link href="/">
-            <Button variant="outline" size="sm">Home</Button>
-          </Link>
-          <Link href="/browse">
-            <Button variant="outline" size="sm">Browse</Button>
-          </Link>
-          <Link href="/profile">
-            <Button variant="outline" size="sm">Profile</Button>
-          </Link>
-        </div>
-      </nav>
+      <AppNav
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Browse", href: "/browse" },
+          { label: "Profile", href: "/profile" },
+        ]}
+      />
 
-      <main className="mx-auto flex min-h-[calc(100vh-81px)] max-w-6xl items-center justify-center px-6 py-12">
+      <main className="mx-auto flex min-h-[calc(100vh-88px)] max-w-6xl items-center justify-center px-6 py-12">
         <section className="w-full max-w-[460px] rounded-[10px] border border-[#E0D8CC] bg-white p-8 shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
           <div className="mb-7">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#2C5F7C]">Welcome back</p>
@@ -118,12 +110,6 @@ export function LoginForm() {
           </p>
         </section>
       </main>
-
-      <style jsx>{`
-        .font-display {
-          font-family: 'Cormorant Garamond', serif;
-        }
-      `}</style>
     </div>
   );
 }
