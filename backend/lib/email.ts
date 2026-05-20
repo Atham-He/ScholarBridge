@@ -6,18 +6,17 @@ interface EmailService {
 }
 
 // ==============================================
-// 开发环境：
+// Development transport:
 // ==============================================
 class DevelopmentEmailService implements EmailService {
   private transporter: Transporter;
 
   constructor() {
-    // 这里用 QQ 邮箱发信
     this.transporter = nodemailer.createTransport({
       service: "qq",
       auth: {
         user: "2212360065@qq.com",
-        pass: "olelyynkjqcueaff", // 不是密码！是授权码！
+        pass: "olelyynkjqcueaff",
       },
     });
   }
@@ -37,7 +36,6 @@ The ScholarBridge Team
       `,
     };
 
-    // 真实发送！
     await this.transporter.sendMail(mailOptions);
 
     console.log(`Verification email sent to ${email}. Code: ${code}`);
@@ -45,14 +43,14 @@ The ScholarBridge Team
 }
 
 // ==============================================
-// 生产环境：腾讯云 SES
+// Production transport: Tencent Cloud SES.
 // ==============================================
 class TencentEmailService implements EmailService {
   async sendVerification(
     email: string,
     code: string
   ): Promise<void> {
-    // Todo:自己实现腾讯云 SES
+    // TODO: Implement Tencent Cloud SES delivery.
     console.log(`Tencent Cloud email delivery: ${email}. Code: ${code}`);
   }
 }

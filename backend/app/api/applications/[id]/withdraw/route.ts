@@ -16,7 +16,6 @@ export async function POST(
 
     const { id: applicationId } = await params;
 
-    // 检查申请是否存在且属于当前用户
     const application = await db.application.findUnique({
       where: { id: applicationId },
     });
@@ -33,7 +32,6 @@ export async function POST(
       return NextResponse.json({ error: "Only pending applications can be withdrawn" }, { status: 409 });
     }
 
-    // 更新申请状态为 WITHDRAWN
     const updated = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const updatedApplication = await tx.application.update({
         where: { id: applicationId },

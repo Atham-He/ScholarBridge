@@ -1,5 +1,5 @@
 /**
- * Card组件 - 基于ScholarBridge设计
+ * Card component for the ScholarBridge interface.
  */
 
 import { HTMLAttributes } from 'react';

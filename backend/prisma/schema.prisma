@@ -29,20 +29,20 @@ model User {
 
   profile Profile?
 
-  ownedProjects          Project[]     @relation("OwnedProjects")
-  savedProjects          SavedProject[]
-  applicationsSubmitted  Application[] @relation("ApplicationsSubmitted")
-  applicationsReceived   Application[] @relation("ApplicationsReceived")
-  notifications          Notification[]
-  emailVerifications     EmailVerification[]
-  securityEvents         SecurityEvent[]
+  ownedProjects         Project[]           @relation("OwnedProjects")
+  savedProjects         SavedProject[]
+  applicationsSubmitted Application[]       @relation("ApplicationsSubmitted")
+  applicationsReceived  Application[]       @relation("ApplicationsReceived")
+  notifications         Notification[]
+  emailVerifications    EmailVerification[]
+  securityEvents        SecurityEvent[]
 
   @@index([orcidId])
   @@index([email])
 }
 
 model Profile {
-  userId          String   @id
+  userId          String  @id
   displayName     String
   institution     String?
   department      String?
@@ -58,7 +58,7 @@ model Profile {
   interests       Json?
   skills          Json?
   materialsJson   Json?
-  status          String   @default("active")
+  status          String  @default("active")
 
   resumeFileName   String?
   resumeMimeType   String?
@@ -92,20 +92,21 @@ model SavedProject {
 }
 
 model Project {
-  id           String        @id @default(cuid())
-  ownerUserId  String
-  title        String
-  description  String
-  researchArea String
-  startTime    String
-  endTime      String?
-  location     String?
-  requirements String?
-  capacity     Int
-  enrolled     Int           @default(0)
-  status       ProjectStatus @default(OPEN)
+  id              String        @id @default(cuid())
+  ownerUserId     String
+  title           String
+  description     String
+  researchArea    String
+  startTime       String
+  endTime         String?
+  location        String?
+  requirements    String?
+  illustrationUrl String?
+  capacity        Int
+  enrolled        Int           @default(0)
+  status          ProjectStatus @default(OPEN)
 
-  owner        User          @relation("OwnedProjects", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  owner        User           @relation("OwnedProjects", fields: [ownerUserId], references: [id], onDelete: Cascade)
   applications Application[]
   savedBy      SavedProject[]
 

@@ -1,5 +1,5 @@
 /**
- * Badge组件 - 基于ScholarBridge设计
+ * Badge component for the ScholarBridge interface.
  */
 
 import { HTMLAttributes } from 'react';

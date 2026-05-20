@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, ensureProfile } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { normalizeProjectIllustrationUrl } from "@/lib/project-illustration";
 
 // GET /api/projects - public list of open research opportunities
 export async function GET() {
@@ -29,6 +30,7 @@ export async function GET() {
         endTime: project.endTime,
         location: project.location,
         requirements: project.requirements,
+        illustrationUrl: project.illustrationUrl,
         capacity: project.capacity,
         enrolled: project.enrolled,
         availableSeats: Math.max(0, project.capacity - project.enrolled),
@@ -37,7 +39,7 @@ export async function GET() {
           id: project.owner.id,
           slug: project.owner.id,
           displayName: project.owner.profile?.displayName || project.owner.email,
-          institution: project.owner.profile?.institution,
+          institution: project.owner.profile?.institution || "Independent",
           department: project.owner.profile?.department,
           title: project.owner.profile?.title,
           bioShort: project.owner.profile?.bioShort,
@@ -82,6 +84,15 @@ export async function POST(request: NextRequest) {
   const location = typeof payload.location === "string" ? payload.location.trim() : "";
   const requirements = typeof payload.requirements === "string" ? payload.requirements.trim() : "";
   const capacity = typeof payload.capacity === "number" ? payload.capacity : Number(payload.capacity);
+  let illustrationUrl: string | null | undefined;
+  try {
+    illustrationUrl = normalizeProjectIllustrationUrl(payload.illustrationUrl);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Invalid project illustration" },
+      { status: 400 },
+    );
+  }
 
   if (!title || !description || !researchArea || !startTime || !Number.isInteger(capacity) || capacity < 1) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -99,6 +110,7 @@ export async function POST(request: NextRequest) {
       endTime: endTime || null,
       location: location || null,
       requirements: requirements || null,
+      illustrationUrl: illustrationUrl || null,
       capacity,
       enrolled: 0,
       status: "OPEN",

@@ -5,7 +5,7 @@ export type SessionData = {
   oauthState?: string;
 };
 
-/** 生产环境务必设置 SESSION_SECRET（≥32 字符） */
+/** Production deployments must set SESSION_SECRET with at least 32 characters. */
 const fallbackSecret =
   "dev-only-secret-change-me-in-env-file-32";
 

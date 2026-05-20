@@ -1,7 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { Button } from "@/components/ui/Button";
+
+const illustrationMaxBytes = 2 * 1024 * 1024;
+const projectPipelineFallbackImage = "/images/projects/ai-safety-research-card.png";
+const projectImageTemplates = [
+  {
+    label: "AutoResearch",
+    src: "/images/project-templates/auto-research-scientific.png",
+  },
+  {
+    label: "AutoExperiment",
+    src: "/images/project-templates/auto-experiment-scientific.png",
+  },
+  {
+    label: "AutoMath",
+    src: "/images/project-templates/auto-math-scientific.png",
+  },
+  {
+    label: "Robotics Systems",
+    src: "/images/project-templates/robotics-systems.png",
+  },
+  {
+    label: "Data Systems",
+    src: "/images/project-templates/data-systems.png",
+  },
+];
 
 interface ProjectApplication {
   id: string;
@@ -38,6 +63,7 @@ interface OwnedProject {
   endTime?: string | null;
   location?: string | null;
   requirements?: string | null;
+  illustrationUrl?: string | null;
   capacity: number;
   enrolled: number;
   status: "OPEN" | "CLOSED" | "COMPLETED";
@@ -61,6 +87,7 @@ type ProjectForm = {
   endTime: string;
   location: string;
   requirements: string;
+  illustrationUrl: string;
   capacity: number;
 };
 
@@ -72,6 +99,7 @@ const emptyForm: ProjectForm = {
   endTime: "",
   location: "",
   requirements: "",
+  illustrationUrl: "",
   capacity: 1,
 };
 
@@ -134,9 +162,34 @@ export function ProfileProjectPanel() {
       endTime: project.endTime || "",
       location: project.location || "",
       requirements: project.requirements || "",
+      illustrationUrl: project.illustrationUrl || "",
       capacity: project.capacity,
     });
     setShowForm(true);
+  };
+
+  const handleIllustrationUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+      alert("Project illustration must be a PNG, JPG, or WebP image.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > illustrationMaxBytes) {
+      alert("Project illustration must be smaller than 2 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => setForm((current) => ({ ...current, illustrationUrl: String(reader.result || "") }));
+    reader.onerror = () => alert("Failed to read project illustration.");
+    reader.readAsDataURL(file);
   };
 
   const submitProject = async () => {
@@ -158,6 +211,7 @@ export function ProfileProjectPanel() {
           endTime: form.endTime || null,
           location: form.location || null,
           requirements: form.requirements || null,
+          illustrationUrl: form.illustrationUrl || null,
           capacity: Number(form.capacity),
         }),
       });
@@ -441,6 +495,57 @@ export function ProfileProjectPanel() {
             Application requirements
             <textarea value={form.requirements} rows={3} onChange={(event) => setForm({ ...form, requirements: event.target.value })} className="rounded border border-[#E0D8CC] bg-white px-3 py-2 font-normal text-[#1A1A1A]" />
           </label>
+          <div className="mt-4 rounded border border-[#E0D8CC] bg-white p-4">
+            <div className="grid gap-4 md:grid-cols-[180px_1fr]">
+              <div className="aspect-video overflow-hidden rounded border border-[#E0D8CC] bg-[#E8E1D6]">
+                <img
+                  src={form.illustrationUrl || projectPipelineFallbackImage}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[#1A1A1A]">Project illustration</p>
+                <p className="mt-1 text-sm leading-6 text-[#4A4A4A]">
+                  Upload a PNG, JPG, or WebP image for the public project card, or select one of the generated templates below.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <label className="inline-flex cursor-pointer items-center justify-center rounded border border-[#E0D8CC] bg-white px-4 py-2 text-sm font-semibold text-[#1A1A1A] transition-all hover:border-[#2C5F7C] hover:text-[#2C5F7C]">
+                    Upload image
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="sr-only"
+                      onChange={handleIllustrationUpload}
+                    />
+                  </label>
+                  {form.illustrationUrl && (
+                    <Button variant="outline" size="sm" onClick={() => setForm((current) => ({ ...current, illustrationUrl: "" }))}>
+                      Use default
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {projectImageTemplates.map((template) => {
+                const selected = form.illustrationUrl === template.src;
+
+                return (
+                  <button
+                    key={template.src}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setForm((current) => ({ ...current, illustrationUrl: template.src }))}
+                    className={`overflow-hidden rounded-[8px] border bg-white text-left transition-all hover:-translate-y-0.5 hover:border-[#8b603b] hover:shadow-[0_10px_20px_rgba(60,42,27,0.1)] ${selected ? "border-[#8b603b] ring-2 ring-[#8b603b]/20" : "border-[#E0D8CC]"}`}
+                  >
+                    <img src={template.src} alt="" className="aspect-video w-full object-cover" />
+                    <span className="block px-3 py-2 text-xs font-semibold text-[#1A1A1A]">{template.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => { setShowForm(false); setForm(emptyForm); }}>Cancel</Button>
             <Button variant="gold" size="sm" disabled={savingProject} onClick={submitProject}>
@@ -460,7 +565,14 @@ export function ProfileProjectPanel() {
           {projects.map((project) => (
             <article key={project.id} className="rounded border border-[#E0D8CC] bg-white p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0">
+                <div className="aspect-video w-full overflow-hidden rounded border border-[#E0D8CC] bg-[#E8E1D6] lg:w-36 lg:shrink-0">
+                  <img
+                    src={project.illustrationUrl || projectPipelineFallbackImage}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <h4 className="text-[16px] font-semibold text-[#1A1A1A]">{project.title}</h4>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${project.status === "OPEN" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>

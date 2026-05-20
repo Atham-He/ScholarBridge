@@ -1,5 +1,5 @@
 /**
- * Button组件 - 基于ScholarBridge设计
+ * Button component for the ScholarBridge interface.
  */
 
 import { ButtonHTMLAttributes } from 'react';

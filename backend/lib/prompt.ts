@@ -1,4 +1,4 @@
-export function buildMentorSystemPrompt(params: {
+export function buildOwnerSystemPrompt(params: {
   ownerDisplayName: string;
   institution: string;
   title: string | null;

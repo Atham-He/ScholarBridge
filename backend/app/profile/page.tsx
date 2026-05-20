@@ -1,13 +1,19 @@
 /**
- * 个人中心
+ * Profile page
  */
 
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { WithdrawButton } from '@/app/withdraw-button';
 import { ProfileProjectPanel } from '@/app/profile/project-management-panel';
+import { AppNav } from '@/components/layout/AppNav';
+import {
+  ResearchEvolutionTimeline,
+  normalizeResearchTimelineData,
+  type ResearchTimelineData,
+} from '@/components/research/ResearchEvolutionTimeline';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -18,6 +24,7 @@ interface UserProfile {
   interests?: string[];
   education?: string;
   skills?: string[];
+  materialsJson?: Record<string, unknown> | null;
   resumeFileName?: string | null;
   resumeMimeType?: string | null;
   resumeSize?: number | null;
@@ -44,6 +51,7 @@ interface ApplicationSummary {
     endTime?: string | null;
     location?: string | null;
     requirements?: string | null;
+    illustrationUrl?: string | null;
     capacity?: number;
     enrolled?: number;
   };
@@ -63,12 +71,12 @@ interface ProjectDetail {
   id: string;
   title: string;
   description?: string;
-  ownerFeedback?: string | null;
   researchArea: string;
   startTime?: string;
   endTime?: string | null;
   location?: string | null;
   requirements?: string | null;
+  illustrationUrl?: string | null;
   capacity?: number;
   enrolled?: number;
   availableSeats?: number;
@@ -82,14 +90,121 @@ interface ProjectDetail {
   };
 }
 
+function ProfileIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <circle cx="12" cy="8" r="4" />
+    </svg>
+  );
+}
+
+function DocumentIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M7 3h7l5 5v13H7z" />
+      <path d="M14 3v5h5" />
+      <path d="M10 13h6M10 17h6" />
+    </svg>
+  );
+}
+
+function BookmarkIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M6 4h12v17l-6-4-6 4z" />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path d="M10 21h4" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 3v12" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M5 21h14" />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function GridIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="4" y="4" width="6" height="6" rx="1" />
+      <rect x="14" y="4" width="6" height="6" rx="1" />
+      <rect x="4" y="14" width="6" height="6" rx="1" />
+      <rect x="14" y="14" width="6" height="6" rx="1" />
+    </svg>
+  );
+}
+
+function StarIcon({ filled = false }: { filled?: boolean }) {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
+      <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z" />
+    </svg>
+  );
+}
+
+type ActiveSection = 'profile' | 'applications' | 'saved' | 'updates' | 'projects';
+type ApplicationFilter = 'all' | 'pending' | 'accepted' | 'rejected' | 'withdrawn';
+
+const normalizeApplicationStatus = (status: string) => status.toLowerCase();
+const listToInput = (items?: unknown) => Array.isArray(items)
+  ? items.filter((item): item is string => typeof item === 'string').join(', ')
+  : '';
+const inputToList = (value: string) => value.split(',').map((item) => item.trim()).filter(Boolean);
+
+const isActiveSection = (section: string | null): section is ActiveSection =>
+  section === 'profile' ||
+  section === 'applications' ||
+  section === 'saved' ||
+  section === 'updates' ||
+  section === 'projects';
+
+const getInitialActiveSection = (): ActiveSection => {
+  if (typeof window === 'undefined') {
+    return 'profile';
+  }
+
+  const section = new URLSearchParams(window.location.search).get('section');
+  return isActiveSection(section) ? section : 'profile';
+};
+
+const getProfileMaterials = (materials: UserProfile['materialsJson']) =>
+  materials && typeof materials === 'object' && !Array.isArray(materials) ? materials : {};
+
 export default function UserProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [resumeUploading, setResumeUploading] = useState(false);
   const [selectedResumeFile, setSelectedResumeFile] = useState<File | null>(null);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [activeSection, setActiveSection] = useState<ActiveSection>(getInitialActiveSection);
+  const [applicationFilter, setApplicationFilter] = useState<ApplicationFilter>('all');
+  const [compareMode, setCompareMode] = useState(false);
+  const [interestsText, setInterestsText] = useState('');
+  const [skillsText, setSkillsText] = useState('');
   const [profile, setProfile] = useState<UserProfile>({
     displayName: '',
     bioShort: '',
@@ -104,15 +219,23 @@ export default function UserProfilePage() {
   const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
+  const researchTimelineData = useMemo(
+    () => normalizeResearchTimelineData(getProfileMaterials(profile.materialsJson).researchTimeline),
+    [profile.materialsJson]
+  );
+
+  const showMessage = useCallback((type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    window.setTimeout(() => setMessage(null), 3200);
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoadError(null);
     try {
-      // 获取个人信息
       const profileRes = await fetch('/api/profile');
       if (profileRes.ok) {
         const data = await profileRes.json();
-        setProfile(data.profile || {
+        const nextProfile = data.profile || {
           displayName: '',
           bioShort: '',
           interests: [],
@@ -122,7 +245,10 @@ export default function UserProfilePage() {
           resumeMimeType: null,
           resumeSize: null,
           resumeUploadedAt: null,
-        });
+        };
+        setProfile(nextProfile);
+        setInterestsText(listToInput(nextProfile.interests));
+        setSkillsText(listToInput(nextProfile.skills));
       } else if (profileRes.status === 401 || profileRes.status === 403) {
         router.replace(`/login?next=${encodeURIComponent('/profile')}`);
         return;
@@ -132,14 +258,14 @@ export default function UserProfilePage() {
         return;
       }
 
-      // 获取收藏的项目
+      // Fetch saved projects.
       const savedRes = await fetch('/api/saved-projects');
       if (savedRes.ok) {
         const data = await savedRes.json();
         setSavedProjects(data.projects || []);
       }
 
-      // 获取我的申请
+      // Fetch applications.
       const applicationsRes = await fetch('/api/applications');
       if (applicationsRes.ok) {
         const data = await applicationsRes.json();
@@ -175,22 +301,69 @@ export default function UserProfilePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const payload = {
+        ...profile,
+        displayName: profile.displayName.trim(),
+        education: profile.education?.trim() || '',
+        bioShort: profile.bioShort?.trim() || '',
+        interests: inputToList(interestsText),
+        skills: inputToList(skillsText),
+      };
+
       const response = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        alert('Profile saved successfully.');
+        const data = await response.json().catch(() => ({}));
+        if (data.profile) {
+          setProfile(data.profile);
+          setInterestsText(listToInput(data.profile.interests));
+          setSkillsText(listToInput(data.profile.skills));
+        }
+        showMessage('success', 'Profile saved.');
       } else {
-        alert('Failed to save profile.');
+        const data = await response.json().catch(() => ({}));
+        showMessage('error', data.error || 'Failed to save profile.');
       }
     } catch {
-      alert('Failed to save profile.');
+      showMessage('error', 'Failed to save profile.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleTimelineSave = async (timeline: ResearchTimelineData) => {
+    const nextMaterials = {
+      ...getProfileMaterials(profile.materialsJson),
+      researchTimeline: timeline,
+    };
+    const payload = {
+      ...profile,
+      materialsJson: nextMaterials,
+    };
+
+    const response = await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      const data = await response.json().catch(() => ({}));
+      if (data.profile) {
+        setProfile(data.profile);
+      } else {
+        setProfile((current) => ({ ...current, materialsJson: nextMaterials }));
+      }
+      showMessage('success', 'Research timeline saved.');
+      return;
+    }
+
+    const data = await response.json().catch(() => ({}));
+    showMessage('error', data.error || 'Failed to save research timeline.');
   };
 
   const handleLogout = async () => {
@@ -205,12 +378,12 @@ export default function UserProfilePage() {
 
   const handleResumeUpload = async () => {
     if (!selectedResumeFile) {
-      alert('Please choose a PDF resume first.');
+      showMessage('error', 'Choose a PDF resume first.');
       return;
     }
 
     if (selectedResumeFile.type !== 'application/pdf') {
-      alert('Only PDF files are supported.');
+      showMessage('error', 'Only PDF files are supported.');
       return;
     }
 
@@ -226,7 +399,7 @@ export default function UserProfilePage() {
 
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        alert(data.error || 'Upload failed.');
+        showMessage('error', data.error || 'Resume upload failed.');
         return;
       }
 
@@ -238,46 +411,33 @@ export default function UserProfilePage() {
         resumeUploadedAt: data.resume?.resumeUploadedAt || new Date().toISOString(),
       }));
       setSelectedResumeFile(null);
-      alert('Resume uploaded successfully.');
+      showMessage('success', 'Resume uploaded.');
     } catch {
-      alert('Upload failed.');
+      showMessage('error', 'Resume upload failed.');
     } finally {
       setResumeUploading(false);
     }
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Pending';
+    switch (normalizeApplicationStatus(status)) {
+      case 'pending': return 'In review';
       case 'accepted': return 'Accepted';
       case 'rejected': return 'Rejected';
-      case 'WITHDRAWN': return 'Withdrawn';
+      case 'withdrawn': return 'Withdrawn';
       default: return status;
     }
   };
 
   const getStatusClassName = (status: string) => {
-    switch (status) {
+    switch (normalizeApplicationStatus(status)) {
       case 'pending': return 'border-yellow-200 bg-yellow-50 text-yellow-800';
       case 'accepted': return 'border-green-200 bg-green-50 text-green-800';
       case 'rejected': return 'border-red-200 bg-red-50 text-red-800';
-      case 'WITHDRAWN': return 'border-[#E0D8CC] bg-[#F5F2ED] text-[#6B6B6B]';
+      case 'withdrawn': return 'border-[#E0D8CC] bg-[#F5F2ED] text-[#6B6B6B]';
       default: return 'border-[#E0D8CC] bg-[#F5F2ED] text-[#1A1A1A]';
     }
   };
-
-  const toggleSection = (section: 'profile' | 'saved' | 'applications' | 'projects') => {
-    setExpandedSections((current) => ({
-      ...current,
-      [section]: !current[section],
-    }));
-  };
-
-  const getSectionButtonClassName = (expanded: boolean) =>
-    [
-      'flex w-full items-center justify-between rounded-[10px] border border-[#E0D8CC] bg-white px-6 py-5 text-left transition-all duration-200 ease hover:border-[#2C5F7C]',
-      expanded ? 'border-[#2C5F7C]' : '',
-    ].join(' ');
 
   const getSeatsLabel = (project: ProjectDetail) => {
     if (typeof project.availableSeats === 'number' && typeof project.capacity === 'number') {
@@ -307,12 +467,12 @@ export default function UserProfilePage() {
     id: app.project.id || app.projectId,
     title: app.project.title,
     description: app.project.description,
-    ownerFeedback: app.ownerFeedback,
     researchArea: app.project.researchArea,
     startTime: app.project.startTime,
     endTime: app.project.endTime,
     location: app.project.location,
     requirements: app.project.requirements,
+    illustrationUrl: app.project.illustrationUrl,
     capacity: app.project.capacity,
     enrolled: app.project.enrolled,
     availableSeats:
@@ -328,6 +488,82 @@ export default function UserProfilePage() {
     },
   });
 
+  const researchInterests = inputToList(interestsText);
+  const currentSkills = inputToList(skillsText);
+  const profileCompletionItems = [
+    Boolean(profile.displayName),
+    Boolean(profile.education),
+    Boolean(profile.bioShort),
+    Boolean(researchInterests.length),
+    Boolean(currentSkills.length),
+    Boolean(profile.resumeFileName),
+  ];
+  const profileCompletion = Math.round(
+    (profileCompletionItems.filter(Boolean).length / profileCompletionItems.length) * 100,
+  );
+  const pendingApplications = applications.filter((app) => normalizeApplicationStatus(app.status) === 'pending').length;
+  const acceptedApplications = applications.filter((app) => normalizeApplicationStatus(app.status) === 'accepted').length;
+  const rejectedApplications = applications.filter((app) => normalizeApplicationStatus(app.status) === 'rejected').length;
+  const withdrawnApplications = applications.filter((app) => normalizeApplicationStatus(app.status) === 'withdrawn').length;
+  const resumeLabel = profile.resumeFileName
+    ? `${profile.resumeFileName}${profile.resumeSize ? ` · ${formatFileSize(profile.resumeSize)}` : ''}`
+    : 'No resume uploaded';
+  const savedOpportunityLabel = `${savedProjects.length} saved ${
+    savedProjects.length === 1 ? 'opportunity' : 'opportunities'
+  }`;
+  const filteredApplications = applicationFilter === 'all'
+    ? applications
+    : applications.filter((app) => normalizeApplicationStatus(app.status) === applicationFilter);
+  const applicationGroups = [
+    {
+      key: 'pending',
+      label: 'In Review',
+      count: applications.filter((app) => app.status === 'pending').length,
+      tone: 'border-[#D8E8F2] bg-[#F3FAFD]',
+    },
+    {
+      key: 'accepted',
+      label: 'Accepted',
+      count: acceptedApplications,
+      tone: 'border-green-200 bg-green-50',
+    },
+    {
+      key: 'rejected',
+      label: 'Rejected',
+      count: rejectedApplications,
+      tone: 'border-red-200 bg-red-50',
+    },
+    {
+      key: 'withdrawn',
+      label: 'Withdrawn',
+      count: withdrawnApplications,
+      tone: 'border-[#E0D8CC] bg-[#F5F2ED]',
+    },
+  ] as const;
+  const visibleApplicationGroups = applicationFilter === 'all'
+    ? applicationGroups
+    : applicationGroups.filter((group) => group.key === applicationFilter);
+  const recentFeedback = applications.find((app) => app.ownerFeedback)?.ownerFeedback;
+  const getMatchScore = (project: ProjectDetail, index: number) => {
+    const interestHit = researchInterests.some((interest) =>
+      project.researchArea.toLowerCase().includes(interest.toLowerCase()) ||
+      project.title.toLowerCase().includes(interest.toLowerCase()),
+    );
+    return Math.min(96, Math.max(72, 92 - index * 5 + (interestHit ? 4 : 0)));
+  };
+  const sidebarItems: Array<{
+    key: ActiveSection;
+    label: string;
+    icon: ReactNode;
+    count?: number;
+  }> = [
+    { key: 'profile', label: 'Profile', icon: <ProfileIcon /> },
+    { key: 'applications', label: 'Applications', icon: <DocumentIcon />, count: applications.length },
+    { key: 'saved', label: 'Saved', icon: <BookmarkIcon />, count: savedProjects.length },
+    { key: 'projects', label: 'Projects', icon: <GridIcon /> },
+    { key: 'updates', label: 'Updates', icon: <BellIcon />, count: pendingApplications },
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
@@ -342,25 +578,17 @@ export default function UserProfilePage() {
   if (loadError) {
     return (
       <div className="min-h-screen bg-[#FAF8F5]">
-        <nav className="flex items-center justify-between py-5 px-10 border-b border-[#E0D8CC] bg-[rgba(250,248,245,0.95)] backdrop-blur-[10px]">
-          <div
-            className="font-display text-[22px] font-semibold text-[#1A1A1A] tracking-[-0.02em] cursor-pointer"
-            onClick={() => router.push('/')}
-          >
-            ScholarBridge
-          </div>
-          <div className="flex gap-2.5">
-            <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => router.push('/')}>Home</button>
-            <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => router.push('/browse')}>Browse</button>
-            <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease">Profile</button>
-            <Button variant="gold" size="sm" onClick={handleLogout}>Sign Out</Button>
-          </div>
-        </nav>
+        <AppNav
+          items={[
+            { label: 'Browse', href: '/browse' },
+            { label: 'Sign Out', onClick: handleLogout, variant: 'primary' },
+          ]}
+        />
         <main className="mx-auto max-w-3xl px-10 py-12">
           <section className="rounded-[10px] border border-red-200 bg-red-50 p-6">
             <h2 className="mb-2 text-[18px] font-semibold text-red-800">Failed to load profile</h2>
             <p className="mb-5 text-sm text-red-700">{loadError}</p>
-            <Button variant="outline" onClick={fetchData}>Reload</Button>
+            <Button variant="outline" onClick={fetchData}>Retry</Button>
           </section>
         </main>
         <style jsx>{`
@@ -374,317 +602,616 @@ export default function UserProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] overflow-y-auto">
-      {/* 导航栏 */}
-      <nav className="flex items-center justify-between py-5 px-10 border-b border-[#E0D8CC] bg-[rgba(250,248,245,0.95)] backdrop-blur-[10px]">
-        <div
-          className="font-display text-[22px] font-semibold text-[#1A1A1A] tracking-[-0.02em] cursor-pointer"
-          onClick={() => router.push('/')}
-        >
-          ScholarBridge
-        </div>
-        <div className="flex gap-2.5">
-          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => router.push('/')}>Home</button>
-          <button className="bg-white text-[#1A1A1A] border border-[#E0D8CC] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease hover:border-[#2C5F7C] hover:text-[#2C5F7C]" onClick={() => router.push('/browse')}>Browse</button>
-          <button className="bg-[#2C5F7C] text-white border border-[#2C5F7C] py-[9px] px-[18px] rounded cursor-pointer text-[13px] font-medium transition-all duration-200 ease">Profile</button>
-          <Button variant="gold" size="sm" onClick={handleLogout}>Sign Out</Button>
-        </div>
-      </nav>
+      {/* Navigation */}
+      <AppNav
+        items={[
+          { label: 'Browse', href: '/browse' },
+          { label: 'Profile', href: '/profile', active: true },
+          { label: 'Sign Out', onClick: handleLogout },
+        ]}
+      />
 
-      <div className="py-8 px-10 max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h2 className="font-display text-[32px] font-semibold text-[#1A1A1A] tracking-[-0.02em]">
-            Profile
-          </h2>
-        </div>
+      <main className="grid min-h-[calc(100vh-88px)] grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="border-b border-[#E0D8CC] bg-[#fffdf9] lg:border-b-0 lg:border-r">
+          <nav className="p-3 lg:sticky lg:top-[88px] lg:p-5">
+            <div className="mb-4 hidden px-2 py-3 lg:block">
+              <p className="font-display text-[22px] font-semibold text-[#17120e]">Research Profile</p>
+              <p className="mt-1 text-xs leading-5 text-[#6d6258]">Manage your public profile, applications, projects, and saved opportunities.</p>
+            </div>
+            <div className="flex gap-2 overflow-x-auto lg:block lg:overflow-visible">
+              {sidebarItems.map((item) => {
+                const active = activeSection === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    aria-label={`Open ${item.label}`}
+                    onClick={() => setActiveSection(item.key)}
+                    className={[
+                      'flex min-w-[150px] items-center justify-between rounded-[7px] px-3 py-3 text-left text-sm font-semibold transition-all lg:mb-1 lg:w-full lg:min-w-0',
+                      active ? 'bg-[#E8F2F7] text-[#17425d]' : 'text-[#3f352d] hover:bg-[#f6f0e8]',
+                    ].join(' ')}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className={active ? 'text-[#17425d]' : 'text-[#7a6f65]'}>{item.icon}</span>
+                      {item.label}
+                    </span>
+                    {typeof item.count === 'number' && item.count > 0 && (
+                      <span className="rounded-full bg-[#17425d] px-2 py-0.5 text-[11px] font-semibold text-white">
+                        {item.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+        </aside>
 
-        <div className="space-y-4">
-          <section>
-            <button
-              type="button"
-              className={getSectionButtonClassName(Boolean(expandedSections.profile))}
-              onClick={() => toggleSection('profile')}
+        <div className="min-w-0 px-4 py-8 sm:px-6 lg:px-8 xl:px-10">
+          {message && (
+            <div
+              className={[
+                'mb-4 rounded-[8px] border px-4 py-3 text-sm font-semibold',
+                message.type === 'success'
+                  ? 'border-green-200 bg-green-50 text-green-800'
+                  : 'border-red-200 bg-red-50 text-red-800',
+              ].join(' ')}
             >
-              <span>
-                <span className="block text-[18px] font-semibold text-[#1A1A1A]">Basic information</span>
-                <span className="mt-1 block text-sm text-[#1A1A1A]">Name, education, bio, interests, and skills</span>
-              </span>
-              <span className="text-[20px] font-semibold text-[#2C5F7C]">{expandedSections.profile ? '-' : '+'}</span>
-            </button>
+              {message.text}
+            </div>
+          )}
 
-            {expandedSections.profile && (
-              <div className="mt-3 bg-white border border-[#E0D8CC] rounded-[10px] p-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Name</label>
-                    <input
-                      type="text"
-                      value={profile.displayName}
-                      onChange={(e) => setProfile({...profile, displayName: e.target.value})}
-                      className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Education</label>
-                    <input
-                      type="text"
-                      value={profile.education || ''}
-                      onChange={(e) => setProfile({...profile, education: e.target.value})}
-                      className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                      placeholder="Example: Peking University · Computer Science · Junior"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Short bio</label>
-                    <textarea
-                      value={profile.bioShort || ''}
-                      onChange={(e) => setProfile({...profile, bioShort: e.target.value})}
-                      rows={4}
-                      className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                      placeholder="Briefly introduce your research interests and background..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-                      Research interests (comma-separated)
-                    </label>
-                    <input
-                      type="text"
-                      value={profile.interests?.join(', ') || ''}
-                      onChange={(e) => setProfile({...profile, interests: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})}
-                      className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                      placeholder="Example: Machine Learning, Computer Vision, NLP"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-                      Skills (comma-separated)
-                    </label>
-                    <input
-                      type="text"
-                      value={profile.skills?.join(', ') || ''}
-                      onChange={(e) => setProfile({...profile, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})}
-                      className="w-full px-4 py-3 border border-[#E0D8CC] rounded-lg focus:outline-none focus:border-[#2C5F7C] text-[#1A1A1A]"
-                      placeholder="Example: Python, PyTorch, Data Analysis"
-                    />
-                  </div>
-
-                  <div className="rounded-lg border border-[#E0D8CC] bg-[#FAF8F5] p-4">
-                    <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-[#1A1A1A]">PDF resume</p>
-                        <p className="mt-1 text-sm text-[#1A1A1A]">
-                          {profile.resumeFileName
-                            ? `${profile.resumeFileName}${profile.resumeSize ? ` · ${formatFileSize(profile.resumeSize)}` : ''}`
-                            : 'No resume uploaded yet'}
-                        </p>
-                        {profile.resumeUploadedAt && (
-                          <p className="mt-1 text-xs text-[#4A4A4A]">
-                            Uploaded: {new Date(profile.resumeUploadedAt).toLocaleString('en-US')}
-                          </p>
-                        )}
-                      </div>
-                      {profile.resumeFileName && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open('/api/profile/resume', '_blank', 'noopener,noreferrer')}
-                        >
-                          View resume
-                        </Button>
-                      )}
+          {activeSection === 'profile' && (
+            <div className="space-y-5">
+              <section className="rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] p-6 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="flex min-w-0 gap-4">
+                    <Avatar name={profile.displayName || 'Scholar'} size="lg" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b603b]">Profile Management</p>
+                      <h1 className="mt-2 font-display text-[38px] font-semibold leading-tight text-[#17120e]">
+                        Welcome back, {profile.displayName || 'Scholar'}
+                      </h1>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5B5148]">
+                        Manage the public profile project owners see, then track applications and saved opportunities from one workspace.
+                      </p>
                     </div>
-
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                      <input
-                        type="file"
-                        accept="application/pdf,.pdf"
-                        onChange={(event) => setSelectedResumeFile(event.target.files?.[0] || null)}
-                        className="w-full rounded border border-[#E0D8CC] bg-white px-3 py-2 text-sm text-[#1A1A1A] file:mr-4 file:rounded file:border-0 file:bg-[#2C5F7C] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
-                      />
-                      <Button
-                        variant="outline"
-                        onClick={handleResumeUpload}
-                        disabled={resumeUploading || !selectedResumeFile}
-                      >
-                        {resumeUploading ? 'Uploading...' : 'Upload resume'}
-                      </Button>
-                    </div>
-                    <p className="mt-2 text-xs text-[#4A4A4A]">PDF only, up to 10MB. Uploaded files are stored in the database.</p>
                   </div>
-                </div>
 
-                <div className="flex justify-end mt-6">
-                  <Button
-                    variant="gold"
+                  <button
+                    type="button"
+                    aria-label="Save public profile"
                     onClick={handleSave}
                     disabled={saving}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[#E0D8CC] bg-white px-4 text-sm font-semibold text-[#2b241d] transition hover:border-[#8b603b] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {saving ? 'Saving...' : 'Save changes'}
-                  </Button>
+                    <EditIcon />
+                    {saving ? 'Saving...' : 'Save Profile'}
+                  </button>
                 </div>
-              </div>
-            )}
-          </section>
 
-          <section>
-            <button
-              type="button"
-              className={getSectionButtonClassName(Boolean(expandedSections.saved))}
-              onClick={() => toggleSection('saved')}
-            >
-              <span>
-                <span className="block text-[18px] font-semibold text-[#1A1A1A]">Saved projects</span>
-                <span className="mt-1 block text-sm text-[#1A1A1A]">{savedProjects.length} saved projects</span>
-              </span>
-              <span className="text-[20px] font-semibold text-[#2C5F7C]">{expandedSections.saved ? '-' : '+'}</span>
-            </button>
+                <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="rounded-[8px] border border-[#E0D8CC] bg-white p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8a8178]">Profile Completion</p>
+                        <p className="mt-1 text-[26px] font-semibold leading-none text-[#17120e]">{profileCompletion}%</p>
+                      </div>
+                      <div
+                        className="grid h-14 w-14 place-items-center rounded-full text-xs font-semibold text-[#17425d]"
+                        style={{ background: `conic-gradient(#17425d ${profileCompletion * 3.6}deg, #E6DED4 0deg)` }}
+                      >
+                        <span className="grid h-10 w-10 place-items-center rounded-full bg-white">{profileCompletion}</span>
+                      </div>
+                    </div>
+                  </div>
 
-            {expandedSections.saved && (
-              <div className="mt-3 bg-white border border-[#E0D8CC] rounded-[10px] p-6">
-                {savedProjects.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-[#1A1A1A] text-sm mb-4">You have not saved any projects yet.</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => router.push('/browse')}
-                    >
-                      Browse projects
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection('applications')}
+                    className="rounded-[8px] border border-[#E0D8CC] bg-white p-4 text-left transition hover:border-[#17425d]"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8a8178]">Applications</p>
+                    <div className="mt-2 flex items-end gap-6">
+                      <span className="text-[28px] font-semibold leading-none text-[#17120e]">{applications.length}</span>
+                      <span className="text-[20px] font-semibold leading-none text-green-700">{acceptedApplications}</span>
+                      <span className="text-[20px] font-semibold leading-none text-red-700">{rejectedApplications}</span>
+                    </div>
+                    <p className="mt-3 text-xs text-[#5B5148]">Total · accepted · rejected</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection('saved')}
+                    className="rounded-[8px] border border-[#E0D8CC] bg-white p-4 text-left transition hover:border-[#17425d]"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8a8178]">Saved Projects</p>
+                    <p className="mt-1 text-[28px] font-semibold leading-none text-[#17120e]">{savedProjects.length}</p>
+                    <p className="mt-3 text-xs text-[#5B5148]">Compare shortlisted opportunities.</p>
+                  </button>
+
+                  <div className="rounded-[8px] border border-[#E0D8CC] bg-white p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8a8178]">Resume Status</p>
+                    <div className="mt-3 flex items-start gap-3">
+                      <button
+                        type="button"
+                        aria-label="Open resume"
+                        onClick={() => profile.resumeFileName && window.open('/api/profile/resume', '_blank', 'noopener,noreferrer')}
+                        className="grid h-9 w-9 place-items-center rounded-[8px] border border-[#D8E8F2] bg-[#F3FAFD] text-[#17425d] disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={!profile.resumeFileName}
+                      >
+                        <DocumentIcon />
+                      </button>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[#17120e]">{profile.resumeFileName ? 'Resume ready' : 'Resume missing'}</p>
+                        <p className="mt-1 truncate text-xs text-[#5B5148]">{resumeLabel}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div className="grid gap-5 xl:grid-cols-[1.2fr_0.9fr]">
+                <section className="rounded-[8px] border border-[#E0D8CC] bg-white shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                  <div className="flex items-center justify-between gap-4 border-b border-[#eee6dc] px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-9 w-9 place-items-center rounded-[8px] bg-[#E8F2F7] text-[#17425d]">
+                        <ProfileIcon />
+                      </div>
+                      <div>
+                        <h2 className="text-[18px] font-semibold text-[#17120e]">Public Profile</h2>
+                        <p className="mt-1 text-sm text-[#5B5148]">The information project owners see when reviewing your applications.</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleSave} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save'}
                     </Button>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {savedProjects.map((saved) => (
+
+                  <div className="grid gap-4 p-5">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                        Name
+                        <input
+                          type="text"
+                          value={profile.displayName}
+                          onChange={(event) => setProfile({ ...profile, displayName: event.target.value })}
+                          className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                          placeholder="Your public name"
+                        />
+                      </label>
+                      <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                        Education
+                        <input
+                          type="text"
+                          value={profile.education || ''}
+                          onChange={(event) => setProfile({ ...profile, education: event.target.value })}
+                          className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                          placeholder="MIT · Computer Science · Master 1"
+                        />
+                      </label>
+                    </div>
+                    <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                      Short Bio
+                      <textarea
+                        value={profile.bioShort || ''}
+                        onChange={(event) => setProfile({ ...profile, bioShort: event.target.value })}
+                        rows={3}
+                        className="resize-none rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 py-3 text-sm font-medium leading-6 text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                        placeholder="Summarize your research interests and project experience."
+                      />
+                    </label>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                        Research Interests
+                        <input
+                          type="text"
+                          value={interestsText}
+                          onChange={(event) => setInterestsText(event.target.value)}
+                          className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                          placeholder="Reinforcement Learning, Robotics"
+                        />
+                      </label>
+                      <label className="grid gap-2 text-sm font-semibold text-[#17120e]">
+                        Skills
+                        <input
+                          type="text"
+                          value={skillsText}
+                          onChange={(event) => setSkillsText(event.target.value)}
+                          className="h-11 rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] px-3 text-sm font-medium text-[#17120e] outline-none transition focus:border-[#17425d] focus:bg-white"
+                          placeholder="Python, PyTorch, Data Analysis"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="rounded-[8px] border border-[#E0D8CC] bg-white shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                  <div className="border-b border-[#eee6dc] px-5 py-4">
+                    <h2 className="text-[18px] font-semibold text-[#17120e]">Next Actions</h2>
+                    <p className="mt-1 text-sm text-[#5B5148]">Recommended steps based on your current profile.</p>
+                  </div>
+                  <div className="divide-y divide-[#eee6dc]">
+                    {[
+                      {
+                        title: profile.resumeFileName ? 'Resume is ready' : 'Upload resume',
+                        detail: profile.resumeFileName ? resumeLabel : 'A PDF resume helps project owners screen faster.',
+                        action: profile.resumeFileName ? 'Open' : 'Choose',
+                        onClick: () => profile.resumeFileName
+                          ? window.open('/api/profile/resume', '_blank', 'noopener,noreferrer')
+                          : setActiveSection('profile'),
+                      },
+                      {
+                        title: savedProjects.length ? 'Review saved opportunities' : 'Save opportunities',
+                        detail: savedOpportunityLabel,
+                        action: savedProjects.length ? 'Review' : 'Browse',
+                        onClick: () => savedProjects.length ? setActiveSection('saved') : router.push('/browse'),
+                      },
+                      {
+                        title: applications.length ? 'Track applications' : 'Apply to projects',
+                        detail: `${pendingApplications} in review · ${withdrawnApplications} withdrawn`,
+                        action: applications.length ? 'Track' : 'Browse',
+                        onClick: () => applications.length ? setActiveSection('applications') : router.push('/browse'),
+                      },
+                    ].map((item) => (
                       <button
-                        key={saved.id}
+                        key={item.title}
                         type="button"
-                        className="w-full text-left border border-[#E0D8CC] rounded-lg p-3 transition-all duration-200 ease hover:border-[#2C5F7C] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] focus:outline-none focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
-                        onClick={() => setSelectedProject(saved.project)}
+                        onClick={item.onClick}
+                        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-[#fffdf9]"
                       >
-                        <h4 className="text-[14px] font-semibold text-[#1A1A1A] mb-1">{saved.project.title}</h4>
-                        <p className="text-[12px] text-[#1A1A1A] mb-2">
-                          {saved.project.owner.displayName} · {saved.project.owner.institution}
-                        </p>
-                        <div className="flex flex-wrap gap-2 text-[10px]">
-                          <span className="bg-[#F5F2ED] text-[#1A1A1A] px-2 py-1 rounded">
-                            {saved.project.researchArea}
-                          </span>
-                          <span className="bg-[#F5F2ED] text-[#1A1A1A] px-2 py-1 rounded">
-                            {saved.project.availableSeats} seats
-                          </span>
-                        </div>
+                        <span>
+                          <span className="block text-sm font-semibold text-[#17120e]">{item.title}</span>
+                          <span className="mt-1 block text-xs leading-5 text-[#5B5148]">{item.detail}</span>
+                        </span>
+                        <span className="rounded-[7px] border border-[#E0D8CC] bg-white px-3 py-2 text-xs font-semibold text-[#17425d]">
+                          {item.action}
+                        </span>
                       </button>
                     ))}
                   </div>
-                )}
+                </section>
               </div>
-            )}
-          </section>
 
-          <section>
-            <button
-              type="button"
-              className={getSectionButtonClassName(Boolean(expandedSections.applications))}
-              onClick={() => toggleSection('applications')}
-            >
-              <span>
-                <span className="block text-[18px] font-semibold text-[#1A1A1A]">My applications</span>
-                <span className="mt-1 block text-sm text-[#1A1A1A]">{applications.length} applications</span>
-              </span>
-              <span className="text-[20px] font-semibold text-[#2C5F7C]">{expandedSections.applications ? '-' : '+'}</span>
-            </button>
-
-            {expandedSections.applications && (
-              <div className="mt-3 bg-white border border-[#E0D8CC] rounded-[10px] p-6">
-                {applications.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-[#1A1A1A] text-sm mb-4">You have not applied to any projects yet.</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => router.push('/browse')}
+              <section className="rounded-[8px] border border-[#E0D8CC] bg-white p-5 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <h2 className="text-[18px] font-semibold text-[#17120e]">Resume</h2>
+                    <p className="mt-1 text-sm text-[#5B5148]">{resumeLabel}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      aria-label="View resume"
+                      onClick={() => profile.resumeFileName && window.open('/api/profile/resume', '_blank', 'noopener,noreferrer')}
+                      disabled={!profile.resumeFileName}
+                      className="inline-flex h-10 items-center gap-2 rounded-[8px] border border-[#E0D8CC] bg-white px-4 text-sm font-semibold text-[#2b241d] disabled:opacity-50"
                     >
-                      Browse projects
+                      <DocumentIcon />
+                      View
+                    </button>
+                    <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-[8px] border border-[#E0D8CC] bg-white px-4 text-sm font-semibold text-[#2b241d] hover:border-[#8b603b]">
+                      <DownloadIcon />
+                      Choose PDF
+                      <input
+                        type="file"
+                        accept="application/pdf,.pdf"
+                        className="sr-only"
+                        onChange={(event) => setSelectedResumeFile(event.target.files?.[0] || null)}
+                      />
+                    </label>
+                    <Button variant="gold" onClick={handleResumeUpload} disabled={resumeUploading || !selectedResumeFile}>
+                      {resumeUploading ? 'Uploading...' : 'Upload'}
                     </Button>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {applications.map((app) => (
-                      <div
-                        key={app.id}
-                        role="button"
-                        tabIndex={0}
-                        className="cursor-pointer border border-[#E0D8CC] rounded-lg p-4 transition-all duration-200 ease hover:border-[#2C5F7C] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] focus:outline-none focus:border-[#2C5F7C] focus:shadow-[0_0_0_3px_rgba(44,95,124,0.1)]"
-                        onClick={() => setSelectedProject(getApplicationProjectDetail(app))}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            setSelectedProject(getApplicationProjectDetail(app));
-                          }
-                        }}
-                      >
-                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                          <div>
-                            <div className="mb-2 flex flex-wrap items-center gap-2">
-                              <h4 className="text-[16px] font-semibold text-[#1A1A1A]">{app.project.title}</h4>
-                              <span className={`rounded border px-3 py-1 text-xs font-semibold ${getStatusClassName(app.status)}`}>
-                                {getStatusText(app.status)}
-                              </span>
-                            </div>
-                            <div className="grid gap-1 text-sm text-[#1A1A1A]">
-                              <p><span className="font-semibold">Project owner:</span> {app.owner.profile?.displayName ?? app.owner.email}</p>
-                              <p><span className="font-semibold">Institution:</span> {app.owner.profile?.institution ?? 'Unknown'}</p>
-                              <p><span className="font-semibold">Research area:</span> {app.project.researchArea}</p>
-                              <p><span className="font-semibold">Applied on:</span> {new Date(app.createdAt).toLocaleDateString('en-US')}</p>
-                            </div>
-                          </div>
+                </div>
+              </section>
 
-                          {app.status === 'pending' && (
-                            <div onClick={(event) => event.stopPropagation()}>
-                              <WithdrawButton applicationId={app.id} onWithdraw={fetchData} />
+              <ResearchEvolutionTimeline
+                compact
+                editable
+                initialData={researchTimelineData}
+                onSave={handleTimelineSave}
+              />
+            </div>
+          )}
+
+          {activeSection === 'applications' && (
+            <div className="space-y-5">
+              <section className="rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] p-6 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b603b]">Application Tracking</p>
+                    <h1 className="mt-2 font-display text-[38px] font-semibold leading-tight text-[#17120e]">Applications Workspace</h1>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5B5148]">
+                      Track every application by stage and keep owner feedback visible beside the board.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => showMessage('success', 'Application records are ready to export when CSV support is connected.')}
+                    className="inline-flex h-10 items-center gap-2 rounded-[8px] border border-[#E0D8CC] bg-white px-4 text-sm font-semibold text-[#2b241d] transition hover:border-[#8b603b]"
+                  >
+                    <DownloadIcon />
+                    Export Records
+                  </button>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-2 border-b border-[#eee6dc] pb-3">
+                  {[
+                    ['all', 'All', applications.length],
+                    ['pending', 'In Review', pendingApplications],
+                    ['accepted', 'Accepted', acceptedApplications],
+                    ['rejected', 'Rejected', rejectedApplications],
+                    ['withdrawn', 'Withdrawn', withdrawnApplications],
+                  ].map(([key, label, count]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setApplicationFilter(key as ApplicationFilter)}
+                      className={[
+                        'rounded-t-[8px] border-b-2 px-4 py-2 text-sm font-semibold transition',
+                        applicationFilter === key
+                          ? 'border-[#17425d] bg-[#E8F2F7] text-[#17425d]'
+                          : 'border-transparent text-[#5B5148] hover:bg-white',
+                      ].join(' ')}
+                    >
+                      {label} <span className="ml-2">{count}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
+                <section className={applicationFilter === 'all' ? 'grid gap-4 md:grid-cols-2 2xl:grid-cols-4' : 'grid gap-4'}>
+                  {visibleApplicationGroups.map((group) => {
+                    const visibleApplications = filteredApplications.filter((app) => normalizeApplicationStatus(app.status) === group.key);
+                    return (
+                      <div key={group.key} className={`rounded-[8px] border p-4 ${group.tone}`}>
+                        <div className="mb-4 flex items-center justify-between">
+                          <h2 className="text-[16px] font-semibold text-[#17120e]">{group.label}</h2>
+                          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#5B5148]">{group.count}</span>
+                        </div>
+                        <div className="space-y-3">
+                          {visibleApplications.length ? visibleApplications.map((app) => (
+                            <article
+                              key={app.id}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => setSelectedProject(getApplicationProjectDetail(app))}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  setSelectedProject(getApplicationProjectDetail(app));
+                                }
+                              }}
+                              className="cursor-pointer rounded-[8px] border border-[#E0D8CC] bg-white p-4 shadow-[0_1px_2px_rgba(60,42,27,0.04)] transition hover:border-[#17425d]"
+                            >
+                              <h3 className="text-sm font-semibold leading-5 text-[#17120e]">{app.project.title}</h3>
+                              <p className="mt-2 text-xs leading-5 text-[#5B5148]">
+                                {app.owner.profile?.displayName ?? app.owner.email} · {app.owner.profile?.institution ?? 'Unknown'}
+                              </p>
+                              <p className="mt-1 text-xs text-[#8a8178]">Applied {new Date(app.createdAt).toLocaleDateString('en-US')}</p>
+                              <div className="mt-3 flex items-center justify-between gap-2">
+                                <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getStatusClassName(app.status)}`}>
+                                  {getStatusText(app.status)}
+                                </span>
+                                {normalizeApplicationStatus(app.status) === 'pending' && (
+                                  <span onClick={(event) => event.stopPropagation()}>
+                                    <WithdrawButton applicationId={app.id} onWithdraw={fetchData} />
+                                  </span>
+                                )}
+                              </div>
+                            </article>
+                          )) : (
+                            <div className="rounded-[8px] border border-dashed border-[#D8CABC] bg-white/70 p-5 text-center text-sm text-[#5B5148]">
+                              No applications in this stage.
                             </div>
                           )}
                         </div>
+                      </div>
+                    );
+                  })}
+                </section>
 
-                        {app.ownerFeedback && (
-                          <div className="mt-4 rounded border border-[#E0D8CC] bg-[#EBF3F8] p-3 text-sm leading-6 text-[#1A1A1A]">
-                            <p className="mb-1 font-semibold">Owner feedback:</p>
-                            {app.ownerFeedback}
+                <aside className="space-y-4">
+                  <section className="rounded-[8px] border border-[#E0D8CC] bg-white p-5 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                    <h2 className="text-[16px] font-semibold text-[#17120e]">Owner Feedback</h2>
+                    <div className="mt-4 flex items-start gap-3">
+                      <Avatar name="Prof. Jane Chen" size="sm" />
+                      <div>
+                        <p className="text-sm font-semibold text-[#17120e]">Latest review note</p>
+                        <p className="mt-2 text-sm leading-6 text-[#5B5148]">
+                          {recentFeedback || 'No owner feedback yet. Feedback will appear here after reviews.'}
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="rounded-[8px] border border-[#E0D8CC] bg-white p-5 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                    <div className="flex items-center justify-between gap-3">
+                      <h2 className="text-[16px] font-semibold text-[#17120e]">Resume Preview</h2>
+                      <button
+                        type="button"
+                        aria-label="Open resume preview"
+                        disabled={!profile.resumeFileName}
+                        onClick={() => profile.resumeFileName && window.open('/api/profile/resume', '_blank', 'noopener,noreferrer')}
+                        className="grid h-9 w-9 place-items-center rounded-[8px] border border-[#E0D8CC] text-[#17425d] disabled:opacity-50"
+                      >
+                        <DocumentIcon />
+                      </button>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-[#5B5148]">{resumeLabel}</p>
+                  </section>
+                </aside>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'saved' && (
+            <div className="space-y-5">
+              <section className="rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] p-6 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b603b]">Saved Opportunities</p>
+                    <h1 className="mt-2 font-display text-[38px] font-semibold leading-tight text-[#17120e]">Saved Research Center</h1>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5B5148]">
+                      Compare shortlisted opportunities by fit, timeline, seats, and owner.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCompareMode((current) => !current)}
+                      className={[
+                        'inline-flex h-10 items-center gap-2 rounded-[8px] border px-4 text-sm font-semibold transition',
+                        compareMode ? 'border-[#17425d] bg-[#17425d] text-white' : 'border-[#E0D8CC] bg-white text-[#2b241d] hover:border-[#8b603b]',
+                      ].join(' ')}
+                    >
+                      <GridIcon />
+                      Compare
+                    </button>
+                    <select
+                      aria-label="Sort saved projects"
+                      className="h-10 rounded-[8px] border border-[#E0D8CC] bg-white px-3 text-sm font-semibold text-[#2b241d] outline-none"
+                    >
+                      <option>Recently saved</option>
+                      <option>Highest match</option>
+                      <option>Deadline soon</option>
+                    </select>
+                    <button
+                      type="button"
+                      aria-label="Toggle grid view"
+                      onClick={() => showMessage('success', 'Grid view is active.')}
+                      className="grid h-10 w-10 place-items-center rounded-[8px] border border-[#E0D8CC] bg-white text-[#17425d]"
+                    >
+                      <GridIcon />
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <div className="grid gap-5 xl:grid-cols-[1fr_280px]">
+                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {savedProjects.length ? savedProjects.map((saved, index) => {
+                    const score = getMatchScore(saved.project, index);
+                    return (
+                      <article key={saved.id} className="rounded-[8px] border border-[#E0D8CC] bg-white p-4 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h2 className="text-[16px] font-semibold leading-6 text-[#17120e]">{saved.project.title}</h2>
+                            <p className="mt-1 text-xs text-[#5B5148]">{saved.project.owner.displayName} · {saved.project.owner.institution}</p>
                           </div>
-                        )}
+                          <button
+                            type="button"
+                            aria-label="Open saved project details"
+                            onClick={() => setSelectedProject(saved.project)}
+                            className="grid h-9 w-9 shrink-0 place-items-center rounded-[8px] border border-[#E0D8CC] text-[#17425d]"
+                          >
+                            <BookmarkIcon />
+                          </button>
+                        </div>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <span className="rounded-full bg-[#F3FAFD] px-2.5 py-1 text-[11px] font-semibold text-[#17425d]">{saved.project.researchArea}</span>
+                          <span className="rounded-full bg-[#F5F2ED] px-2.5 py-1 text-[11px] font-semibold text-[#5B5148]">{getSeatsLabel(saved.project)}</span>
+                          <span className="rounded-full bg-[#F5F2ED] px-2.5 py-1 text-[11px] font-semibold text-[#5B5148]">{saved.project.location || 'Flexible'}</span>
+                        </div>
+                        <div className="mt-5">
+                          <div className="flex items-center justify-between text-xs font-semibold text-[#5B5148]">
+                            <span>Match</span>
+                            <span>{score}%</span>
+                          </div>
+                          <div className="mt-2 h-1.5 rounded-full bg-[#E6DED4]">
+                            <div className="h-1.5 rounded-full bg-[#17425d]" style={{ width: `${score}%` }} />
+                          </div>
+                          <p className="mt-2 text-xs text-[#5B5148]">
+                            {score >= 88 ? 'Strong alignment with your interests.' : 'Related research direction.'}
+                          </p>
+                        </div>
+                        <div className="mt-5 flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => setSelectedProject(saved.project)}>Details</Button>
+                          <Button variant="outline" size="sm" onClick={() => showMessage('success', 'Saved project kept in your shortlist.')}>Keep</Button>
+                        </div>
+                      </article>
+                    );
+                  }) : (
+                    <div className="rounded-[8px] border border-dashed border-[#D8CABC] bg-white px-5 py-10 text-center md:col-span-2 xl:col-span-3">
+                      <p className="text-sm text-[#5B5148]">No saved opportunities yet.</p>
+                      <Button className="mt-4" variant="gold" onClick={() => router.push('/browse')}>Browse Projects</Button>
+                    </div>
+                  )}
+                </section>
+
+                <aside className="rounded-[8px] border border-[#E0D8CC] bg-white p-5 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                  <h2 className="text-[16px] font-semibold text-[#17120e]">Comparison Summary</h2>
+                  <p className="mt-1 text-sm text-[#5B5148]">{compareMode ? 'Compare mode is active.' : 'Turn on compare mode to evaluate saved projects.'}</p>
+                  <div className="mt-4 space-y-3">
+                    {[
+                      ['Research fit', 4],
+                      ['Skill match', 4],
+                      ['Location fit', 3],
+                      ['Timeline', 4],
+                    ].map(([label, rating]) => (
+                      <div key={label as string} className="flex items-center justify-between gap-3 text-sm">
+                        <span className="font-semibold text-[#5B5148]">{label}</span>
+                        <span className="flex text-[#d69b2d]">
+                          {[0, 1, 2, 3, 4].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              aria-label={`${label as string} rating ${star + 1}`}
+                              onClick={() => showMessage('success', `${label as string} comparison rating selected.`)}
+                              className="rounded-sm transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#17425d]"
+                            >
+                              <StarIcon filled={star < Number(rating)} />
+                            </button>
+                          ))}
+                        </span>
                       </div>
                     ))}
                   </div>
-                )}
+                  <Button className="mt-5 w-full" variant="gold" onClick={() => showMessage('success', 'Comparison details are ready.')}>View Comparison</Button>
+                </aside>
               </div>
-            )}
-          </section>
+            </div>
+          )}
 
-          <section>
-            <button
-              type="button"
-              className={getSectionButtonClassName(Boolean(expandedSections.projects))}
-              onClick={() => toggleSection('projects')}
-            >
-              <span>
-                <span className="block text-[18px] font-semibold text-[#1A1A1A]">My projects</span>
-                <span className="mt-1 block text-sm text-[#1A1A1A]">Publish projects, review applications, manage feedback, and use AI resume scoring</span>
-              </span>
-              <span className="text-[20px] font-semibold text-[#2C5F7C]">{expandedSections.projects ? '-' : '+'}</span>
-            </button>
+          {activeSection === 'projects' && (
+            <div className="space-y-5">
+              <section className="rounded-[8px] border border-[#E0D8CC] bg-[#fffdf9] p-6 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b603b]">Project Workspace</p>
+                    <h1 className="mt-2 font-display text-[38px] font-semibold leading-tight text-[#17120e]">Project Management</h1>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5B5148]">
+                      Publish research opportunities, upload project illustrations, and review incoming applications from the same profile workspace.
+                    </p>
+                  </div>
+                  <Button variant="outline" onClick={() => setActiveSection('profile')}>Back to Profile</Button>
+                </div>
+              </section>
 
-            {expandedSections.projects && (
-              <div className="mt-3 bg-white border border-[#E0D8CC] rounded-[10px] p-6">
+              <section className="rounded-[8px] border border-[#E0D8CC] bg-white p-5 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
                 <ProfileProjectPanel />
-              </div>
-            )}
-          </section>
+              </section>
+            </div>
+          )}
+
+          {activeSection === 'updates' && (
+            <section className="rounded-[8px] border border-[#E0D8CC] bg-white p-6 shadow-[0_1px_3px_rgba(60,42,27,0.05)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8b603b]">Updates</p>
+              <h1 className="mt-2 font-display text-[38px] font-semibold leading-tight text-[#17120e]">
+                Notification Center
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5B5148]">
+                Application updates and owner messages will be collected here.
+              </p>
+              <Button className="mt-6" variant="outline" onClick={() => setActiveSection('profile')}>Back to Profile</Button>
+            </section>
+          )}
         </div>
-      </div>
+      </main>
 
       {selectedProject && (
         <div
@@ -696,7 +1223,7 @@ export default function UserProfilePage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="profile-project-details-title"
-            className="max-h-[calc(100vh-64px)] w-full max-w-[720px] overflow-y-auto rounded-[10px] border border-[#E0D8CC] bg-white shadow-[0_18px_48px_rgba(26,26,26,0.18)]"
+            className="max-h-[calc(100vh-64px)] w-full max-w-[1040px] overflow-y-auto rounded-[10px] border border-[#E0D8CC] bg-white shadow-[0_18px_48px_rgba(26,26,26,0.18)]"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="border-b border-[#E0D8CC] px-6 py-5">
@@ -765,19 +1292,14 @@ export default function UserProfilePage() {
                 <p>{selectedProject.requirements || 'No formal requirements listed yet.'}</p>
               </div>
 
-              {selectedProject.ownerFeedback && (
-                <div className="rounded border border-[#E0D8CC] bg-[#EBF3F8] p-4">
-                  <p className="mb-2 font-semibold">Owner feedback</p>
-                  <p>{selectedProject.ownerFeedback}</p>
-                </div>
-              )}
-
               {selectedProject.owner.bioShort && (
                 <div>
-                  <p className="mb-2 font-semibold">Mentor focus</p>
+                  <p className="mb-2 font-semibold">Owner focus</p>
                   <p>{selectedProject.owner.bioShort}</p>
                 </div>
               )}
+
+              <ResearchEvolutionTimeline compact />
             </div>
 
             <div className="flex flex-wrap gap-2 border-t border-[#E0D8CC] px-6 py-5">
