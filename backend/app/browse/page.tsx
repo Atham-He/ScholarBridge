@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AppNav } from '@/components/layout/AppNav';
+import { InterestSelector } from '@/components/research/InterestSelector';
 import { ResearchEvolutionTimeline } from '@/components/research/ResearchEvolutionTimeline';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -483,6 +484,8 @@ export default function BrowsePage() {
       />
 
       <main className="mx-auto max-w-[1440px] px-4 py-7 sm:px-6 lg:px-10">
+        {user && <InterestSelector />}
+
         <section className="mb-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
