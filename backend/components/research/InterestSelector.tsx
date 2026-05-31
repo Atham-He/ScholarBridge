@@ -17,92 +17,106 @@ interface Category {
 
 const MOCK_CATEGORIES: Category[] = [
   {
-    id: 'trending',
-    title: '热搜聚合',
-    icon: '🌐',
+    id: 'computing',
+    title: '前沿计算与人工智能',
+    icon: '💻',
     topics: [
-      { id: 't1', label: '建立月球基地' },
-      { id: 't2', label: '大语言模型 Agents' },
-      { id: 't3', label: 'CRISPR 基因编辑' },
-      { id: 't4', label: '室温超导技术' },
+      { id: 'c1', label: '大语言模型 Agents' },
+      { id: 'c2', label: '具身智能 (Embodied AI)' },
+      { id: 'c3', label: '量子计算突破' },
+      { id: 'c4', label: '可信人工智能' },
     ],
   },
   {
-    id: 'ai-tech',
-    title: '今日头条',
+    id: 'life-science',
+    title: '生命科学与医学',
+    icon: '🧬',
+    topics: [
+      { id: 'l1', label: 'CRISPR 基因编辑' },
+      { id: 'l2', label: '脑机接口 (BCI)' },
+      { id: 'l3', label: '合成生物学' },
+      { id: 'l4', label: '靶向药物递送' },
+    ],
+  },
+  {
+    id: 'physics-space',
+    title: '航空航天与物理',
     icon: '🚀',
     topics: [
-      { id: 'a1', label: '自动驾驶系统' },
-      { id: 'a2', label: '脑机接口 (BCI)' },
-      { id: 'a3', label: '空间智能与具身智能' },
-      { id: 'a4', label: '量子计算突破' },
-    ],
-  },
-  {
-    id: 'space-physics',
-    title: '36氪',
-    icon: '🔬',
-    topics: [
-      { id: 's1', label: '火星探测计划' },
-      { id: 's2', label: '暗物质探测' },
-      { id: 's3', label: '系外行星寻找' },
-      { id: 's4', label: '可控核聚变' },
+      { id: 'p1', label: '建立月球基地' },
+      { id: 'p2', label: '可控核聚变' },
+      { id: 'p3', label: '暗物质探测' },
+      { id: 'p4', label: '室温超导技术' },
     ],
   },
   {
     id: 'interdisciplinary',
-    title: '虎嗅',
-    icon: '💡',
+    title: '交叉学科与应用',
+    icon: '🌐',
     topics: [
       { id: 'i1', label: 'AI 与医疗诊断' },
       { id: 'i2', label: '科技与社会伦理' },
       { id: 'i3', label: '计算金融学' },
-      { id: 'i4', label: '数字人文学科' },
+      { id: 'i4', label: '气候变化建模' },
     ],
   },
 ];
 
 export function InterestSelector() {
-  const [selectedTopicIds, setSelectedTopicIds] = useState<Set<string>>(new Set());
+  const [selectedTopics, setSelectedTopics] = useState<Map<string, string>>(new Map());
   const [customKeyword, setCustomKeyword] = useState('');
 
-  const toggleTopic = (id: string) => {
-    setSelectedTopicIds(prev => {
-      const next = new Set(prev);
+  const toggleTopic = (id: string, label: string) => {
+    setSelectedTopics(prev => {
+      const next = new Map(prev);
       if (next.has(id)) {
         next.delete(id);
       } else {
-        next.add(id);
+        next.set(id, label);
       }
       return next;
     });
   };
 
   const handleAddCustom = () => {
-    if (customKeyword.trim()) {
-      // Create a mock ID for the new custom keyword
+    const keyword = customKeyword.trim();
+    if (keyword) {
       const newId = `custom-${Date.now()}`;
-      setSelectedTopicIds(prev => {
-        const next = new Set(prev);
-        next.add(newId);
+      setSelectedTopics(prev => {
+        const next = new Map(prev);
+        // 检查是否已经存在相同名称的词条（不区分大小写）
+        const exists = Array.from(next.values()).some(
+          val => val.toLowerCase() === keyword.toLowerCase()
+        );
+        if (!exists) {
+          next.set(newId, keyword);
+        }
         return next;
       });
       setCustomKeyword('');
     }
   };
 
+  const removeTopic = (id: string) => {
+    setSelectedTopics(prev => {
+      const next = new Map(prev);
+      next.delete(id);
+      return next;
+    });
+  };
+
   return (
     <div className="mb-8 rounded-[12px] border border-[#E0D8CC] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
       <div className="mb-6 text-center">
         <h2 className="font-display text-[28px] font-semibold leading-tight tracking-[-0.02em] text-[#1A1A1A] sm:text-[32px] flex items-center justify-center gap-2">
-          <span className="text-[#2C5F7C]">✨</span> 输入关键词
+          <span className="text-[#2C5F7C]">✨</span> 探索研究方向
         </h2>
         <p className="mt-2 text-sm text-[#6B6B6B]">
-          告诉我们您感兴趣的研究方向，大模型将为您实时匹配相关领域的顶尖导师与项目
+          选择或输入您感兴趣的领域，我们将为您实时匹配相关的顶尖导师与科研项目
         </p>
       </div>
 
-      <div className="mx-auto mb-8 flex max-w-4xl items-center gap-2 rounded-[8px] border border-[#E0D8CC] bg-[#FAF8F5] p-1.5 focus-within:border-[#2C5F7C] focus-within:ring-1 focus-within:ring-[#2C5F7C] transition-all">
+      <div className="mx-auto mb-6 flex max-w-3xl items-center gap-2 rounded-[8px] border border-[#E0D8CC] bg-[#FAF8F5] p-1.5 focus-within:border-[#2C5F7C] focus-within:ring-1 focus-within:ring-[#2C5F7C] transition-all">
         <input
           type="text"
           placeholder="例如：人工智能、建立月球基地、量子计算..."
@@ -116,6 +130,29 @@ export function InterestSelector() {
         </Button>
       </div>
 
+      {selectedTopics.size > 0 && (
+        <div className="mx-auto max-w-4xl mb-8 flex flex-wrap items-center justify-center gap-2 rounded-[8px] bg-[#F9FBFC] p-4 border border-[#EBF3F8]">
+          <span className="text-sm font-semibold text-[#2C5F7C] mr-2">已选方向：</span>
+          {Array.from(selectedTopics.entries()).map(([id, label]) => (
+            <span
+              key={id}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#2C5F7C] pl-3 pr-1 py-1 text-xs font-medium text-white shadow-sm transition-all hover:bg-[#1f455c]"
+            >
+              {label}
+              <button
+                onClick={() => removeTopic(id)}
+                className="ml-0.5 rounded-full p-1 hover:bg-white/20 transition-colors"
+                aria-label={`Remove ${label}`}
+              >
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {MOCK_CATEGORIES.map(category => (
           <div key={category.id} className="flex flex-col gap-3">
@@ -126,28 +163,36 @@ export function InterestSelector() {
             
             <div className="flex flex-col gap-2.5">
               {category.topics.map(topic => {
-                const isSelected = selectedTopicIds.has(topic.id);
+                const isSelected = selectedTopics.has(topic.id);
                 return (
                   <div
                     key={topic.id}
-                    className={`group flex items-center justify-between rounded-[8px] border p-3 transition-all duration-200 ${
+                    className={`group flex items-center justify-between rounded-[8px] border p-2.5 transition-all duration-200 cursor-pointer ${
                       isSelected
                         ? 'border-[#2C5F7C] bg-[#F3FAFD]'
                         : 'border-[#E0D8CC] bg-[#FFFEFB] hover:border-[#8b603b] hover:shadow-[0_4px_12px_rgba(139,96,59,0.06)]'
                     }`}
+                    onClick={() => toggleTopic(topic.id, topic.label)}
                   >
                     <span className={`text-[13px] line-clamp-1 mr-2 ${isSelected ? 'font-semibold text-[#2C5F7C]' : 'text-[#4A4A4A] group-hover:text-[#1A1A1A]'}`}>
                       {topic.label}
                     </span>
                     <button
-                      onClick={() => toggleTopic(topic.id)}
-                      className={`flex h-7 shrink-0 items-center justify-center rounded-[4px] px-2.5 text-[12px] font-medium transition-colors ${
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[14px] transition-colors ${
                         isSelected
-                          ? 'bg-[#2C5F7C] text-white hover:bg-[#1f455c]'
-                          : 'bg-[#F5F2ED] text-[#6B6B6B] border border-transparent hover:border-[#8b603b] hover:bg-white hover:text-[#8b603b]'
+                          ? 'bg-[#2C5F7C] text-white'
+                          : 'bg-[#F5F2ED] text-[#6B6B6B] border border-transparent group-hover:bg-[#8b603b] group-hover:text-white'
                       }`}
                     >
-                      {isSelected ? '已添加' : '+ 添加'}
+                      {isSelected ? (
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      ) : (
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6v12m-6-6h12"></path>
+                        </svg>
+                      )}
                     </button>
                   </div>
                 );
